@@ -85,7 +85,7 @@ class mcp_abap_adt_server {
         // Implement tool execution handlers
         this.server.setRequestHandler(types_js_1.CallToolRequestSchema, async (request) => {
             switch (request.params.name) {
-                case 'get_abap_source':
+                case 'get_program_source':
                     return await this.handleGetProgramSource(request.params.arguments);
                 case 'get_program_properties':
                     return await this.handleGetProgramProperties(request.params.arguments);
@@ -163,10 +163,10 @@ class mcp_abap_adt_server {
     }
     async handleGetProgramSource(args) {
         try {
-            const programName = this.validateProgramArgs(args, 'get_abap_source');
+            const programName = this.validateProgramArgs(args, 'get_program_source');
             const response = await this.createAxiosInstance()({
                 method: 'GET',
-                url: `${this.getBaseUrl()}/sap/bc/adt/programs/programs/${programName}/main`,
+                url: `${this.getBaseUrl()}/sap/bc/adt/programs/programs/${programName}/source/main`,
                 headers: {
                     'Content-Type': 'text/plain',
                     ...this.getAuthHeaders()
