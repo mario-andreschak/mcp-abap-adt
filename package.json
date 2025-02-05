@@ -4,7 +4,9 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "( if not exist dist mkdir dist || true ) && tsc && node -e \"require('fs').chmodSync('dist/index.js', '755')\""
+    "build": "tsc -p tsconfig.json",
+    "start": "node ./dist/index.js",
+    "dev": "npx @modelcontextprotocol/inspector node ./dist/index.js"
   },
   "keywords": [],
   "author": "",
@@ -16,8 +18,10 @@
     "typescript": "^5.7.3"
   },
   "dependencies": {
-    "ini": "^5.0.0",
-    "tsc": "^2.0.4"
+    "@modelcontextprotocol/sdk": "^1.4.1",
+    "@types/node": "^22.10.10",
+    "dotenv": "^16.4.7",
+    "typescript": "^5.7.3"
   },
   "description": ""
 }
