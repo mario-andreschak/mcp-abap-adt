@@ -44,10 +44,10 @@ Now, let's get the project code and set it up:
 
 ### Installing via Smithery
 
-To install MCP ABAP Development Tools Server for Claude Desktop automatically via [Smithery](https://smithery.ai/server/@mario-andreschak/mcp-abap-adt):
+To install MCP ABAP Development Tools Server for Cline automatically via [Smithery](https://smithery.ai/server/@mario-andreschak/mcp-abap-adt):
 
 ```bash
-npx -y @smithery/cli install @mario-andreschak/mcp-abap-adt --client claude
+npx -y @smithery/cli install @mario-andreschak/mcp-abap-adt --client cline
 ```
 
 ### Manual Installation
