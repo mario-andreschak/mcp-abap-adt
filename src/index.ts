@@ -16,18 +16,6 @@ import { Agent } from 'https';
 // Load environment variables from .env file
 dotenv.config({ path: path.resolve(__dirname, '../.env') });
 
-// Verbose logging function
-function log(message: string) {
-  console.error(`[${new Date().toISOString()}] ${message}`);
-}
-
-// Log the environment variables (without sensitive information)
-log('Environment variables loaded');
-log(`SAP_URL: ${process.env.SAP_URL}`);
-log(`SAP_USERNAME: ${process.env.SAP_USERNAME}`);
-//log(`SAP_PASSWORD: ${process.env.SAP_PASSWORD}`);  // Password is intentionally not logged
-log(`SAP_CLIENT: ${process.env.SAP_CLIENT}`);
-
 // Interface for SAP configuration
 interface SapConfig {
   url: string;
@@ -43,7 +31,6 @@ interface SapConfig {
  * @throws {Error} If any required environment variable is missing.
  */
 function getConfig(): SapConfig {
-  log('Loading SAP configuration from environment variables');
   const url = process.env.SAP_URL;
   const username = process.env.SAP_USERNAME;
   const password = process.env.SAP_PASSWORD;
@@ -58,7 +45,6 @@ function getConfig(): SapConfig {
 - SAP_CLIENT`);
   }
 
-  log('SAP configuration loaded successfully');
   return { url, username, password, client };
 }
 
@@ -73,7 +59,6 @@ class mcp_abap_adt_server {
    * Constructor for the mcp_abap_adt_server class.
    */
   constructor() {
-    //log('Initializing mcp_abap_adt_server');
     this.sapConfig = getConfig(); // Load SAP configuration
     this.server = new Server(  // Initialize the MCP server
       {
@@ -88,7 +73,6 @@ class mcp_abap_adt_server {
     );
 
     this.setupHandlers(); // Setup request handlers
-    //log('mcp_abap_adt_server initialized');
   }
 
   /**
@@ -96,12 +80,10 @@ class mcp_abap_adt_server {
    * @private
    */
   private setupHandlers() {
-    //log('Setting up request handlers');
     // Setup tool handlers
 
     // Handler for ListToolsRequest
     this.server.setRequestHandler(ListToolsRequestSchema, async () => {
-      //log('Handling ListToolsRequest');
       return {
         tools: [ // Define available tools
           {
@@ -264,7 +246,6 @@ class mcp_abap_adt_server {
 
     // Handler for CallToolRequest
     this.server.setRequestHandler(CallToolRequestSchema, async (request) => {
-      log(`Handling CallToolRequest for tool: ${request.params.name}`);
       switch (request.params.name) {
         case 'GetProgram':
           return await this.handleGetProgram(request.params.arguments);
@@ -287,7 +268,6 @@ class mcp_abap_adt_server {
         case 'SearchObject':
           return await this.handleSearchObject(request.params.arguments);
         default:
-          log(`Unknown tool requested: ${request.params.name}`);
           throw new McpError(
             ErrorCode.MethodNotFound,
             `Unknown tool: ${request.params.name}`
@@ -297,11 +277,9 @@ class mcp_abap_adt_server {
 
     // Handle server shutdown on SIGINT (Ctrl+C)
     process.on('SIGINT', async () => {
-      log('Received SIGINT signal, shutting down server');
       await this.server.close();
       process.exit(0);
     });
-
   }
 
   /**
@@ -323,10 +301,8 @@ class mcp_abap_adt_server {
    * @returns {object} An object containing the 'Authorization' and 'X-SAP-Client' headers.
    */
   private getAuthHeaders() {
-    //log('Generating authentication headers');
     const { username, password, client } = this.sapConfig;
     const auth = Buffer.from(`${username}:${password}`).toString('base64'); // Create Basic Auth string
-    //log(`Authorization header generated (${auth})`); // Don't log the full auth string
     return {
       'Authorization': `Basic ${auth}`, // Basic Authentication header
       'X-SAP-Client': client            // SAP client header
@@ -334,12 +310,11 @@ class mcp_abap_adt_server {
   }
 
   /**
- * Extracts and encodes the base URL from the SAP URL.
- *
- * @private
- * @returns {string} The encoded base URL.
- * @throws {Error} If the URL in the configuration is invalid.
- */
+   * Extracts and encodes the base URL from the SAP URL.
+   * @private
+   * @returns {string} The encoded base URL.
+   * @throws {Error} If the URL in the configuration is invalid.
+   */
   private getBaseUrl() {
     const { url } = this.sapConfig;
     try {
@@ -348,7 +323,6 @@ class mcp_abap_adt_server {
       return baseUrl;
     } catch (error) {
       const errorMessage = `Invalid URL in configuration: ${error instanceof Error ? error.message : error}`;
-      log(`Error: ${errorMessage}`);
       throw new Error(errorMessage);
     }
   }
@@ -384,17 +358,15 @@ class mcp_abap_adt_server {
       if (!args?.program_name) {
         throw new McpError(ErrorCode.InvalidParams, 'Program name is required');
       }
-      log(`Retrieving program: ${args.program_name}`);
       const url = `${this.getBaseUrl()}/sap/bc/adt/programs/programs/${args.program_name}/source/main`;
-      const data = await this.makeAdtRequest(url, 'GET', 30000); // Make the ADT request
-      return {  // Return the program source code
+      const data = await this.makeAdtRequest(url, 'GET', 30000);
+      return {
         content: [{
           type: 'text',
           text: data
         }]
       };
     } catch (error) {
-      // Handle errors and return an error response
       return {
         isError: true,
         content: [{
@@ -416,9 +388,7 @@ class mcp_abap_adt_server {
       if (!args?.class_name) {
         throw new McpError(ErrorCode.InvalidParams, 'Class name is required');
       }
-      log(`Retrieving class: ${args.class_name}`);
       const data = await this.makeAdtRequest(`${this.getBaseUrl()}/sap/bc/adt/oo/classes/${args.class_name}/source/main`, 'GET', 30000);
-
       return {
         content: [{
           type: 'text',
@@ -437,18 +407,16 @@ class mcp_abap_adt_server {
   }
 
   /**
-     * Handles the 'GetFunctionGroup' tool request.
-     *
-     * @private
-     * @param {any} args - The arguments passed to the tool.
-     * @returns {Promise<object>} - A Promise that resolves with the tool's result.
-     */
+   * Handles the 'GetFunctionGroup' tool request.
+   * @private
+   * @param {any} args - The arguments passed to the tool.
+   * @returns {Promise<object>} - A Promise that resolves with the tool's result.
+   */
   private async handleGetFunctionGroup(args: any) {
     try {
       if (!args?.function_group) {
         throw new McpError(ErrorCode.InvalidParams, 'Function Group is required');
       }
-      log(`Retrieving function group: ${args.function_group}`);
       const url = `${this.getBaseUrl()}/sap/bc/adt/functions/groups/${args.function_group}/source/main`;
       const data = await this.makeAdtRequest(url, 'GET', 30000);
       return {
@@ -468,7 +436,7 @@ class mcp_abap_adt_server {
     }
   }
 
-    /**
+  /**
    * Handles the 'GetFunction' tool request.
    * @private
    * @param {any} args The arguments passed to the tool.
@@ -479,7 +447,6 @@ class mcp_abap_adt_server {
       if (!args?.function_name || !args?.function_group) {
         throw new McpError(ErrorCode.InvalidParams, 'Function name and group are required');
       }
-      log(`Retrieving function module: ${args.function_name}`);
       const url = `${this.getBaseUrl()}/sap/bc/adt/functions/groups/${args.function_group}/fmodules/${args.function_name}`;
       const data = await this.makeAdtRequest(url, 'GET', 30000);
       return {
@@ -499,7 +466,7 @@ class mcp_abap_adt_server {
     }
   }
 
-    /**
+  /**
    * Handles the 'GetTable' tool request.
    * @private
    * @param {any} args The arguments passed to the tool.
@@ -510,7 +477,6 @@ class mcp_abap_adt_server {
       if (!args?.table_name) {
         throw new McpError(ErrorCode.InvalidParams, 'Table name is required');
       }
-      log(`Retrieving table structure: ${args.table_name}`);
       const url = `${this.getBaseUrl()}/sap/bc/adt/ddic/structures/${args.table_name}/source/main`;
       const data = await this.makeAdtRequest(url, 'GET', 30000);
       return {
@@ -530,12 +496,11 @@ class mcp_abap_adt_server {
     }
   }
 
-    /**
+  /**
    * Handles the 'GetTableContents' tool request.
    * @private
    * @param {any} args The arguments passed to the tool.
    * @returns {Promise<object>} A Promise that resolves with the tool's result.
-   *
    */
   private async handleGetTableContents(args: any) {
     try {
@@ -564,8 +529,7 @@ class mcp_abap_adt_server {
     }
   }
 
-
-    /**
+  /**
    * Handles the 'GetPackage' tool request.
    * @private
    * @param {any} args The arguments passed to the tool.
@@ -576,7 +540,6 @@ class mcp_abap_adt_server {
       if (!args?.package_name) {
         throw new McpError(ErrorCode.InvalidParams, 'Package name is required');
       }
-      log(`Retrieving package: ${args.package_name}`);
       const url = `${this.getBaseUrl()}/sap/bc/adt/repository/nodestructure?parent_name=${args.package_name}&parent_tech_name=${args.package_name}&parent_type=DEVC%2FK&withShortDescriptions=true/`;
       const data = await this.makeAdtRequest(url, 'GET', 30000);
       return {
@@ -596,7 +559,7 @@ class mcp_abap_adt_server {
     }
   }
 
-      /**
+  /**
    * Handles the 'GetInclude' tool request.
    * @private
    * @param {any} args The arguments passed to the tool.
@@ -607,7 +570,6 @@ class mcp_abap_adt_server {
       if (!args?.type_name) {
         throw new McpError(ErrorCode.InvalidParams, 'Type name is required');
       }
-      log(`Retrieving type info: ${args.type_name}`);
       const url = `${this.getBaseUrl()}/sap/bc/adt/programs/includes/${args.type_name}/source/main`;
       const data = await this.makeAdtRequest(url, 'GET', 30000);
       return {
@@ -627,7 +589,7 @@ class mcp_abap_adt_server {
     }
   }
 
-    /**
+  /**
    * Handles the 'GetTypeInfo' tool request.
    * @private
    * @param {any} args The arguments passed to the tool.
@@ -638,7 +600,6 @@ class mcp_abap_adt_server {
       if (!args?.type_name) {
         throw new McpError(ErrorCode.InvalidParams, 'Type name is required');
       }
-      log(`Retrieving type info: ${args.type_name}`);
       const url = `${this.getBaseUrl()}/sap/bc/adt/ddic/domains/${args.type_name}/source/main`;
       const data = await this.makeAdtRequest(url, 'GET', 30000);
       return {
@@ -658,7 +619,7 @@ class mcp_abap_adt_server {
     }
   }
 
-    /**
+  /**
    * Handles the 'SearchObject' tool request.
    * @private
    * @param {any} args The arguments passed to the tool.
@@ -670,7 +631,6 @@ class mcp_abap_adt_server {
         throw new McpError(ErrorCode.InvalidParams, 'Search query is required');
       }
       const maxResults = args.maxResults || 100;
-      log(`Searching for objects with query: ${args.query} (max ${maxResults} results)`);
       const url = `${this.getBaseUrl()}/sap/bc/adt/repository/informationsystem/search?operation=quickSearch&query=${args.query}*&maxResults=${maxResults}`;
       const data = await this.makeAdtRequest(url, 'GET', 30000);
       return {
@@ -694,17 +654,13 @@ class mcp_abap_adt_server {
    * Starts the MCP server and connects it to the transport.
    */
   async run() {
-    log('Starting mcp_abap_adt_server');
-    const transport = new StdioServerTransport(); // Create a standard I/O transport
-    await this.server.connect(transport);       // Connect the server to the transport
-    log('mcp_abap_adt_server is now running');
+    const transport = new StdioServerTransport();
+    await this.server.connect(transport);
   }
 }
 
 // Create and run the server
 const server = new mcp_abap_adt_server();
-log('Initializing mcp_abap_adt_server');
-server.run().catch((error) => { // Start the server and handle any errors
-  log(`Error running mcp_abap_adt_server: ${error instanceof Error ? error.message : error}`);
-  process.exit(1); // Exit with an error code
+server.run().catch((error) => {
+  process.exit(1);
 });
