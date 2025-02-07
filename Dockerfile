@@ -5,11 +5,12 @@ FROM node:18-alpine
 # Set the working directory
 WORKDIR /app
 
+# Copy package.json
+COPY package.json ./
+
 # Install dependencies
 RUN npm install -r
 
-# Copy package.json
-COPY package.json ./
 
 # Copy the rest of the application code
 COPY . .
