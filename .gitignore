@@ -4,6 +4,7 @@ node_modules/
 # Build output
 dist/
 build/
+package-lock.json
 
 # Environment variables
 .env
@@ -41,4 +42,4 @@ Thumbs.db
 
 # Backup files
 *.bak
-config.ini.bak
+

@@ -26,4 +26,4 @@ startCommand:
   commandFunction:
     # A function that produces the CLI command to start the MCP on stdio.
     |-
-    (config) => ({command:'node', args:['dist/index.js'], env:{SAP_URL:config.sapUrl, SAP_USERNAME:config.sapUsername, SAP_PASSWORD:config.sapPassword, SAP_CLIENT:config.sapClient}})
+    (config) => ({command:'node', args:['./dist/index.js'], env:{SAP_URL:config.sapUrl, SAP_USERNAME:config.sapUsername, SAP_PASSWORD:config.sapPassword, SAP_CLIENT:config.sapClient}})

@@ -567,8 +567,8 @@ class mcp_abap_adt_server {
    */
   private async handleGetInclude(args: any) {
     try {
-      if (!args?.type_name) {
-        throw new McpError(ErrorCode.InvalidParams, 'Type name is required');
+      if (!args?.include_name) {
+        throw new McpError(ErrorCode.InvalidParams, 'Include name is required');
       }
       const url = `${this.getBaseUrl()}/sap/bc/adt/programs/includes/${args.type_name}/source/main`;
       const data = await this.makeAdtRequest(url, 'GET', 30000);
