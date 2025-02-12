@@ -122,7 +122,7 @@ This mode is useful for debugging.
     ```bash
     npm run dev
     ```
-    This will start the server and output a message like:  `Server starten on https://localhost:5173/...`.
+    This will start the server and output a message like:  `🔍 MCP Inspector is up and running at http://localhost:5173 🚀`.
     This is the URL you'll use to open the MCP inspector in your Browser.
 
 ## 4. Integrating with Cline
