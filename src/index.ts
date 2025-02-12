@@ -447,7 +447,7 @@ class mcp_abap_adt_server {
       if (!args?.function_name || !args?.function_group) {
         throw new McpError(ErrorCode.InvalidParams, 'Function name and group are required');
       }
-      const url = `${this.getBaseUrl()}/sap/bc/adt/functions/groups/${args.function_group}/fmodules/${args.function_name}`;
+      const url = `${this.getBaseUrl()}/sap/bc/adt/functions/groups/${args.function_group}/fmodules/${args.function_name}/source/main`;
       const data = await this.makeAdtRequest(url, 'GET', 30000);
       return {
         content: [{
@@ -570,7 +570,7 @@ class mcp_abap_adt_server {
       if (!args?.include_name) {
         throw new McpError(ErrorCode.InvalidParams, 'Include name is required');
       }
-      const url = `${this.getBaseUrl()}/sap/bc/adt/programs/includes/${args.type_name}/source/main`;
+      const url = `${this.getBaseUrl()}/sap/bc/adt/programs/includes/${args.include_name}/source/main`;
       const data = await this.makeAdtRequest(url, 'GET', 30000);
       return {
         content: [{
