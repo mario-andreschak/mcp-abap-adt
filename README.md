@@ -122,7 +122,7 @@ This mode is useful for debugging.
     ```bash
     npm run dev
     ```
-    This will start the server and output a message like:  `listening on https://127.0.0.1:5173/...`.
+    This will start the server and output a message like:  `Server starten on https://localhost:5173/...`.
     This is the URL you'll use to open the MCP inspector in your Browser.
 
 ## 4. Integrating with Cline
@@ -142,10 +142,10 @@ Cline is a VS Code extension that uses MCP servers to provide language support. 
     {
       "mcpServers": 
         {
-          "mcp-abap-abap-adt-api": {
+          "mcp-abap-adt": {
             "command": "node",
             "args": [
-              "C:/Users/username/OneDrive/Documents/GitHub/mcp-abap-abap-adt-api/dist/index.js"
+              "C:/PATH_TO/mcp-abap-adt/dist/index.js"
             ],
             "disabled": true,
             "autoApprove": []
