@@ -188,7 +188,8 @@ This server provides the following tools, which can be used through Cline (or an
 | `GetClass`          | Retrieve ABAP class source code.                | `class_name` (string): Name of the ABAP class.              | `@tool GetClass class_name=ZCL_MY_CLASS`                   |
 | `GetFunctionGroup`  | Retrieve ABAP Function Group source code.       | `function_group` (string): Name of the function group        |`@tool GetFunctionGroup function_group=ZMY_FUNCTION_GROUP` |
 | `GetFunction`       | Retrieve ABAP Function Module source code.       | `function_name` (string), `function_group` (string)      | `@tool GetFunction function_name=ZMY_FUNCTION function_group=ZFG`|
-| `GetTable`          | Retrieve ABAP table structure.                  | `table_name` (string): Name of the ABAP table.              | `@tool GetTable table_name=ZMY_TABLE`                      |
+| `GetStructure`          | Retrieve ABAP Structure.                  | `structure_name` (string): Name of the DDIC Structure.              | `@tool GetStructure structure_name=ZMY_STRUCT`                      |
+| `GetTable`          | Retrieve ABAP table structure.                  | `table_name` (string): Name of the ABAP DB table.              | `@tool GetTable table_name=ZMY_TABLE`                      |
 | `GetTableContents`  | Retrieve contents of an ABAP table.            | `table_name` (string), `max_rows` (number, optional, default 100) | `@tool GetTableContents table_name=ZMY_TABLE max_rows=50` |
 | `GetPackage`        | Retrieve ABAP package details.                  | `package_name` (string): Name of the ABAP package.          | `@tool GetPackage package_name=ZMY_PACKAGE`                |
 | `GetTypeInfo`       | Retrieve ABAP type information.                 | `type_name` (string): Name of the ABAP type.                | `@tool GetTypeInfo type_name=ZMY_TYPE`                    |

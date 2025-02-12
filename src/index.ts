@@ -147,6 +147,20 @@ class mcp_abap_adt_server {
             }
           },
           {
+            name: 'GetStructure',
+            description: 'Retrieve ABAP Structure',
+            inputSchema: {
+              type: 'object',
+              properties: {
+                structure_name: {
+                  type: 'string',
+                  description: 'Name of the ABAP Structure'
+                }
+              },
+              required: ['structure_name']
+            }
+          },
+          {
             name: 'GetTable',
             description: 'Retrieve ABAP table structure',
             inputSchema: {
@@ -255,6 +269,8 @@ class mcp_abap_adt_server {
           return await this.handleGetFunction(request.params.arguments);
         case 'GetFunctionGroup':
           return await this.handleGetFunctionGroup(request.params.arguments);
+        case 'GetStructure':
+          return await this.handleGetStructure(request.params.arguments);
         case 'GetTable':
           return await this.handleGetTable(request.params.arguments);
         case 'GetTableContents':
@@ -477,8 +493,45 @@ class mcp_abap_adt_server {
       if (!args?.table_name) {
         throw new McpError(ErrorCode.InvalidParams, 'Table name is required');
       }
-      const url = `${this.getBaseUrl()}/sap/bc/adt/ddic/structures/${args.table_name}/source/main`;
+      const url = `${this.getBaseUrl()}/sap/bc/adt/ddic/tables/${args.table_name}/source/main`;
       const data = await this.makeAdtRequest(url, 'GET', 30000);
+
+      // const url_appends = `${this.getBaseUrl()}/sap/bc/adt/ddic/tables/${args.table_name}/enhancement/elements`;
+      // const data_appends = await this.makeAdtRequest(url, 'GET', 30000);
+
+      
+      return {
+        content: [{
+          type: 'text',
+          // text: data + data_appends
+          text: data
+        }]
+      };
+    } catch (error) {
+      return {
+        isError: true,
+        content: [{
+          type: 'text',
+          text: `Error: ${error instanceof Error ? error.message : String(error)}`
+        }]
+      };
+    }
+  }
+
+  /**
+   * Handles the 'GetStructure' tool request.
+   * @private
+   * @param {any} args The arguments passed to the tool.
+   * @returns {Promise<object>} A Promise that resolves with the tool's result.
+   */
+  private async handleGetStructure(args: any) {
+    try {
+      if (!args?.structure_name) {
+        throw new McpError(ErrorCode.InvalidParams, 'Structure name is required');
+      }
+      const url = `${this.getBaseUrl()}/sap/bc/adt/ddic/structures/${args.structure_name}/source/main`;
+      const data = await this.makeAdtRequest(url, 'GET', 30000);
+      
       return {
         content: [{
           type: 'text',
