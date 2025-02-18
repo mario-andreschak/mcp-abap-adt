@@ -182,16 +182,17 @@ Cline is a VS Code extension that uses MCP servers to provide language support. 
 
 This server provides the following tools, which can be used through Cline (or any other MCP client):
 
-| Tool Name           | Description                                      | Input Parameters                                             | Example Usage (in Cline)                                   |
-| -------------------- | ------------------------------------------------ | ------------------------------------------------------------ | ---------------------------------------------------------- |
-| `GetProgram`        | Retrieve ABAP program source code.              | `program_name` (string): Name of the ABAP program.            | `@tool GetProgram program_name=ZMY_PROGRAM`                |
-| `GetClass`          | Retrieve ABAP class source code.                | `class_name` (string): Name of the ABAP class.              | `@tool GetClass class_name=ZCL_MY_CLASS`                   |
-| `GetFunctionGroup`  | Retrieve ABAP Function Group source code.       | `function_group` (string): Name of the function group        |`@tool GetFunctionGroup function_group=ZMY_FUNCTION_GROUP` |
-| `GetFunction`       | Retrieve ABAP Function Module source code.       | `function_name` (string), `function_group` (string)      | `@tool GetFunction function_name=ZMY_FUNCTION function_group=ZFG`|
-| `GetStructure`          | Retrieve ABAP Structure.                  | `structure_name` (string): Name of the DDIC Structure.              | `@tool GetStructure structure_name=ZMY_STRUCT`                      |
-| `GetTable`          | Retrieve ABAP table structure.                  | `table_name` (string): Name of the ABAP DB table.              | `@tool GetTable table_name=ZMY_TABLE`                      |
-| `GetTableContents`  | Retrieve contents of an ABAP table.            | `table_name` (string), `max_rows` (number, optional, default 100) | `@tool GetTableContents table_name=ZMY_TABLE max_rows=50` |
-| `GetPackage`        | Retrieve ABAP package details.                  | `package_name` (string): Name of the ABAP package.          | `@tool GetPackage package_name=ZMY_PACKAGE`                |
-| `GetTypeInfo`       | Retrieve ABAP type information.                 | `type_name` (string): Name of the ABAP type.                | `@tool GetTypeInfo type_name=ZMY_TYPE`                    |
-|`GetInclude`          | Retrieve ABAP include source code           |`include_name` (string): name of the ABAP include`           |`@tool GetInclude include_name=ZMY_INCLUDE`                  |
-| `SearchObject`      | Search for ABAP objects using quick search.     | `query` (string), `maxResults` (number, optional, default 100) | `@tool SearchObject query=ZMY* maxResults=20`             |
+| Tool Name           | Description                                       | Input Parameters                                                   | Example Usage (in Cline)                                   |
+| ------------------- | ------------------------------------------------- | ------------------------------------------------------------------ | ---------------------------------------------------------- |
+| `GetProgram`        | Retrieve ABAP program source code.                | `program_name` (string): Name of the ABAP program.                 | `@tool GetProgram program_name=ZMY_PROGRAM`                |
+| `GetClass`          | Retrieve ABAP class source code.                  | `class_name` (string): Name of the ABAP class.                     | `@tool GetClass class_name=ZCL_MY_CLASS`                   |
+| `GetFunctionGroup`  | Retrieve ABAP Function Group source code.         | `function_group` (string): Name of the function group              | `@tool GetFunctionGroup function_group=ZMY_FUNCTION_GROUP` |
+| `GetFunction`       | Retrieve ABAP Function Module source code.        | `function_name` (string), `function_group` (string)                | `@tool GetFunction function_name=ZMY_FUNCTION function_group=ZFG`|
+| `GetStructure`      | Retrieve ABAP Structure.                          | `structure_name` (string): Name of the DDIC Structure.             | `@tool GetStructure structure_name=ZMY_STRUCT`             |
+| `GetTable`          | Retrieve ABAP table structure.                    | `table_name` (string): Name of the ABAP DB table.                  | `@tool GetTable table_name=ZMY_TABLE`                      |
+| `GetTableContents`  | Retrieve contents of an ABAP table.               | `table_name` (string), `max_rows` (number, optional, default 100)  | `@tool GetTableContents table_name=ZMY_TABLE max_rows=50`  |
+| `GetPackage`        | Retrieve ABAP package details.                    | `package_name` (string): Name of the ABAP package.                 | `@tool GetPackage package_name=ZMY_PACKAGE`                |
+| `GetTypeInfo`       | Retrieve ABAP type information.                   | `type_name` (string): Name of the ABAP type.                       | `@tool GetTypeInfo type_name=ZMY_TYPE`                     |
+| `GetInclude`        | Retrieve ABAP include source code                 | `include_name` (string): name of the ABAP include`                 | `@tool GetInclude include_name=ZMY_INCLUDE`                |
+| `SearchObject`      | Search for ABAP objects using quick search.       | `query` (string), `maxResults` (number, optional, default 100)     | `@tool SearchObject query=ZMY* maxResults=20`              |
+| `GetInterface`      | Retrieve ABAP interface source code.              | `interface_name` (string): Name of the ABAP interface.             | `@tool GetInterface interface_name=ZIF_MY_INTERFACE`       |

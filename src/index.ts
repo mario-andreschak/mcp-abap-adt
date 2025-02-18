@@ -7,17 +7,31 @@ import {
   ListToolsRequestSchema,
   McpError,
 } from '@modelcontextprotocol/sdk/types.js';
-import axios from 'axios';
-import fs from 'fs';
-import path, { join } from 'path';
+import path from 'path';
 import dotenv from 'dotenv';
-import { Agent } from 'https';
+
+// Import handler functions
+import { handleGetProgram } from './handlers/handleGetProgram';
+import { handleGetClass } from './handlers/handleGetClass';
+import { handleGetFunctionGroup } from './handlers/handleGetFunctionGroup';
+import { handleGetFunction } from './handlers/handleGetFunction';
+import { handleGetTable } from './handlers/handleGetTable';
+import { handleGetStructure } from './handlers/handleGetStructure';
+import { handleGetTableContents } from './handlers/handleGetTableContents';
+import { handleGetPackage } from './handlers/handleGetPackage';
+import { handleGetInclude } from './handlers/handleGetInclude';
+import { handleGetTypeInfo } from './handlers/handleGetTypeInfo';
+import { handleGetInterface } from './handlers/handleGetInterface';
+import { handleSearchObject } from './handlers/handleSearchObject';
+
+// Import shared utility functions and types
+import { getBaseUrl, getAuthHeaders, createAxiosInstance, makeAdtRequest, return_error, return_response } from './lib/utils';
 
 // Load environment variables from .env file
 dotenv.config({ path: path.resolve(__dirname, '../.env') });
 
 // Interface for SAP configuration
-interface SapConfig {
+export interface SapConfig {
   url: string;
   username: string;
   password: string;
@@ -30,7 +44,7 @@ interface SapConfig {
  * @returns {SapConfig} The SAP configuration object.
  * @throws {Error} If any required environment variable is missing.
  */
-function getConfig(): SapConfig {
+export function getConfig(): SapConfig {
   const url = process.env.SAP_URL;
   const username = process.env.SAP_USERNAME;
   const password = process.env.SAP_PASSWORD;
@@ -51,7 +65,7 @@ function getConfig(): SapConfig {
 /**
  * Server class for interacting with ABAP systems via ADT.
  */
-class mcp_abap_adt_server {
+export class mcp_abap_adt_server {
   private server: Server;  // Instance of the MCP server
   private sapConfig: SapConfig; // SAP configuration
 
@@ -253,6 +267,20 @@ class mcp_abap_adt_server {
               },
               required: ['query']
             }
+          },
+          {
+            name: 'GetInterface',
+            description: 'Retrieve ABAP interface source code',
+            inputSchema: {
+              type: 'object',
+              properties: {
+                interface_name: {
+                  type: 'string',
+                  description: 'Name of the ABAP interface'
+                }
+              },
+              required: ['interface_name']
+            }
           }
         ]
       };
@@ -262,27 +290,29 @@ class mcp_abap_adt_server {
     this.server.setRequestHandler(CallToolRequestSchema, async (request) => {
       switch (request.params.name) {
         case 'GetProgram':
-          return await this.handleGetProgram(request.params.arguments);
+          return await handleGetProgram(request.params.arguments);
         case 'GetClass':
-          return await this.handleGetClass(request.params.arguments);
+          return await handleGetClass(request.params.arguments);
         case 'GetFunction':
-          return await this.handleGetFunction(request.params.arguments);
+          return await handleGetFunction(request.params.arguments);
         case 'GetFunctionGroup':
-          return await this.handleGetFunctionGroup(request.params.arguments);
+          return await handleGetFunctionGroup(request.params.arguments);
         case 'GetStructure':
-          return await this.handleGetStructure(request.params.arguments);
+          return await handleGetStructure(request.params.arguments);
         case 'GetTable':
-          return await this.handleGetTable(request.params.arguments);
+          return await handleGetTable(request.params.arguments);
         case 'GetTableContents':
-          return await this.handleGetTableContents(request.params.arguments);
+          return await handleGetTableContents(request.params.arguments);
         case 'GetPackage':
-          return await this.handleGetPackage(request.params.arguments);
+          return await handleGetPackage(request.params.arguments);
         case 'GetTypeInfo':
-          return await this.handleGetTypeInfo(request.params.arguments);
+          return await handleGetTypeInfo(request.params.arguments);
         case 'GetInclude':
-          return await this.handleGetInclude(request.params.arguments);
+          return await handleGetInclude(request.params.arguments);
         case 'SearchObject':
-          return await this.handleSearchObject(request.params.arguments);
+          return await handleSearchObject(request.params.arguments);
+        case 'GetInterface':
+          return await handleGetInterface(request.params.arguments);
         default:
           throw new McpError(
             ErrorCode.MethodNotFound,
@@ -296,411 +326,6 @@ class mcp_abap_adt_server {
       await this.server.close();
       process.exit(0);
     });
-  }
-
-  /**
-   * Creates an axios instance with custom HTTPS agent for ignoring SSL errors.
-   * @private
-   * @returns {import('axios').AxiosInstance} An axios instance.
-   */
-  private createAxiosInstance() {
-    return axios.create({
-      httpsAgent: new Agent({
-        rejectUnauthorized: false // Allow self-signed certificates
-      })
-    });
-  }
-
-  /**
-   * Generates authentication headers for SAP requests.
-   * @private
-   * @returns {object} An object containing the 'Authorization' and 'X-SAP-Client' headers.
-   */
-  private getAuthHeaders() {
-    const { username, password, client } = this.sapConfig;
-    const auth = Buffer.from(`${username}:${password}`).toString('base64'); // Create Basic Auth string
-    return {
-      'Authorization': `Basic ${auth}`, // Basic Authentication header
-      'X-SAP-Client': client            // SAP client header
-    };
-  }
-
-  /**
-   * Extracts and encodes the base URL from the SAP URL.
-   * @private
-   * @returns {string} The encoded base URL.
-   * @throws {Error} If the URL in the configuration is invalid.
-   */
-  private getBaseUrl() {
-    const { url } = this.sapConfig;
-    try {
-      const urlObj = new URL(url);
-      const baseUrl = Buffer.from(`${urlObj.origin}`);
-      return baseUrl;
-    } catch (error) {
-      const errorMessage = `Invalid URL in configuration: ${error instanceof Error ? error.message : error}`;
-      throw new Error(errorMessage);
-    }
-  }
-
-  /**
-   * Makes a request to the SAP system via ADT.
-   * @param {string} url The ADT endpoint URL.
-   * @param {string} method - The HTTP method ('GET', 'POST', etc.).
-   * @param {number} timeout Request timeout in milliseconds.
-   * @returns {Promise<any>} A Promise that resolves with the response data.
-   */
-  private async makeAdtRequest(url: string, method: string, timeout: number) {
-    const response = await this.createAxiosInstance()({
-      method,
-      url,
-      headers: {
-        'Content-Type': 'text', // Set Content-Type header
-        ...this.getAuthHeaders()  // Include authentication headers
-      },
-      timeout // Set request timeout
-    });
-    return response.data; // Return the response data
-  }
-
-  /**
-   * Handles the 'GetProgram' tool request.
-   * @private
-   * @param {any} args The arguments passed to the tool.
-   * @returns {Promise<object>} A Promise that resolves with the tool's result.
-   */
-  private async handleGetProgram(args: any) {
-    try {
-      if (!args?.program_name) {
-        throw new McpError(ErrorCode.InvalidParams, 'Program name is required');
-      }
-      const url = `${this.getBaseUrl()}/sap/bc/adt/programs/programs/${args.program_name}/source/main`;
-      const data = await this.makeAdtRequest(url, 'GET', 30000);
-      return {
-        content: [{
-          type: 'text',
-          text: data
-        }]
-      };
-    } catch (error) {
-      return {
-        isError: true,
-        content: [{
-          type: 'text',
-          text: `Error: ${error instanceof Error ? error.message : String(error)}`
-        }]
-      };
-    }
-  }
-
-  /**
-   * Handles the 'GetClass' tool request.
-   * @private
-   * @param {any} args - The arguments passed to the tool.
-   * @returns {Promise<object>} - A Promise that resolves with the tool's result.
-   */
-  private async handleGetClass(args: any) {
-    try {
-      if (!args?.class_name) {
-        throw new McpError(ErrorCode.InvalidParams, 'Class name is required');
-      }
-      const data = await this.makeAdtRequest(`${this.getBaseUrl()}/sap/bc/adt/oo/classes/${args.class_name}/source/main`, 'GET', 30000);
-      return {
-        content: [{
-          type: 'text',
-          text: data
-        }]
-      };
-    } catch (error) {
-      return {
-        isError: true,
-        content: [{
-          type: 'text',
-          text: `Error: ${error instanceof Error ? error.message : String(error)}`
-        }]
-      };
-    }
-  }
-
-  /**
-   * Handles the 'GetFunctionGroup' tool request.
-   * @private
-   * @param {any} args - The arguments passed to the tool.
-   * @returns {Promise<object>} - A Promise that resolves with the tool's result.
-   */
-  private async handleGetFunctionGroup(args: any) {
-    try {
-      if (!args?.function_group) {
-        throw new McpError(ErrorCode.InvalidParams, 'Function Group is required');
-      }
-      const url = `${this.getBaseUrl()}/sap/bc/adt/functions/groups/${args.function_group}/source/main`;
-      const data = await this.makeAdtRequest(url, 'GET', 30000);
-      return {
-        content: [{
-          type: 'text',
-          text: data
-        }]
-      };
-    } catch (error) {
-      return {
-        isError: true,
-        content: [{
-          type: 'text',
-          text: `Error: ${error instanceof Error ? error.message : String(error)}`
-        }]
-      };
-    }
-  }
-
-  /**
-   * Handles the 'GetFunction' tool request.
-   * @private
-   * @param {any} args The arguments passed to the tool.
-   * @returns {Promise<object>} A Promise that resolves with the tool's result.
-   */
-  private async handleGetFunction(args: any) {
-    try {
-      if (!args?.function_name || !args?.function_group) {
-        throw new McpError(ErrorCode.InvalidParams, 'Function name and group are required');
-      }
-      const url = `${this.getBaseUrl()}/sap/bc/adt/functions/groups/${args.function_group}/fmodules/${args.function_name}/source/main`;
-      const data = await this.makeAdtRequest(url, 'GET', 30000);
-      return {
-        content: [{
-          type: 'text',
-          text: data
-        }]
-      };
-    } catch (error) {
-      return {
-        isError: true,
-        content: [{
-          type: 'text',
-          text: `Error: ${error instanceof Error ? error.message : String(error)}`
-        }]
-      };
-    }
-  }
-
-  /**
-   * Handles the 'GetTable' tool request.
-   * @private
-   * @param {any} args The arguments passed to the tool.
-   * @returns {Promise<object>} A Promise that resolves with the tool's result.
-   */
-  private async handleGetTable(args: any) {
-    try {
-      if (!args?.table_name) {
-        throw new McpError(ErrorCode.InvalidParams, 'Table name is required');
-      }
-      const url = `${this.getBaseUrl()}/sap/bc/adt/ddic/tables/${args.table_name}/source/main`;
-      const data = await this.makeAdtRequest(url, 'GET', 30000);
-
-      // const url_appends = `${this.getBaseUrl()}/sap/bc/adt/ddic/tables/${args.table_name}/enhancement/elements`;
-      // const data_appends = await this.makeAdtRequest(url, 'GET', 30000);
-
-      
-      return {
-        content: [{
-          type: 'text',
-          // text: data + data_appends
-          text: data
-        }]
-      };
-    } catch (error) {
-      return {
-        isError: true,
-        content: [{
-          type: 'text',
-          text: `Error: ${error instanceof Error ? error.message : String(error)}`
-        }]
-      };
-    }
-  }
-
-  /**
-   * Handles the 'GetStructure' tool request.
-   * @private
-   * @param {any} args The arguments passed to the tool.
-   * @returns {Promise<object>} A Promise that resolves with the tool's result.
-   */
-  private async handleGetStructure(args: any) {
-    try {
-      if (!args?.structure_name) {
-        throw new McpError(ErrorCode.InvalidParams, 'Structure name is required');
-      }
-      const url = `${this.getBaseUrl()}/sap/bc/adt/ddic/structures/${args.structure_name}/source/main`;
-      const data = await this.makeAdtRequest(url, 'GET', 30000);
-      
-      return {
-        content: [{
-          type: 'text',
-          text: data
-        }]
-      };
-    } catch (error) {
-      return {
-        isError: true,
-        content: [{
-          type: 'text',
-          text: `Error: ${error instanceof Error ? error.message : String(error)}`
-        }]
-      };
-    }
-  }
-
-  /**
-   * Handles the 'GetTableContents' tool request.
-   * @private
-   * @param {any} args The arguments passed to the tool.
-   * @returns {Promise<object>} A Promise that resolves with the tool's result.
-   */
-  private async handleGetTableContents(args: any) {
-    try {
-      if (!args?.table_name) {
-        throw new McpError(ErrorCode.InvalidParams, 'Table name is required');
-      }
-      const maxRows = args.max_rows || 100;
-      //NOTE: This service requires a custom service implementation
-      const url = `${this.getBaseUrl()}/z_mcp_abap_adt/z_tablecontent/${args.table_name}?maxRows=${maxRows}`;
-      const data = await this.makeAdtRequest(url, 'GET', 30000);
-      return {
-        content: [{
-          type: 'text',
-          text: data
-        }]
-      };
-    } catch (error) {
-      // Specific error message for GetTableContents since it requires custom implementation
-      return {
-        isError: true,
-        content: [{
-          type: 'text',
-          text: `Tool not available, Service /z_mcp_abap_adt/z_tablecontent not implemented. Please visit: https://community.sap.com/t5/application-development-blog-posts/how-to-use-rfc-read-table-from-javascript-via-webservice/ba-p/13172358`
-        }]
-      };
-    }
-  }
-
-  /**
-   * Handles the 'GetPackage' tool request.
-   * @private
-   * @param {any} args The arguments passed to the tool.
-   * @returns {Promise<object>} A Promise that resolves with the tool's result.
-   */
-  private async handleGetPackage(args: any) {
-    try {
-      if (!args?.package_name) {
-        throw new McpError(ErrorCode.InvalidParams, 'Package name is required');
-      }
-      const url = `${this.getBaseUrl()}/sap/bc/adt/repository/nodestructure?parent_name=${args.package_name}&parent_tech_name=${args.package_name}&parent_type=DEVC%2FK&withShortDescriptions=true/`;
-      const data = await this.makeAdtRequest(url, 'GET', 30000);
-      return {
-        content: [{
-          type: 'text',
-          text: data
-        }]
-      };
-    } catch (error) {
-      return {
-        isError: true,
-        content: [{
-          type: 'text',
-          text: `Error: ${error instanceof Error ? error.message : String(error)}`
-        }]
-      };
-    }
-  }
-
-  /**
-   * Handles the 'GetInclude' tool request.
-   * @private
-   * @param {any} args The arguments passed to the tool.
-   * @returns {Promise<object>} A Promise that resolves with the tool's result.
-   */
-  private async handleGetInclude(args: any) {
-    try {
-      if (!args?.include_name) {
-        throw new McpError(ErrorCode.InvalidParams, 'Include name is required');
-      }
-      const url = `${this.getBaseUrl()}/sap/bc/adt/programs/includes/${args.include_name}/source/main`;
-      const data = await this.makeAdtRequest(url, 'GET', 30000);
-      return {
-        content: [{
-          type: 'text',
-          text: data
-        }]
-      };
-    } catch (error) {
-      return {
-        isError: true,
-        content: [{
-          type: 'text',
-          text: `Error: ${error instanceof Error ? error.message : String(error)}`
-        }]
-      };
-    }
-  }
-
-  /**
-   * Handles the 'GetTypeInfo' tool request.
-   * @private
-   * @param {any} args The arguments passed to the tool.
-   * @returns {Promise<object>} A Promise that resolves with the tool's result.
-   */
-  private async handleGetTypeInfo(args: any) {
-    try {
-      if (!args?.type_name) {
-        throw new McpError(ErrorCode.InvalidParams, 'Type name is required');
-      }
-      const url = `${this.getBaseUrl()}/sap/bc/adt/ddic/domains/${args.type_name}/source/main`;
-      const data = await this.makeAdtRequest(url, 'GET', 30000);
-      return {
-        content: [{
-          type: 'text',
-          text: data
-        }]
-      };
-    } catch (error) {
-      return {
-        isError: true,
-        content: [{
-          type: 'text',
-          text: `Error: ${error instanceof Error ? error.message : String(error)}`
-        }]
-      };
-    }
-  }
-
-  /**
-   * Handles the 'SearchObject' tool request.
-   * @private
-   * @param {any} args The arguments passed to the tool.
-   * @returns {Promise<object>} A Promise that resolves with the tool's result.
-   */
-  private async handleSearchObject(args: any) {
-    try {
-      if (!args?.query) {
-        throw new McpError(ErrorCode.InvalidParams, 'Search query is required');
-      }
-      const maxResults = args.maxResults || 100;
-      const url = `${this.getBaseUrl()}/sap/bc/adt/repository/informationsystem/search?operation=quickSearch&query=${args.query}*&maxResults=${maxResults}`;
-      const data = await this.makeAdtRequest(url, 'GET', 30000);
-      return {
-        content: [{
-          type: 'text',
-          text: data
-        }]
-      };
-    } catch (error) {
-      return {
-        isError: true,
-        content: [{
-          type: 'text',
-          text: `Error: ${error instanceof Error ? error.message : String(error)}`
-        }]
-      };
-    }
   }
 
   /**

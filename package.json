@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "jest",
     "build": "tsc -p tsconfig.json",
     "start": "node ./dist/index.js",
     "dev": "npx @modelcontextprotocol/inspector node ./dist/index.js"
@@ -12,13 +12,17 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
+    "@types/jest": "^29.5.14",
     "@types/node": "^22.10.10",
+    "jest": "^29.7.0",
+    "ts-jest": "^29.2.5",
     "typescript": "^5.7.3"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.4.1",
     "axios": "^1.7.9",
-    "dotenv": "^16.4.7"
+    "dotenv": "^16.4.7",
+    "xml-js": "^1.6.11"
   },
   "description": ""
 }
