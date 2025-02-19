@@ -22,6 +22,7 @@ import { handleGetPackage } from './handlers/handleGetPackage';
 import { handleGetInclude } from './handlers/handleGetInclude';
 import { handleGetTypeInfo } from './handlers/handleGetTypeInfo';
 import { handleGetInterface } from './handlers/handleGetInterface';
+import { handleGetTransaction } from './handlers/handleGetTransaction';
 import { handleSearchObject } from './handlers/handleSearchObject';
 
 // Import shared utility functions and types
@@ -269,6 +270,20 @@ export class mcp_abap_adt_server {
             }
           },
           {
+            name: 'GetTransaction',
+            description: 'Retrieve ABAP transaction details',
+            inputSchema: {
+              type: 'object',
+              properties: {
+                transaction_name: {
+                  type: 'string',
+                  description: 'Name of the ABAP transaction'
+                }
+              },
+              required: ['transaction_name']
+            }
+          },
+          {
             name: 'GetInterface',
             description: 'Retrieve ABAP interface source code',
             inputSchema: {
@@ -313,6 +328,8 @@ export class mcp_abap_adt_server {
           return await handleSearchObject(request.params.arguments);
         case 'GetInterface':
           return await handleGetInterface(request.params.arguments);
+        case 'GetTransaction':
+          return await handleGetTransaction(request.params.arguments);
         default:
           throw new McpError(
             ErrorCode.MethodNotFound,

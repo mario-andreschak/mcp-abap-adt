@@ -11,6 +11,7 @@ import { handleGetPackage } from './handlers/handleGetPackage';
 import { handleGetInclude } from './handlers/handleGetInclude';
 import { handleGetTypeInfo } from './handlers/handleGetTypeInfo';
 import { handleGetInterface } from './handlers/handleGetInterface';
+import { handleGetTransaction } from './handlers/handleGetTransaction';
 import { handleSearchObject } from './handlers/handleSearchObject';
 import { cleanup } from './lib/utils';
 
@@ -132,6 +133,17 @@ describe('mcp_abap_adt_server - Integration Tests', () => {
   describe('handleSearchObject', () => {
     it('should successfully search for an object', async () => {
       const result = await handleSearchObject({ query: 'SYST' });
+      expect(result.isError).toBe(false);
+      expect(Array.isArray(result.content)).toBe(true);
+      expect(result.content.length).toBeGreaterThan(0);
+      expect(result.content[0].type).toBe('text');
+    });
+  });
+
+  describe('handleGetTransaction', () => {
+    it('should successfully retrieve transaction details', async () => {
+      const result = await handleGetTransaction({ transaction_name: 'SE93' });
+      console.log(result)
       expect(result.isError).toBe(false);
       expect(Array.isArray(result.content)).toBe(true);
       expect(result.content.length).toBeGreaterThan(0);

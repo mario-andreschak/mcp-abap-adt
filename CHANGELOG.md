@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.0] - 2025-02-19
+
+### Added
+- New `GetTransaction` tool to retrieve ABAP transaction details.
+  - Allows fetching transaction details using the ADT endpoint `/sap/bc/adt/repository/informationsystem/objectproperties/values`.
+  - Added documentation in README.md.
+
 ## [0.1.2] - 2025-02-18
 
 ### Changed
