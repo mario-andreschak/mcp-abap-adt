@@ -73,7 +73,7 @@ npx -y @smithery/cli install @mario-andreschak/mcp-abap-adt --client cline
         4.  Choose a local path (where you want to save the project on your computer).
         5.  Click "Clone".
 
-2.  **Install Dependencies:**  This downloads all the necessary libraries the project needs.  In the terminal, inside the `server` directory, run:
+2.  **Install Dependencies:**  This downloads all the necessary libraries the project needs.  In the terminal, inside the root directory, run:
     ```bash
     npm install
     ```
@@ -85,7 +85,7 @@ npx -y @smithery/cli install @mario-andreschak/mcp-abap-adt --client cline
     ```
 
 4.  **Create a `.env` file:** This file stores sensitive information like your SAP credentials.  It's *very* important to keep this file secure.
-    1.  In the `server` directory, create a new file named `.env` (no extension).
+    1.  In the root directory, create a new file named `.env` (no extension).
     2.  Open the `.env` file in a text editor (like Notepad, VS Code, etc.).
     3.  Add the following lines, replacing the placeholders with your actual SAP system information:
         Important: If your password contains a "#" character, make sure to enclose your password in quotes!
