@@ -1,5 +1,5 @@
 {
-  "name": "mcp-abap-adt",
+  "name": "@orchestraight.co/mcp-abap-adt",
   "version": "1.1.0",
   "main": "index.js",
   "scripts": {
@@ -8,9 +8,17 @@
     "start": "node ./dist/index.js",
     "dev": "npx @modelcontextprotocol/inspector node ./dist/index.js"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "keywords":  ["abap", "sap", "adt", "mcp", "model-context-protocol"],
+  "author": "orchestraight.co",
+  "description": "ABAP ADT (ABAP Development Tools) MCP Server for interacting with SAP systems",
+  "license": "MIT",
+  "publishConfig": {
+    "access": "public"
+  },  
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mario-andreschak/mcp-abap-adt.git"
+  },  
   "devDependencies": {
     "@types/jest": "^29.5.14",
     "@types/node": "^22.10.10",
@@ -23,6 +31,5 @@
     "axios": "^1.7.9",
     "dotenv": "^16.4.7",
     "xml-js": "^1.6.11"
-  },
-  "description": ""
+  }
 }
