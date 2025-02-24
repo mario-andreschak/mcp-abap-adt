@@ -99,10 +99,10 @@ npx -y @smithery/cli install @mario-andreschak/mcp-abap-adt --client cline
 
 ## 3. Running the Server
 
-You can run the server in two main ways:
+To be fair, you usually dont usually "run" this server on it's own. It is supposed to be integrated into an MCP Client like Cline or Claude Desktop. But you *can* manually run the server in two main ways:
 
-*   **Standalone Mode:**  This runs the server directly, and it will output messages to the terminal.
-*   **Development/Debug Mode:** This runs the server with the Node.js inspector.
+*   **Standalone Mode:**  This runs the server directly, and it will output messages to the terminal. The server will start and wait for client connections, so potentially rendering it useless except to see if it starts.
+*   **Development/Debug Mode:** This runs the server with the MCP Inspector. You can open the URL that it outputs in your browser and start playing around.
 
 ### 3.1 Standalone Mode
 
