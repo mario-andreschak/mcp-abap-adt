@@ -172,11 +172,21 @@ Cline is a VS Code extension that uses MCP servers to provide language support. 
     *   Double-check the settings in `cline_mcp_settings.json`.  It *must* be the correct, absolute path to the `root-server` directory, and use double backslashes on Windows.
     *   Make sure the server is running (use `npm run start` to check).
     *   Restart VS Code.
+    *   Alternatively: 
+    *   Navigate to the root folder of mcp-abap-adt in your Explorer, Shift+Right-Click and select "Open Powershell here". (Or open a Powershell and navigate to the folder using `cd C:/PATH_TO/mcp-abap-adt/`
+    *   Run "npm install"
+    *   Run "npm run build"
+    *   Run "npx @modelcontextprotocol/inspector node dist/index.js"
+    *   Open your browser at the URL it outputs. Click "connect" on the left side.
+    *   Click "Tools" on the top, then click "List Tools"
+    *   Click GetProgram and enter "SAPMV45A" or any other Report name as Program Name on the right
+    *   Test and see what the output is
 *   **SAP connection errors:**
     *   Verify your SAP credentials in the `.env` file.
     *   Ensure that the SAP system is running and accessible from your network.
     *   Make sure that your SAP user has the necessary authorizations to access the ADT services.
     *   Check that the required ADT services are activated in transaction `SICF`.
+    *   If you're using self-signed certificates or there is an issue with your SAP systems http config, make sure to set TLS_REJECT_UNAUTHORIZED as described above!
 
 ## 6. Available Tools
 
