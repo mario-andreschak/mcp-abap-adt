@@ -4,6 +4,10 @@
 
 This project provides a server that allows you to interact with SAP ABAP systems using the Model Context Protocol (MCP).  Think of it as a bridge that lets tools like [Cline](https://marketplace.visualstudio.com/items?itemName=saoudrizwan.claude-dev) (a VS Code extension) talk to your ABAP system and retrieve information like source code, table structures, and more.  It's like having a remote control for your ABAP development environment!
 
+<a href="https://glama.ai/mcp/servers/gwkh12xlu7">
+  <img width="380" height="200" src="https://glama.ai/mcp/servers/gwkh12xlu7/badge" alt="ABAP ADT MCP server" />
+</a>
+
 This guide is designed for beginners, so we'll walk through everything step-by-step.  We'll cover:
 
 1.  **Prerequisites:** What you need before you start.
