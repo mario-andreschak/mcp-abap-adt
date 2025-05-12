@@ -159,18 +159,13 @@ export async function getAuthHeaders() {
       "base64"
     );
     headers["Authorization"] = `Basic ${auth}`;
-  } else if (config.authType === "sso") {
-    // Check if we need to refresh the token
-    if (!isSsoTokenValid()) {
-      config.ssoToken = await refreshSsoToken();
-    }
-
-    // SSO authentication with token
-    if (!config.ssoToken) {
-      throw new Error("No valid SSO token available");
-    }
-
+  } else if (config.authType === "xsuaa" && config.ssoToken) {
+    // XSUAA JWT Bearer authentication
     headers["Authorization"] = `Bearer ${config.ssoToken}`;
+  } else if (config.authType === "sso" && config.ssoToken) {
+    // SSO cookie authentication (Eclipse/ADT style)
+    // Do NOT add Authorization, only Cookie
+    // Cookie will be added in makeAdtRequest
   } else {
     throw new Error("Invalid authentication configuration");
   }
@@ -297,9 +292,11 @@ export async function makeAdtRequest(
     requestHeaders["x-csrf-token"] = csrfToken;
   }
 
-  // Add cookies if available
+  // Add cookies if available or for SSO authType
   if (cookies) {
     requestHeaders["Cookie"] = cookies;
+  } else if (config && config.authType === "sso" && config.ssoToken) {
+    requestHeaders["Cookie"] = config.ssoToken;
   }
 
   // Додаємо Accept заголовок для ADT запитів

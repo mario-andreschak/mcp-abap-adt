@@ -43,7 +43,7 @@ export interface SapConfig {
   url: string;
   client: string;
   // Authentication options
-  authType: "basic" | "sso";
+  authType: "basic" | "sso" | "xsuaa";
   username?: string;
   password?: string;
   ssoToken?: string;
@@ -72,7 +72,7 @@ export function getConfig(): SapConfig {
   const config: SapConfig = {
     url,
     client,
-    authType: authType as "basic" | "sso",
+    authType: authType as "basic" | "sso" | "xsuaa",
   };
 
   // For basic auth, username and password are required
@@ -89,15 +89,14 @@ export function getConfig(): SapConfig {
     config.username = username;
     config.password = password;
   }
-  // For SSO, the token is required
-  else if (authType === "sso") {
+  // For SSO or XSUAA, the token is required
+  else if (authType === "sso" || authType === "xsuaa") {
     const ssoToken = process.env.SAP_SSO_TOKEN;
 
     if (!ssoToken) {
-      throw new Error(`SSO authentication requires a token. Missing variable:
+      throw new Error(`SSO/XSUAA authentication requires a token. Missing variable:
 - SAP_SSO_TOKEN`);
     }
-
     config.ssoToken = ssoToken;
   }
 
