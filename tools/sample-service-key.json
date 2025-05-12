@@ -1,0 +1,27 @@
+{
+    "uaa": {
+        "clientid": "sb-abap-trial-1234567890",
+        "clientsecret": "your-client-secret-here",
+        "url": "https://your-account.authentication.eu10.hana.ondemand.com",
+        "tokenendpoint": "https://your-account.authentication.eu10.hana.ondemand.com/oauth/token"
+    },
+    "abap": {
+        "url": "https://your-account-abap-trial.eu10.abap.cloud.sap",
+        "sapClient": "100"
+    },
+    "binding": {
+        "env": "cloud",
+        "version": "1.0.0",
+        "type": "abap-cloud",
+        "id": "abap-trial"
+    },
+    "endpoints": {
+        "api": "https://your-account-abap-trial.eu10.abap.cloud.sap/sap/bc/adt",
+        "catalog": "https://your-account-abap-trial.eu10.abap.cloud.sap/sap/opu/odata/sap/SEPM_PRODUCT_CATALOG",
+        "webide": "https://your-account-abap-trial.eu10.abap.cloud.sap/sap/bc/webide"
+    },
+    "systemid": "ABC",
+    "apiinfo": "API information can be fetched from the cloud platform system",
+    "communicationScenarioId": "SAP_COM_0510",
+    "communicationArrangementId": "ABAP_TRIAL_1234567890"
+}

@@ -1,42 +1,52 @@
 #!/usr/bin/env node
-import { Server } from '@modelcontextprotocol/sdk/server/index.js';
-import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
+import { Server } from "@modelcontextprotocol/sdk/server/index.js";
+import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import {
   CallToolRequestSchema,
   ErrorCode,
   ListToolsRequestSchema,
   McpError,
-} from '@modelcontextprotocol/sdk/types.js';
-import path from 'path';
-import dotenv from 'dotenv';
+} from "@modelcontextprotocol/sdk/types.js";
+import path from "path";
+import dotenv from "dotenv";
 
 // Import handler functions
-import { handleGetProgram } from './handlers/handleGetProgram';
-import { handleGetClass } from './handlers/handleGetClass';
-import { handleGetFunctionGroup } from './handlers/handleGetFunctionGroup';
-import { handleGetFunction } from './handlers/handleGetFunction';
-import { handleGetTable } from './handlers/handleGetTable';
-import { handleGetStructure } from './handlers/handleGetStructure';
-import { handleGetTableContents } from './handlers/handleGetTableContents';
-import { handleGetPackage } from './handlers/handleGetPackage';
-import { handleGetInclude } from './handlers/handleGetInclude';
-import { handleGetTypeInfo } from './handlers/handleGetTypeInfo';
-import { handleGetInterface } from './handlers/handleGetInterface';
-import { handleGetTransaction } from './handlers/handleGetTransaction';
-import { handleSearchObject } from './handlers/handleSearchObject';
+import { handleGetProgram } from "./handlers/handleGetProgram";
+import { handleGetClass } from "./handlers/handleGetClass";
+import { handleGetFunctionGroup } from "./handlers/handleGetFunctionGroup";
+import { handleGetFunction } from "./handlers/handleGetFunction";
+import { handleGetTable } from "./handlers/handleGetTable";
+import { handleGetStructure } from "./handlers/handleGetStructure";
+import { handleGetTableContents } from "./handlers/handleGetTableContents";
+import { handleGetPackage } from "./handlers/handleGetPackage";
+import { handleGetInclude } from "./handlers/handleGetInclude";
+import { handleGetTypeInfo } from "./handlers/handleGetTypeInfo";
+import { handleGetInterface } from "./handlers/handleGetInterface";
+import { handleGetTransaction } from "./handlers/handleGetTransaction";
+import { handleSearchObject } from "./handlers/handleSearchObject";
 
 // Import shared utility functions and types
-import { getBaseUrl, getAuthHeaders, createAxiosInstance, makeAdtRequest, return_error, return_response } from './lib/utils';
+import {
+  getBaseUrl,
+  getAuthHeaders,
+  createAxiosInstance,
+  makeAdtRequest,
+  return_error,
+  return_response,
+} from "./lib/utils";
 
 // Load environment variables from .env file
-dotenv.config({ path: path.resolve(__dirname, '../.env') });
+dotenv.config({ path: path.resolve(__dirname, "../.env") });
 
 // Interface for SAP configuration
 export interface SapConfig {
   url: string;
-  username: string;
-  password: string;
   client: string;
+  // Authentication options
+  authType: "basic" | "sso";
+  username?: string;
+  password?: string;
+  ssoToken?: string;
 }
 
 /**
@@ -47,27 +57,58 @@ export interface SapConfig {
  */
 export function getConfig(): SapConfig {
   const url = process.env.SAP_URL;
-  const username = process.env.SAP_USERNAME;
-  const password = process.env.SAP_PASSWORD;
   const client = process.env.SAP_CLIENT;
+  const authType = process.env.SAP_AUTH_TYPE || "basic";
 
-  // Check if all required environment variables are set
-  if (!url || !username || !password || !client) {
+  // Check if required environment variables are set
+  if (!url || !client) {
     throw new Error(`Missing required environment variables. Required variables:
 - SAP_URL
-- SAP_USERNAME
-- SAP_PASSWORD
-- SAP_CLIENT`);
+- SAP_CLIENT
+- SAP_AUTH_TYPE (optional, defaults to 'basic')`);
   }
 
-  return { url, username, password, client };
+  // Config object
+  const config: SapConfig = {
+    url,
+    client,
+    authType: authType as "basic" | "sso",
+  };
+
+  // For basic auth, username and password are required
+  if (authType === "basic") {
+    const username = process.env.SAP_USERNAME;
+    const password = process.env.SAP_PASSWORD;
+
+    if (!username || !password) {
+      throw new Error(`Basic authentication requires username and password. Missing variables:
+- SAP_USERNAME
+- SAP_PASSWORD`);
+    }
+
+    config.username = username;
+    config.password = password;
+  }
+  // For SSO, the token is required
+  else if (authType === "sso") {
+    const ssoToken = process.env.SAP_SSO_TOKEN;
+
+    if (!ssoToken) {
+      throw new Error(`SSO authentication requires a token. Missing variable:
+- SAP_SSO_TOKEN`);
+    }
+
+    config.ssoToken = ssoToken;
+  }
+
+  return config;
 }
 
 /**
  * Server class for interacting with ABAP systems via ADT.
  */
 export class mcp_abap_adt_server {
-  private server: Server;  // Instance of the MCP server
+  private server: Server; // Instance of the MCP server
   private sapConfig: SapConfig; // SAP configuration
 
   /**
@@ -75,10 +116,10 @@ export class mcp_abap_adt_server {
    */
   constructor() {
     this.sapConfig = getConfig(); // Load SAP configuration
-    this.server = new Server(  // Initialize the MCP server
+    this.server = new Server( // Initialize the MCP server
       {
-        name: 'mcp-abap-adt', // Server name
-        version: '0.1.0',       // Server version
+        name: "mcp-abap-adt", // Server name
+        version: "0.1.0", // Server version
       },
       {
         capabilities: {
@@ -100,235 +141,236 @@ export class mcp_abap_adt_server {
     // Handler for ListToolsRequest
     this.server.setRequestHandler(ListToolsRequestSchema, async () => {
       return {
-        tools: [ // Define available tools
+        tools: [
+          // Define available tools
           {
-            name: 'GetProgram',
-            description: 'Retrieve ABAP program source code',
+            name: "GetProgram",
+            description: "Retrieve ABAP program source code",
             inputSchema: {
-              type: 'object',
+              type: "object",
               properties: {
                 program_name: {
-                  type: 'string',
-                  description: 'Name of the ABAP program'
-                }
+                  type: "string",
+                  description: "Name of the ABAP program",
+                },
               },
-              required: ['program_name']
-            }
+              required: ["program_name"],
+            },
           },
           {
-            name: 'GetClass',
-            description: 'Retrieve ABAP class source code',
+            name: "GetClass",
+            description: "Retrieve ABAP class source code",
             inputSchema: {
-              type: 'object',
+              type: "object",
               properties: {
                 class_name: {
-                  type: 'string',
-                  description: 'Name of the ABAP class'
-                }
+                  type: "string",
+                  description: "Name of the ABAP class",
+                },
               },
-              required: ['class_name']
-            }
+              required: ["class_name"],
+            },
           },
           {
-            name: 'GetFunctionGroup',
-            description: 'Retrieve ABAP Function Group source code',
+            name: "GetFunctionGroup",
+            description: "Retrieve ABAP Function Group source code",
             inputSchema: {
-              type: 'object',
+              type: "object",
               properties: {
                 function_group: {
-                  type: 'string',
-                  description: 'Name of the function module'
-                }
+                  type: "string",
+                  description: "Name of the function module",
+                },
               },
-              required: ['function_group']
-            }
+              required: ["function_group"],
+            },
           },
           {
-            name: 'GetFunction',
-            description: 'Retrieve ABAP Function Module source code',
+            name: "GetFunction",
+            description: "Retrieve ABAP Function Module source code",
             inputSchema: {
-              type: 'object',
+              type: "object",
               properties: {
                 function_name: {
-                  type: 'string',
-                  description: 'Name of the function module'
+                  type: "string",
+                  description: "Name of the function module",
                 },
                 function_group: {
-                  type: 'string',
-                  description: 'Name of the function group'
-                }
+                  type: "string",
+                  description: "Name of the function group",
+                },
               },
-              required: ['function_name', 'function_group']
-            }
+              required: ["function_name", "function_group"],
+            },
           },
           {
-            name: 'GetStructure',
-            description: 'Retrieve ABAP Structure',
+            name: "GetStructure",
+            description: "Retrieve ABAP Structure",
             inputSchema: {
-              type: 'object',
+              type: "object",
               properties: {
                 structure_name: {
-                  type: 'string',
-                  description: 'Name of the ABAP Structure'
-                }
+                  type: "string",
+                  description: "Name of the ABAP Structure",
+                },
               },
-              required: ['structure_name']
-            }
+              required: ["structure_name"],
+            },
           },
           {
-            name: 'GetTable',
-            description: 'Retrieve ABAP table structure',
+            name: "GetTable",
+            description: "Retrieve ABAP table structure",
             inputSchema: {
-              type: 'object',
+              type: "object",
               properties: {
                 table_name: {
-                  type: 'string',
-                  description: 'Name of the ABAP table'
-                }
+                  type: "string",
+                  description: "Name of the ABAP table",
+                },
               },
-              required: ['table_name']
-            }
+              required: ["table_name"],
+            },
           },
           {
-            name: 'GetTableContents',
-            description: 'Retrieve contents of an ABAP table',
+            name: "GetTableContents",
+            description: "Retrieve contents of an ABAP table",
             inputSchema: {
-              type: 'object',
+              type: "object",
               properties: {
                 table_name: {
-                  type: 'string',
-                  description: 'Name of the ABAP table'
+                  type: "string",
+                  description: "Name of the ABAP table",
                 },
                 max_rows: {
-                  type: 'number',
-                  description: 'Maximum number of rows to retrieve',
-                  default: 100
-                }
+                  type: "number",
+                  description: "Maximum number of rows to retrieve",
+                  default: 100,
+                },
               },
-              required: ['table_name']
-            }
+              required: ["table_name"],
+            },
           },
           {
-            name: 'GetPackage',
-            description: 'Retrieve ABAP package details',
+            name: "GetPackage",
+            description: "Retrieve ABAP package details",
             inputSchema: {
-              type: 'object',
+              type: "object",
               properties: {
                 package_name: {
-                  type: 'string',
-                  description: 'Name of the ABAP package'
-                }
+                  type: "string",
+                  description: "Name of the ABAP package",
+                },
               },
-              required: ['package_name']
-            }
+              required: ["package_name"],
+            },
           },
           {
-            name: 'GetTypeInfo',
-            description: 'Retrieve ABAP type information',
+            name: "GetTypeInfo",
+            description: "Retrieve ABAP type information",
             inputSchema: {
-              type: 'object',
+              type: "object",
               properties: {
                 type_name: {
-                  type: 'string',
-                  description: 'Name of the ABAP type'
-                }
+                  type: "string",
+                  description: "Name of the ABAP type",
+                },
               },
-              required: ['type_name']
-            }
+              required: ["type_name"],
+            },
           },
           {
-            name: 'GetInclude',
-            description: 'Retrieve ABAP Include Source Code',
+            name: "GetInclude",
+            description: "Retrieve ABAP Include Source Code",
             inputSchema: {
-              type: 'object',
+              type: "object",
               properties: {
                 include_name: {
-                  type: 'string',
-                  description: 'Name of the ABAP Include'
-                }
+                  type: "string",
+                  description: "Name of the ABAP Include",
+                },
               },
-              required: ['include_name']
-            }
+              required: ["include_name"],
+            },
           },
           {
-            name: 'SearchObject',
-            description: 'Search for ABAP objects using quick search',
+            name: "SearchObject",
+            description: "Search for ABAP objects using quick search",
             inputSchema: {
-              type: 'object',
+              type: "object",
               properties: {
                 query: {
-                  type: 'string',
-                  description: 'Search query string'
+                  type: "string",
+                  description: "Search query string",
                 },
                 maxResults: {
-                  type: 'number',
-                  description: 'Maximum number of results to return',
-                  default: 100
-                }
+                  type: "number",
+                  description: "Maximum number of results to return",
+                  default: 100,
+                },
               },
-              required: ['query']
-            }
+              required: ["query"],
+            },
           },
           {
-            name: 'GetTransaction',
-            description: 'Retrieve ABAP transaction details',
+            name: "GetTransaction",
+            description: "Retrieve ABAP transaction details",
             inputSchema: {
-              type: 'object',
+              type: "object",
               properties: {
                 transaction_name: {
-                  type: 'string',
-                  description: 'Name of the ABAP transaction'
-                }
+                  type: "string",
+                  description: "Name of the ABAP transaction",
+                },
               },
-              required: ['transaction_name']
-            }
+              required: ["transaction_name"],
+            },
           },
           {
-            name: 'GetInterface',
-            description: 'Retrieve ABAP interface source code',
+            name: "GetInterface",
+            description: "Retrieve ABAP interface source code",
             inputSchema: {
-              type: 'object',
+              type: "object",
               properties: {
                 interface_name: {
-                  type: 'string',
-                  description: 'Name of the ABAP interface'
-                }
+                  type: "string",
+                  description: "Name of the ABAP interface",
+                },
               },
-              required: ['interface_name']
-            }
-          }
-        ]
+              required: ["interface_name"],
+            },
+          },
+        ],
       };
     });
 
     // Handler for CallToolRequest
     this.server.setRequestHandler(CallToolRequestSchema, async (request) => {
       switch (request.params.name) {
-        case 'GetProgram':
+        case "GetProgram":
           return await handleGetProgram(request.params.arguments);
-        case 'GetClass':
+        case "GetClass":
           return await handleGetClass(request.params.arguments);
-        case 'GetFunction':
+        case "GetFunction":
           return await handleGetFunction(request.params.arguments);
-        case 'GetFunctionGroup':
+        case "GetFunctionGroup":
           return await handleGetFunctionGroup(request.params.arguments);
-        case 'GetStructure':
+        case "GetStructure":
           return await handleGetStructure(request.params.arguments);
-        case 'GetTable':
+        case "GetTable":
           return await handleGetTable(request.params.arguments);
-        case 'GetTableContents':
+        case "GetTableContents":
           return await handleGetTableContents(request.params.arguments);
-        case 'GetPackage':
+        case "GetPackage":
           return await handleGetPackage(request.params.arguments);
-        case 'GetTypeInfo':
+        case "GetTypeInfo":
           return await handleGetTypeInfo(request.params.arguments);
-        case 'GetInclude':
+        case "GetInclude":
           return await handleGetInclude(request.params.arguments);
-        case 'SearchObject':
+        case "SearchObject":
           return await handleSearchObject(request.params.arguments);
-        case 'GetInterface':
+        case "GetInterface":
           return await handleGetInterface(request.params.arguments);
-        case 'GetTransaction':
+        case "GetTransaction":
           return await handleGetTransaction(request.params.arguments);
         default:
           throw new McpError(
@@ -339,7 +381,7 @@ export class mcp_abap_adt_server {
     });
 
     // Handle server shutdown on SIGINT (Ctrl+C)
-    process.on('SIGINT', async () => {
+    process.on("SIGINT", async () => {
       await this.server.close();
       process.exit(0);
     });
