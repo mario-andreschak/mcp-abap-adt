@@ -69,7 +69,6 @@ export function cleanup() {
 let config: SapConfig | undefined;
 let csrfToken: string | null = null;
 let cookies: string | null = null; // Variable to store cookies
-let ssoTokenExpiry: number | null = null;
 
 export async function getBaseUrl() {
   if (!config) {
@@ -87,61 +86,6 @@ export async function getBaseUrl() {
   }
 }
 
-/**
- * Fetches an SSO token from the identity provider
- * This is a placeholder implementation. In a real scenario you would:
- * 1. Redirect to SSO login page
- * 2. Process the auth code
- * 3. Exchange code for tokens
- * 4. Store and refresh tokens as needed
- */
-export async function refreshSsoToken(): Promise<string> {
-  try {
-    if (!config) {
-      config = getConfig();
-    }
-
-    // Check if we're configured for SSO
-    if (config.authType !== "sso") {
-      throw new Error(
-        "SSO token refresh requested but authentication type is not SSO"
-      );
-    }
-
-    // In a real implementation, this would make a request to get a new token if expired
-    // For now, we'll just return the existing token or throw an error if none is set
-    if (!config.ssoToken) {
-      throw new Error("No SSO token available in configuration");
-    }
-
-    // Set a mock expiry time of 1 hour from now
-    ssoTokenExpiry = Date.now() + 60 * 60 * 1000;
-
-    return config.ssoToken;
-  } catch (error) {
-    throw new Error(
-      `Failed to refresh SSO token: ${
-        error instanceof Error ? error.message : String(error)
-      }`
-    );
-  }
-}
-
-/**
- * Checks if the current SSO token is valid or needs to be refreshed
- * @returns true if token is valid, false if it needs to be refreshed
- */
-export function isSsoTokenValid(): boolean {
-  if (!ssoTokenExpiry) {
-    return false;
-  }
-
-  // Check if token is about to expire (less than 5 minutes remaining)
-  const fiveMinutes = 5 * 60 * 1000;
-  return Date.now() < ssoTokenExpiry - fiveMinutes;
-}
-
-// Update getAuthHeaders to use token refreshing
 export async function getAuthHeaders() {
   if (!config) {
     config = getConfig();
@@ -159,13 +103,9 @@ export async function getAuthHeaders() {
       "base64"
     );
     headers["Authorization"] = `Basic ${auth}`;
-  } else if (config.authType === "xsuaa" && config.ssoToken) {
+  } else if (config.authType === "xsuaa" && config.jwtToken) {
     // XSUAA JWT Bearer authentication
-    headers["Authorization"] = `Bearer ${config.ssoToken}`;
-  } else if (config.authType === "sso" && config.ssoToken) {
-    // SSO cookie authentication (Eclipse/ADT style)
-    // Do NOT add Authorization, only Cookie
-    // Cookie will be added in makeAdtRequest
+    headers["Authorization"] = `Bearer ${config.jwtToken}`;
   } else {
     throw new Error("Invalid authentication configuration");
   }
@@ -175,16 +115,15 @@ export async function getAuthHeaders() {
 
 async function fetchCsrfToken(url: string): Promise<string> {
   try {
-    // Додаємо шлях /sap/bc/adt/discovery до URL якщо його немає
-    // Це стандартний ендпоінт для отримання CSRF-токена в SAP ABAP системах
+    // Add /sap/bc/adt/discovery path to the URL if not present
+    // This is the standard endpoint for obtaining a CSRF token in SAP ABAP systems
     let csrfUrl = url;
     if (!url.includes("/sap/bc/adt/")) {
       csrfUrl = `${url}/sap/bc/adt/discovery`;
     }
 
-    // Логування CSRF-запиту тільки якщо DEBUG=true і не xsuaa
-    if (process.env.DEBUG === "true" && config?.authType !== "xsuaa") {
-      console.log(`Отримую CSRF-токен з: ${csrfUrl}`);
+    if (process.env.DEBUG === "true") {
+      console.log(`Fetching CSRF token from: ${csrfUrl}`);
     }
 
     const response = await createAxiosInstance()({
@@ -209,24 +148,24 @@ async function fetchCsrfToken(url: string): Promise<string> {
 
     return token;
   } catch (error) {
-    // Виводимо деталі помилки для відладки
+    // Output error details for debugging
     if (error instanceof AxiosError) {
-      if (process.env.DEBUG === "true" && config?.authType !== "xsuaa") {
-        console.error(`CSRF токен помилка: ${error.message}`);
+      if (process.env.DEBUG === "true") {
+        console.error(`CSRF token error: ${error.message}`);
         if (error.response) {
-          console.error(`Статус: ${error.response.status}`);
-          console.error(`Заголовки: ${JSON.stringify(error.response.headers)}`);
-          console.error(`Дані: ${error.response.data?.slice(0, 200)}...`);
+          console.error(`Status: ${error.response.status}`);
+          console.error(`Headers: ${JSON.stringify(error.response.headers)}`);
+          console.error(`Data: ${error.response.data?.slice(0, 200)}...`);
         }
       }
-      // Якщо 405 — це не критична помилка, CSRF токен часто все одно повертається (SAP специфіка)
+      // If 405 — not a critical error, CSRF token is often still returned (SAP specifics)
       if (
         error.response?.status === 405 &&
         error.response?.headers["x-csrf-token"]
       ) {
         if (process.env.DEBUG === "true") {
           console.warn(
-            "CSRF: SAP повернув 405 (Method Not Allowed) — це не критично, токен може бути у заголовку."
+            "CSRF: SAP returned 405 (Method Not Allowed) — not critical, token may be in the header."
           );
         }
         const token = error.response.headers["x-csrf-token"];
@@ -237,7 +176,7 @@ async function fetchCsrfToken(url: string): Promise<string> {
           return token;
         }
       }
-      // Перевіряємо заголовки відповіді на наявність CSRF токена навіть при інших помилках
+      // Check response headers for CSRF token even on other errors
       if (error.response?.headers["x-csrf-token"]) {
         const token = error.response.headers["x-csrf-token"];
         if (error.response.headers["set-cookie"]) {
@@ -247,16 +186,7 @@ async function fetchCsrfToken(url: string): Promise<string> {
       }
     }
 
-    // Якщо не вдалося отримати CSRF токен, змінимо поведінку в режимі SSO
-    if (config && config.authType === "sso") {
-      console.warn(
-        "CSRF токен не знайдено, але в режимі SSO продовжуємо без нього."
-      );
-      // Повертаємо токен-заглушку, яка буде використовуватися лише для SSO запитів
-      return "SSO_MODE";
-    }
-
-    // Для базової автентифікації все ще вимагаємо справжній CSRF токен
+    // For both basic and JWT, a real CSRF token is still required
     throw new Error(
       `Failed to fetch CSRF token: ${
         error instanceof Error ? error.message : String(error)
@@ -272,7 +202,7 @@ export async function makeAdtRequest(
   data?: any,
   params?: any
 ) {
-  // Додаємо правильні шляхи ADT до URL, якщо вони відсутні
+  // Add correct ADT paths to the URL if not present
   let requestUrl = url;
   if (!url.includes("/sap/bc/adt/") && !url.endsWith("/sap/bc/adt")) {
     if (url.endsWith("/")) {
@@ -282,25 +212,14 @@ export async function makeAdtRequest(
     }
   }
 
-  // Для SSO не вимагаємо CSRF токен для POST/PUT запитів
-  const isSSO = config && config.authType === "sso";
-
-  // Для POST/PUT запитів, отримуємо CSRF токен (за винятком режиму SSO)
-  if ((method === "POST" || method === "PUT") && !csrfToken && !isSSO) {
+  // For POST/PUT requests, obtain CSRF token
+  if ((method === "POST" || method === "PUT") && !csrfToken) {
     try {
       csrfToken = await fetchCsrfToken(requestUrl);
     } catch (error) {
       throw new Error(
         "CSRF token is required for POST/PUT requests but could not be fetched"
       );
-    }
-  } else if ((method === "POST" || method === "PUT") && isSSO && !csrfToken) {
-    // В режимі SSO спробуємо отримати токен, але продовжимо навіть без нього
-    try {
-      csrfToken = await fetchCsrfToken(requestUrl);
-    } catch (error) {
-      console.warn("SSO режим: працюємо без CSRF токена");
-      csrfToken = "SSO_MODE"; // використовуємо заглушку
     }
   }
 
@@ -313,14 +232,12 @@ export async function makeAdtRequest(
     requestHeaders["x-csrf-token"] = csrfToken;
   }
 
-  // Add cookies if available or for SSO authType
+  // Add cookies if available
   if (cookies) {
     requestHeaders["Cookie"] = cookies;
-  } else if (config && config.authType === "sso" && config.ssoToken) {
-    requestHeaders["Cookie"] = config.ssoToken;
   }
 
-  // Додаємо Accept заголовок для ADT запитів
+  // Add Accept header for ADT requests
   if (!requestHeaders["Accept"]) {
     requestHeaders["Accept"] =
       "application/xml, application/json, text/plain, */*";
@@ -339,19 +256,19 @@ export async function makeAdtRequest(
     requestConfig.data = data;
   }
 
-  console.log(`Виконую запит до: ${requestUrl} (метод: ${method})`);
+  console.log(`Executing request to: ${requestUrl} (method: ${method})`);
 
   try {
     const response = await createAxiosInstance()(requestConfig);
     return response;
   } catch (error) {
-    // Логування деталей помилки
+    // Log error details
     if (error instanceof AxiosError) {
-      console.error(`Помилка запиту: ${error.message}`);
+      console.error(`Request error: ${error.message}`);
       if (error.response) {
-        console.error(`Статус: ${error.response.status}`);
+        console.error(`Status: ${error.response.status}`);
         console.error(
-          `Дані: ${
+          `Data: ${
             typeof error.response.data === "string"
               ? error.response.data.slice(0, 200)
               : JSON.stringify(error.response.data).slice(0, 200)

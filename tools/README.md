@@ -1,43 +1,43 @@
-# SAP ABAP SSO Authentication CLI
+# SAP ABAP Authentication CLI
 
-Ця CLI-утиліта дозволяє автоматично отримувати OAuth токен для підключення до SAP BTP ABAP Environment через SSO, використовуючи service key.
+This CLI utility allows you to automatically obtain an OAuth2 JWT token (XSUAA) or use basic authentication to connect to SAP BTP ABAP Environment using a service key.
 
-## Вимоги
+## Requirements
 
 - Node.js (>= 14.x)
-- Service key файл у форматі JSON з SAP BTP ABAP Environment
+- Service key file in JSON format from SAP BTP ABAP Environment
 
-## Створення Service Key
+## Creating a Service Key
 
-1. Увійдіть до SAP BTP Cockpit
-2. Перейдіть до свого ABAP Environment (або Trial)
-3. Виберіть "Service Keys" (або створіть інстанс сервісу, якщо його ще немає)
-4. Створіть новий Service Key з потрібними параметрами
-5. Скопіюйте JSON даних і збережіть у файл (наприклад, `abap-service-key.json`)
+1. Log in to SAP BTP Cockpit
+2. Go to your ABAP Environment (or Trial)
+3. Select "Service Keys" (or create a service instance if you don't have one yet)
+4. Create a new Service Key with the required parameters
+5. Copy the JSON data and save it to a file (e.g., `abap-service-key.json`)
 
-## Використання
+## Usage
 
 ```bash
-# Використання через npm script
+# Using npm script
+yarn auth -- -k path/to/service-key.json
+# or
 npm run auth -- -k path/to/service-key.json
 
-# Або напряму через Node.js
-node tools/sap-abap-auth.js auth -k path/to/service-key.json
+# Or directly via Node.js
+node tools/sap-abap-auth-browser.js auth -k path/to/service-key.json
 ```
 
-## Результат
+## Result
 
-CLI утиліта:
+The CLI utility will:
 
-1. Зчитає файл service key
-2. Отримає OAuth токен через client credentials flow
-3. Витягне URL та клієнт SAP ABAP системи
-4. Оновить `.env` файл з необхідними значеннями для SSO автентифікації
-5. Покаже статус операцій у консолі
+1. Read the service key file
+2. Obtain an OAuth2 JWT token via XSUAA (or use basic)
+3. Extract the URL and client of the SAP ABAP system
+4. Update the `.env` file with the required values for JWT (xsuaa) or basic authentication
+5. Display the operation status in the console
 
-## Структура файлу service key
-
-Типова структура service key для SAP BTP ABAP Environment:
+## Example service key file structure
 
 ```json
 {
@@ -57,10 +57,20 @@ CLI утиліта:
 }
 ```
 
-## Для розробників
+## Example .env for JWT (xsuaa) and basic
 
-Якщо вам потрібно змінити логіку аутентифікації:
+```
+SAP_URL=https://your-abap-url
+SAP_CLIENT=100
+SAP_AUTH_TYPE=xsuaa
+SAP_JWT_TOKEN=your_jwt_token_here
+# or for basic
+# SAP_AUTH_TYPE=basic
+# SAP_USERNAME=your_username
+# SAP_PASSWORD=your_password
+```
 
-1. Модифікуйте функцію `fetchOAuthToken()` для іншого типу OAuth flow
-2. Змініть функцію `getAbapUrl()` для іншого способу отримання URL
-3. Оновіть схему `.env` файлу в функції `updateEnvFile()`
+## For developers
+
+- To change authentication logic, modify the relevant functions in `sap-abap-auth-browser.js`.
+- The MCP server automatically uses JWT or basic according to the .env.

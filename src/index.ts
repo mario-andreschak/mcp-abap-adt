@@ -43,10 +43,10 @@ export interface SapConfig {
   url: string;
   client: string;
   // Authentication options
-  authType: "basic" | "sso" | "xsuaa";
+  authType: "basic" | "xsuaa";
   username?: string;
   password?: string;
-  ssoToken?: string;
+  jwtToken?: string;
 }
 
 /**
@@ -62,17 +62,16 @@ export function getConfig(): SapConfig {
 
   // Check if required environment variables are set
   if (!url || !client) {
-    throw new Error(`Missing required environment variables. Required variables:
-- SAP_URL
-- SAP_CLIENT
-- SAP_AUTH_TYPE (optional, defaults to 'basic')`);
+    throw new Error(
+      `Missing required environment variables. Required variables:\n- SAP_URL\n- SAP_CLIENT\n- SAP_AUTH_TYPE (optional, defaults to 'basic')`
+    );
   }
 
   // Config object
   const config: SapConfig = {
     url,
     client,
-    authType: authType as "basic" | "sso" | "xsuaa",
+    authType: authType as "basic" | "xsuaa",
   };
 
   // For basic auth, username and password are required
@@ -81,23 +80,24 @@ export function getConfig(): SapConfig {
     const password = process.env.SAP_PASSWORD;
 
     if (!username || !password) {
-      throw new Error(`Basic authentication requires username and password. Missing variables:
-- SAP_USERNAME
-- SAP_PASSWORD`);
+      throw new Error(
+        `Basic authentication requires username and password. Missing variables:\n- SAP_USERNAME\n- SAP_PASSWORD`
+      );
     }
 
     config.username = username;
     config.password = password;
   }
-  // For SSO or XSUAA, the token is required
-  else if (authType === "sso" || authType === "xsuaa") {
-    const ssoToken = process.env.SAP_SSO_TOKEN;
+  // For XSUAA/JWT, the token is required
+  else if (authType === "xsuaa") {
+    const jwtToken = process.env.SAP_JWT_TOKEN;
 
-    if (!ssoToken) {
-      throw new Error(`SSO/XSUAA authentication requires a token. Missing variable:
-- SAP_SSO_TOKEN`);
+    if (!jwtToken) {
+      throw new Error(
+        `JWT/XSUAA authentication requires a token. Missing variable:\n- SAP_JWT_TOKEN`
+      );
     }
-    config.ssoToken = ssoToken;
+    config.jwtToken = jwtToken;
   }
 
   return config;

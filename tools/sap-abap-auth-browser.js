@@ -8,10 +8,10 @@ const express = require("express");
 const open = require("open").default;
 const http = require("http");
 
-// Шлях до .env файлу відносно кореня проекту
+// Path to the .env file relative to the project root
 const ENV_FILE_PATH = path.resolve(process.cwd(), ".env");
 
-// Вибір браузера через опцію --browser (chrome, edge, firefox, system)
+// Browser selection via --browser option (chrome, edge, firefox, system)
 const BROWSER_MAP = {
   chrome: "chrome",
   edge: "msedge",
@@ -20,90 +20,90 @@ const BROWSER_MAP = {
 };
 
 /**
- * Читає JSON-файл з service key
- * @param {string} filePath Шлях до файлу service key
- * @returns {object} Об'єкт з даними service key
+ * Reads a JSON service key file
+ * @param {string} filePath Path to the service key file
+ * @returns {object} Service key data object
  */
 function readServiceKey(filePath) {
   try {
     const fullPath = path.resolve(process.cwd(), filePath);
     if (!fs.existsSync(fullPath)) {
-      console.error(`Файл не знайдено: ${fullPath}`);
+      console.error(`File not found: ${fullPath}`);
       process.exit(1);
     }
 
     const fileContent = fs.readFileSync(fullPath, "utf8");
     return JSON.parse(fileContent);
   } catch (error) {
-    console.error(`Помилка при читанні service key: ${error.message}`);
+    console.error(`Error reading service key: ${error.message}`);
     process.exit(1);
   }
 }
 
 /**
- * Оновлює .env файл з новими значеннями
- * @param {Object} updates Об'єкт з оновленими значеннями
+ * Updates the .env file with new values
+ * @param {Object} updates Object with updated values
  */
 function updateEnvFile(updates) {
   try {
-    // Перевіряємо наявність .env файлу
+    // Check if .env file exists
     if (!fs.existsSync(ENV_FILE_PATH)) {
-      console.error(`.env файл не знайдено за шляхом: ${ENV_FILE_PATH}`);
-      console.log("Створюю новий .env файл...");
+      console.error(`.env file not found at: ${ENV_FILE_PATH}`);
+      console.log("Creating a new .env file...");
 
-      // Створюємо базовий .env файл
+      // Create a basic .env file
       const defaultEnv = `SAP_URL=https://your-abap-system.com
 SAP_CLIENT=100
 SAP_LANGUAGE=en
 TLS_REJECT_UNAUTHORIZED=0
 
-# Authentication type: basic or sso
-SAP_AUTH_TYPE=sso
+# Authentication type: basic or xsuaa
+SAP_AUTH_TYPE=xsuaa
 
-# For SSO authentication
-SAP_SSO_TOKEN=your_sso_token_here
+# For JWT (XSUAA) authentication
+SAP_JWT_TOKEN=your_jwt_token_here
 
-# Basic authentication settings (not used with SSO)
+# For basic authentication
 # SAP_USERNAME=your_username
 # SAP_PASSWORD=your_password
 `;
       fs.writeFileSync(ENV_FILE_PATH, defaultEnv, "utf8");
     }
 
-    // Читаємо поточний .env файл
+    // Read current .env file
     let envContent = fs.readFileSync(ENV_FILE_PATH, "utf8");
 
-    // Оновлюємо значення в .env файлі
+    // Update values in the .env file
     Object.entries(updates).forEach(([key, value]) => {
-      // Перевіряємо, чи існує ключ у файлі
+      // Check if the key exists in the file
       const regex = new RegExp(`^${key}=.*$`, "m");
 
       if (regex.test(envContent)) {
-        // Оновлюємо існуюче значення
+        // Update existing value
         envContent = envContent.replace(regex, `${key}=${value}`);
       } else {
-        // Додаємо нове значення
+        // Add new value
         envContent += `\n${key}=${value}`;
       }
     });
 
-    // Зберігаємо оновлений .env файл
+    // Save the updated .env file
     fs.writeFileSync(ENV_FILE_PATH, envContent, "utf8");
-    console.log(".env файл успішно оновлено.");
+    console.log(".env file updated successfully.");
   } catch (error) {
-    console.error(`Помилка при оновленні .env файлу: ${error.message}`);
+    console.error(`Error updating .env file: ${error.message}`);
     process.exit(1);
   }
 }
 
 /**
- * Отримує URL API ABAP системи з service key
- * @param {Object} serviceKey Об'єкт з SAP BTP service key
- * @returns {string} URL API ABAP системи
+ * Gets the ABAP system API URL from the service key
+ * @param {Object} serviceKey SAP BTP service key object
+ * @returns {string} ABAP system API URL
  */
 function getAbapUrl(serviceKey) {
   try {
-    // Перевіряємо різні можливі структури service key
+    // Check various possible service key structures
     if (serviceKey.url) {
       return serviceKey.url;
     } else if (serviceKey.endpoints && serviceKey.endpoints.api) {
@@ -111,43 +111,41 @@ function getAbapUrl(serviceKey) {
     } else if (serviceKey.abap && serviceKey.abap.url) {
       return serviceKey.abap.url;
     } else {
-      throw new Error("Не вдалося знайти URL ABAP системи в service key");
+      throw new Error("Could not find ABAP system URL in service key");
     }
   } catch (error) {
-    console.error(`Помилка при отриманні URL ABAP системи: ${error.message}`);
+    console.error(`Error getting ABAP system URL: ${error.message}`);
     process.exit(1);
   }
 }
 
 /**
- * Отримує клієнт ABAP системи з service key
- * @param {Object} serviceKey Об'єкт з SAP BTP service key
- * @returns {string} Клієнт ABAP системи
+ * Gets the ABAP system client from the service key
+ * @param {Object} serviceKey SAP BTP service key object
+ * @returns {string} ABAP system client
  */
 function getAbapClient(serviceKey) {
   try {
-    // Перевіряємо різні можливі структури service key
+    // Check various possible service key structures
     if (serviceKey.sapClient) {
       return serviceKey.sapClient;
     } else if (serviceKey.abap && serviceKey.abap.sapClient) {
       return serviceKey.abap.sapClient;
     } else {
-      // За замовчуванням для хмарних систем
+      // Default for cloud systems
       return "100";
     }
   } catch (error) {
-    console.error(
-      `Помилка при отриманні клієнта ABAP системи: ${error.message}`
-    );
+    console.error(`Error getting ABAP system client: ${error.message}`);
     process.exit(1);
   }
 }
 
 /**
- * Формує URL для автентифікації через XSUAA (OAuth2)
- * @param {Object} serviceKey Об'єкт з SAP BTP service key
- * @param {number} port Порт для redirect-url
- * @returns {string} URL для автентифікації
+ * Builds the XSUAA (OAuth2) authentication URL
+ * @param {Object} serviceKey SAP BTP service key object
+ * @param {number} port Redirect URL port
+ * @returns {string} Authentication URL
  */
 function getXsuaaAuthorizationUrl(serviceKey, port = 3001) {
   const { url, clientid } = serviceKey.uaa;
@@ -158,29 +156,11 @@ function getXsuaaAuthorizationUrl(serviceKey, port = 3001) {
 }
 
 /**
- * Формує URL для автентифікації через reentranceticket (ADT-style)
- * @param {Object} serviceKey Об'єкт з SAP BTP service key
- * @param {number} port Порт для redirect-url
- * @returns {string} URL для автентифікації
- */
-function getAdtAuthorizationUrl(serviceKey, port = 3001) {
-  let abapUrl =
-    serviceKey.endpoints && serviceKey.endpoints.abap
-      ? serviceKey.endpoints.abap
-      : serviceKey.url;
-  abapUrl = abapUrl.replace(".abap.", ".abap-web.");
-  const redirectUri = `http://localhost:${port}/adt/redirect`;
-  return `${abapUrl}/sap/bc/adt/core/http/reentranceticket?redirect-url=${encodeURIComponent(
-    redirectUri
-  )}`;
-}
-
-/**
- * Запускає локальний сервер для перехоплення відповіді автентифікації
- * @param {Object} serviceKey Об'єкт з SAP BTP service key
- * @param {string} browser Браузер для відкриття
- * @param {string} flow Тип flow: xsuaa (OAuth2) або adt (SSO cookie)
- * @returns {Promise<string>} Promise, що повертає токен або cookie
+ * Starts a local server to intercept the authentication response
+ * @param {Object} serviceKey SAP BTP service key object
+ * @param {string} browser Browser to open
+ * @param {string} flow Flow type: xsuaa (OAuth2)
+ * @returns {Promise<string>} Promise that resolves to the token
  */
 async function startAuthServer(serviceKey, browser = "system", flow = "xsuaa") {
   return new Promise((resolve, reject) => {
@@ -189,66 +169,40 @@ async function startAuthServer(serviceKey, browser = "system", flow = "xsuaa") {
     const PORT = 3001;
     let serverInstance = null;
 
-    // Вибираємо URL для авторизації залежно від flow
-    const authorizationUrl =
-      flow === "adt"
-        ? getAdtAuthorizationUrl(serviceKey, PORT)
-        : getXsuaaAuthorizationUrl(serviceKey, PORT);
+    // Choose the authorization URL
+    const authorizationUrl = getXsuaaAuthorizationUrl(serviceKey, PORT);
 
-    // XSUAA OAuth2 flow (отримуємо code, міняємо на токен)
+    // XSUAA OAuth2 flow (get code, exchange for token)
     app.get("/callback", async (req, res) => {
       try {
         const { code } = req.query;
         if (!code) {
-          res.status(400).send("Помилка: Код авторизації відсутній");
-          return reject(new Error("Код авторизації відсутній"));
+          res.status(400).send("Error: Authorization code missing");
+          return reject(new Error("Authorization code missing"));
         }
-        console.log("Отримано код авторизації");
+        console.log("Authorization code received");
         res.send(
-          `<html><body style='font-family:sans-serif;text-align:center;margin-top:100px;'><h1>✅ Авторизація успішна!</h1><p>Можна закрити це вікно.</p></body></html>`
+          `<html><body style='font-family:sans-serif;text-align:center;margin-top:100px;'><h1>✅ Authentication successful!</h1><p>You can close this window.</p></body></html>`
         );
         try {
           const token = await exchangeCodeForToken(serviceKey, code);
           server.close(() => {
-            console.log("Сервер автентифікації зупинено");
+            console.log("Authentication server stopped");
           });
           resolve(token);
         } catch (error) {
           reject(error);
         }
       } catch (error) {
-        console.error("Помилка при обробці callback:", error);
-        res.status(500).send("Помилка при обробці автентифікації");
+        console.error("Error handling callback:", error);
+        res.status(500).send("Error processing authentication");
         reject(error);
       }
     });
 
-    // ADT SSO cookie flow
-    app.get("/adt/redirect", (req, res) => {
-      const cookies = req.headers.cookie;
-      if (
-        cookies &&
-        (cookies.includes("MYSAPSSO2") || cookies.includes("SAP_SESSIONID"))
-      ) {
-        updateEnvFile({ SAP_SSO_COOKIE: cookies });
-        res.send(
-          `<html><body style='font-family:sans-serif;text-align:center;margin-top:100px;'><h1>✅ SSO cookie отримано!</h1><p>Можна закрити це вікно та повернутися до застосунку.</p><p style='color:#666'>Cookie збережено у .env</p></body></html>`
-        );
-        server.close(() => {
-          console.log("Сервер автентифікації зупинено");
-        });
-        resolve(cookies);
-      } else {
-        res.send(
-          `<html><body style='font-family:sans-serif;text-align:center;margin-top:100px;'><h1>⚠️ Не вдалося отримати SSO cookie</h1><p>Спробуйте ще раз або перевірте налаштування.</p></body></html>`
-        );
-        reject(new Error("SSO cookie not found"));
-      }
-    });
-
     serverInstance = server.listen(PORT, () => {
-      console.log(`Сервер автентифікації запущено на порту ${PORT}`);
-      console.log("Відкриваю браузер для автентифікації...");
+      console.log(`Authentication server started on port ${PORT}`);
+      console.log("Opening browser for authentication...");
       const browserApp = BROWSER_MAP[browser] || undefined;
       if (browserApp) {
         open(authorizationUrl, { app: { name: browserApp } });
@@ -260,17 +214,17 @@ async function startAuthServer(serviceKey, browser = "system", flow = "xsuaa") {
     setTimeout(() => {
       if (serverInstance) {
         serverInstance.close();
-        reject(new Error("Тайм-аут автентифікації. Процес перервано."));
+        reject(new Error("Authentication timeout. Process aborted."));
       }
     }, 5 * 60 * 1000);
   });
 }
 
 /**
- * Обмінює код авторизації на токен
- * @param {Object} serviceKey Об'єкт з SAP BTP service key
- * @param {string} code Код авторизації
- * @returns {Promise<string>} Promise, що повертає токен
+ * Exchanges the authorization code for a token
+ * @param {Object} serviceKey SAP BTP service key object
+ * @param {string} code Authorization code
+ * @returns {Promise<string>} Promise that resolves to the token
  */
 async function exchangeCodeForToken(serviceKey, code) {
   try {
@@ -298,100 +252,96 @@ async function exchangeCodeForToken(serviceKey, code) {
     });
 
     if (response.data && response.data.access_token) {
-      console.log("OAuth токен успішно отримано.");
+      console.log("OAuth token received successfully.");
       return response.data.access_token;
     } else {
-      throw new Error("Відповідь не містить access_token");
+      throw new Error("Response does not contain access_token");
     }
   } catch (error) {
     if (error.response) {
       console.error(
-        `Помилка API (${error.response.status}): ${JSON.stringify(
+        `API error (${error.response.status}): ${JSON.stringify(
           error.response.data
         )}`
       );
     } else {
-      console.error(`Помилка при отриманні OAuth токену: ${error.message}`);
+      console.error(`Error obtaining OAuth token: ${error.message}`);
     }
     throw error;
   }
 }
 
 /**
- * Головна функція програми
+ * Main program function
  */
 async function main() {
   program
     .name("sap-abap-auth-browser")
     .description(
-      "CLI утиліта для автентифікації в SAP ABAP системах через браузер"
+      "CLI utility for authentication in SAP ABAP systems via browser"
     )
     .version("1.0.0");
 
   program
     .command("auth")
     .description(
-      "Автентифікація в SAP ABAP системі через браузер і оновлення .env файлу"
+      "Authenticate in SAP ABAP system via browser and update .env file (JWT/XSUAA)"
     )
     .requiredOption(
       "-k, --key <path>",
-      "Шлях до файлу service key в форматі JSON"
+      "Path to the service key file in JSON format"
     )
     .option(
       "-b, --browser <browser>",
-      "Браузер для відкриття (chrome, edge, firefox, system)",
+      "Browser to open (chrome, edge, firefox, system)",
       "system"
-    )
-    .option(
-      "-f, --flow <flow>",
-      "Тип flow: xsuaa (OAuth2) або adt (SSO cookie)",
-      "xsuaa"
     )
     .action(async (options) => {
       try {
-        console.log("Починаю процес автентифікації...");
-
-        // Читаємо service key
+        console.log("Starting authentication process...");
         const serviceKey = readServiceKey(options.key);
-        console.log("Service key успішно зчитано.");
-
-        // Запускаємо сервер для автентифікації та отримуємо токен або cookie
-        console.log("Запускаю процес автентифікації через браузер...");
-        const tokenOrCookie = await startAuthServer(
+        console.log("Service key read successfully.");
+        // Start the server for XSUAA authentication
+        const token = await startAuthServer(
           serviceKey,
           options.browser,
-          options.flow
+          "xsuaa"
         );
-
-        // Отримуємо URL ABAP системи
         const abapUrl = getAbapUrl(serviceKey);
-
-        // Отримуємо клієнт ABAP системи
         const abapClient = getAbapClient(serviceKey);
-
-        // Формуємо об'єкт для оновлення .env
+        // Collect all relevant parameters from service key
         const envUpdates = {
           SAP_URL: abapUrl,
           SAP_CLIENT: abapClient,
           TLS_REJECT_UNAUTHORIZED: "0",
+          SAP_AUTH_TYPE: "xsuaa",
+          SAP_JWT_TOKEN: token,
         };
-        if (options.flow === "adt") {
-          envUpdates["SAP_AUTH_TYPE"] = "sso";
-          envUpdates["SAP_SSO_COOKIE"] = tokenOrCookie;
-          envUpdates["SAP_SSO_TOKEN"] = ""; // очищаємо JWT, якщо був
-        } else {
-          envUpdates["SAP_AUTH_TYPE"] = "xsuaa";
-          envUpdates["SAP_SSO_TOKEN"] = tokenOrCookie;
-          envUpdates["SAP_SSO_COOKIE"] = ""; // очищаємо cookie, якщо був
+        // Optional: language
+        if (serviceKey.language) {
+          envUpdates.SAP_LANGUAGE = serviceKey.language;
+        } else if (serviceKey.abap && serviceKey.abap.language) {
+          envUpdates.SAP_LANGUAGE = serviceKey.abap.language;
         }
-
-        // Оновлюємо .env файл
+        // UAA details
+        if (serviceKey.uaa) {
+          if (serviceKey.uaa.clientid)
+            envUpdates.UAA_CLIENTID = serviceKey.uaa.clientid;
+          if (serviceKey.uaa.clientsecret)
+            envUpdates.UAA_CLIENTSECRET = serviceKey.uaa.clientsecret;
+          if (serviceKey.uaa.url) envUpdates.UAA_URL = serviceKey.uaa.url;
+          if (serviceKey.uaa.tokenendpoint)
+            envUpdates.UAA_TOKENENDPOINT = serviceKey.uaa.tokenendpoint;
+        }
+        // Endpoints
+        if (serviceKey.endpoints && serviceKey.endpoints.api) {
+          envUpdates.ENDPOINTS_API = serviceKey.endpoints.api;
+        }
         updateEnvFile(envUpdates);
-
-        console.log("Автентифікація успішно завершена!");
+        console.log("Authentication completed successfully!");
         process.exit(0);
       } catch (error) {
-        console.error(`Помилка при автентифікації: ${error.message}`);
+        console.error(`Authentication error: ${error.message}`);
         process.exit(1);
       }
     });
@@ -399,5 +349,5 @@ async function main() {
   program.parse();
 }
 
-// Запускаємо головну функцію
+// Run the main function
 main();
