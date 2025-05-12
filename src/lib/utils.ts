@@ -182,7 +182,10 @@ async function fetchCsrfToken(url: string): Promise<string> {
       csrfUrl = `${url}/sap/bc/adt/discovery`;
     }
 
-    console.log(`Отримую CSRF-токен з: ${csrfUrl}`);
+    // Логування CSRF-запиту тільки якщо DEBUG=true і не xsuaa
+    if (process.env.DEBUG === "true" && config?.authType !== "xsuaa") {
+      console.log(`Отримую CSRF-токен з: ${csrfUrl}`);
+    }
 
     const response = await createAxiosInstance()({
       method: "GET",
@@ -208,17 +211,35 @@ async function fetchCsrfToken(url: string): Promise<string> {
   } catch (error) {
     // Виводимо деталі помилки для відладки
     if (error instanceof AxiosError) {
-      console.error(`CSRF токен помилка: ${error.message}`);
-      if (error.response) {
-        console.error(`Статус: ${error.response.status}`);
-        console.error(`Заголовки: ${JSON.stringify(error.response.headers)}`);
-        console.error(`Дані: ${error.response.data?.slice(0, 200)}...`);
+      if (process.env.DEBUG === "true" && config?.authType !== "xsuaa") {
+        console.error(`CSRF токен помилка: ${error.message}`);
+        if (error.response) {
+          console.error(`Статус: ${error.response.status}`);
+          console.error(`Заголовки: ${JSON.stringify(error.response.headers)}`);
+          console.error(`Дані: ${error.response.data?.slice(0, 200)}...`);
+        }
       }
-
-      // Перевіряємо заголовки відповіді на наявність CSRF токена навіть при помилці
+      // Якщо 405 — це не критична помилка, CSRF токен часто все одно повертається (SAP специфіка)
+      if (
+        error.response?.status === 405 &&
+        error.response?.headers["x-csrf-token"]
+      ) {
+        if (process.env.DEBUG === "true") {
+          console.warn(
+            "CSRF: SAP повернув 405 (Method Not Allowed) — це не критично, токен може бути у заголовку."
+          );
+        }
+        const token = error.response.headers["x-csrf-token"];
+        if (token) {
+          if (error.response.headers["set-cookie"]) {
+            cookies = error.response.headers["set-cookie"].join("; ");
+          }
+          return token;
+        }
+      }
+      // Перевіряємо заголовки відповіді на наявність CSRF токена навіть при інших помилках
       if (error.response?.headers["x-csrf-token"]) {
         const token = error.response.headers["x-csrf-token"];
-        // Extract and store cookies from the error response as well
         if (error.response.headers["set-cookie"]) {
           cookies = error.response.headers["set-cookie"].join("; ");
         }

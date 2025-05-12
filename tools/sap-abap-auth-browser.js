@@ -357,7 +357,7 @@ async function main() {
 
         // Запускаємо сервер для автентифікації та отримуємо токен або cookie
         console.log("Запускаю процес автентифікації через браузер...");
-        const token = await startAuthServer(
+        const tokenOrCookie = await startAuthServer(
           serviceKey,
           options.browser,
           options.flow
@@ -369,14 +369,24 @@ async function main() {
         // Отримуємо клієнт ABAP системи
         const abapClient = getAbapClient(serviceKey);
 
-        // Оновлюємо .env файл
-        updateEnvFile({
+        // Формуємо об'єкт для оновлення .env
+        const envUpdates = {
           SAP_URL: abapUrl,
           SAP_CLIENT: abapClient,
-          SAP_AUTH_TYPE: options.flow === "adt" ? "sso" : "xsuaa",
-          SAP_SSO_TOKEN: token,
           TLS_REJECT_UNAUTHORIZED: "0",
-        });
+        };
+        if (options.flow === "adt") {
+          envUpdates["SAP_AUTH_TYPE"] = "sso";
+          envUpdates["SAP_SSO_COOKIE"] = tokenOrCookie;
+          envUpdates["SAP_SSO_TOKEN"] = ""; // очищаємо JWT, якщо був
+        } else {
+          envUpdates["SAP_AUTH_TYPE"] = "xsuaa";
+          envUpdates["SAP_SSO_TOKEN"] = tokenOrCookie;
+          envUpdates["SAP_SSO_COOKIE"] = ""; // очищаємо cookie, якщо був
+        }
+
+        // Оновлюємо .env файл
+        updateEnvFile(envUpdates);
 
         console.log("Автентифікація успішно завершена!");
         process.exit(0);
