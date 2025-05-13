@@ -10,6 +10,13 @@ const path = require("path");
 // Load environment variables
 dotenv.config({ path: path.resolve(__dirname, "../.env") });
 
+// Get authentication type from environment variables or command line
+const args = process.argv.slice(2);
+// Use command line arg if provided, otherwise use SAP_AUTH_TYPE from .env, default to "basic"
+const authType = args[0] || process.env.SAP_AUTH_TYPE || "basic";
+
+console.log(`Using auth type: ${authType}`); // Show which auth type was selected
+
 // Create an axios instance with the same settings as the main app
 const axiosInstance = axios.create({
   httpsAgent: new https.Agent({
@@ -24,10 +31,36 @@ if (!sapUrl) {
   process.exit(1);
 }
 
-// Get the JWT token for authentication
-const jwtToken = process.env.SAP_JWT_TOKEN;
-if (!jwtToken) {
-  console.error("Error: SAP_JWT_TOKEN is not set in .env file");
+// Get the authentication details based on auth type
+let authHeaders = {};
+
+if (authType === "basic") {
+  const username = process.env.SAP_USERNAME;
+  const password = process.env.SAP_PASSWORD;
+
+  if (!username || !password) {
+    console.error(
+      "Error: SAP_USERNAME or SAP_PASSWORD is not set in .env file"
+    );
+    process.exit(1);
+  }
+
+  authHeaders.Authorization = `Basic ${Buffer.from(
+    `${username}:${password}`
+  ).toString("base64")}`;
+} else if (authType === "xsuaa") {
+  const jwtToken = process.env.SAP_JWT_TOKEN;
+
+  if (!jwtToken) {
+    console.error("Error: SAP_JWT_TOKEN is not set in .env file");
+    process.exit(1);
+  }
+
+  authHeaders.Authorization = `Bearer ${jwtToken}`;
+} else {
+  console.error(
+    `Error: Unknown auth type: ${authType}. Use 'basic' or 'xsuaa'`
+  );
   process.exit(1);
 }
 
@@ -52,8 +85,9 @@ async function testCsrfTokenFetching() {
       method: "GET",
       url: csrfUrl,
       headers: {
-        Authorization: `Bearer ${jwtToken}`,
+        ...authHeaders,
         "x-csrf-token": "fetch",
+        "X-SAP-Client": process.env.SAP_CLIENT || "100", // Add client
         Accept: "application/atomsvc+xml", // SAP ADT requires this specific Accept header
       },
     });
@@ -85,7 +119,8 @@ async function testCsrfTokenFetching() {
         method: "POST",
         url: `${sapUrl}/sap/bc/adt/discovery`,
         headers: {
-          Authorization: `Bearer ${jwtToken}`,
+          ...authHeaders,
+          "X-SAP-Client": process.env.SAP_CLIENT || "100", // Add client
           "x-csrf-token": token,
           "Content-Type": "application/json",
           Cookie: response.headers["set-cookie"]
