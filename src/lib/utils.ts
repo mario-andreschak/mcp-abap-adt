@@ -3,6 +3,7 @@ import axios, { AxiosError, AxiosInstance } from "axios";
 import { Agent } from "https";
 import { AxiosResponse } from "axios";
 import { getConfig, SapConfig } from "../index"; // getConfig needs to be exported from index.ts
+import { logger } from "./logger"; // Import the MCP-compatible logger
 
 export { McpError, ErrorCode, AxiosResponse };
 
@@ -46,17 +47,8 @@ export function createAxiosInstance() {
       (process.env.TLS_REJECT_UNAUTHORIZED === "1" &&
         process.env.NODE_TLS_REJECT_UNAUTHORIZED !== "0");
 
-    if (process.env.DEBUG === "true") {
-      console.log(
-        JSON.stringify({
-          type: "TLS_CONFIG",
-          message: `TLS certificate validation is ${
-            rejectUnauthorized ? "enabled" : "disabled"
-          }`,
-          rejectUnauthorized: rejectUnauthorized,
-        })
-      );
-    }
+    // Log TLS configuration using MCP-compatible logger
+    logger.tlsConfig(rejectUnauthorized);
 
     axiosInstance = axios.create({
       httpsAgent: new Agent({
@@ -148,21 +140,7 @@ async function fetchCsrfToken(
   retryCount = 3,
   retryDelay = 1000
 ): Promise<string> {
-  // Function to log debug info in JSON format for MCP compatibility
-  const logDebug = (
-    type: "info" | "warn" | "error",
-    message: string,
-    data?: any
-  ) => {
-    if (process.env.DEBUG === "true") {
-      const logObj = {
-        type: `CSRF_${type.toUpperCase()}`,
-        message,
-        ...data,
-      };
-      console.log(JSON.stringify(logObj));
-    }
-  };
+  // Use our MCP-compatible logger for CSRF operations
 
   // Add /sap/bc/adt/discovery path to the URL if not present
   // This is the standard endpoint for obtaining a CSRF token in SAP ABAP systems
@@ -171,14 +149,14 @@ async function fetchCsrfToken(
     csrfUrl = `${url}/sap/bc/adt/discovery`;
   }
 
-  logDebug("info", `Fetching CSRF token from: ${csrfUrl}`);
+  logger.csrfToken("fetch", `Fetching CSRF token from: ${csrfUrl}`);
 
   for (let attempt = 0; attempt <= retryCount; attempt++) {
     try {
       // Only log retry attempts after the first attempt
       if (attempt > 0) {
-        logDebug(
-          "info",
+        logger.csrfToken(
+          "retry",
           `Retry attempt ${attempt}/${retryCount} for CSRF token`
         );
       }
@@ -197,7 +175,7 @@ async function fetchCsrfToken(
 
       const token = response.headers["x-csrf-token"];
       if (!token) {
-        logDebug("warn", "No CSRF token in response headers", {
+        logger.csrfToken("error", "No CSRF token in response headers", {
           headers: response.headers,
           status: response.status,
         });
@@ -212,17 +190,17 @@ async function fetchCsrfToken(
       // Extract and store cookies
       if (response.headers["set-cookie"]) {
         cookies = response.headers["set-cookie"].join("; ");
-        logDebug("info", "Cookies extracted from response", {
+        logger.csrfToken("success", "Cookies extracted from response", {
           cookieLength: cookies.length,
         });
       }
 
-      logDebug("info", "CSRF token successfully obtained");
+      logger.csrfToken("success", "CSRF token successfully obtained");
       return token;
     } catch (error) {
       // Output error details for debugging
       if (error instanceof AxiosError) {
-        logDebug("error", `CSRF token error: ${error.message}`, {
+        logger.csrfToken("error", `CSRF token error: ${error.message}`, {
           url: csrfUrl,
           status: error.response?.status,
           attempt: attempt + 1,
@@ -234,8 +212,8 @@ async function fetchCsrfToken(
           error.response?.status === 405 &&
           error.response?.headers["x-csrf-token"]
         ) {
-          logDebug(
-            "warn",
+          logger.csrfToken(
+            "retry",
             "CSRF: SAP returned 405 (Method Not Allowed) — not critical, token found in header"
           );
 
@@ -250,8 +228,8 @@ async function fetchCsrfToken(
 
         // Check response headers for CSRF token even on other errors
         if (error.response?.headers["x-csrf-token"]) {
-          logDebug(
-            "warn",
+          logger.csrfToken(
+            "success",
             `Got CSRF token despite error (status: ${error.response?.status})`
           );
 
@@ -264,7 +242,7 @@ async function fetchCsrfToken(
 
         // Log detailed error information
         if (error.response) {
-          logDebug("error", "CSRF error details", {
+          logger.csrfToken("error", "CSRF error details", {
             status: error.response.status,
             statusText: error.response.statusText,
             headers: Object.keys(error.response.headers),
@@ -274,12 +252,16 @@ async function fetchCsrfToken(
                 : JSON.stringify(error.response.data).slice(0, 200),
           });
         } else if (error.request) {
-          logDebug("error", "CSRF request error - no response received", {
-            request: error.request.path,
-          });
+          logger.csrfToken(
+            "error",
+            "CSRF request error - no response received",
+            {
+              request: error.request.path,
+            }
+          );
         }
       } else {
-        logDebug("error", "CSRF non-axios error", {
+        logger.csrfToken("error", "CSRF non-axios error", {
           error: error instanceof Error ? error.message : String(error),
         });
       }
@@ -329,15 +311,13 @@ export async function makeAdtRequest(
     } catch (error) {
       const errorMsg =
         "CSRF token is required for POST/PUT requests but could not be fetched";
-      if (process.env.DEBUG === "true") {
-        console.log(
-          JSON.stringify({
-            type: "ERROR",
-            message: errorMsg,
-            cause: error instanceof Error ? error.message : String(error),
-          })
-        );
-      }
+
+      // Log the error using the MCP-compatible logger
+      logger.error(errorMsg, {
+        type: "CSRF_FETCH_ERROR",
+        cause: error instanceof Error ? error.message : String(error),
+      });
+
       throw new Error(errorMsg);
     }
   }
@@ -375,32 +355,23 @@ export async function makeAdtRequest(
     requestConfig.data = data;
   }
 
-  // Use JSON.stringify for logging to ensure MCP compatibility
-  if (process.env.DEBUG === "true") {
-    console.log(
-      JSON.stringify({
-        type: "REQUEST_INFO",
-        message: `Executing ${method} request to: ${requestUrl}`,
-        url: requestUrl,
-        method: method,
-      })
-    );
-  }
+  // Log request info using the MCP-compatible logger
+  logger.info(`Executing ${method} request to: ${requestUrl}`, {
+    type: "REQUEST_INFO",
+    url: requestUrl,
+    method: method,
+  });
 
   try {
     const response = await createAxiosInstance()(requestConfig);
 
-    // Log success in JSON format
-    if (process.env.DEBUG === "true") {
-      console.log(
-        JSON.stringify({
-          type: "REQUEST_SUCCESS",
-          status: response.status,
-          url: requestUrl,
-          method: method,
-        })
-      );
-    }
+    // Log success using the MCP-compatible logger
+    logger.info(`Request succeeded with status ${response.status}`, {
+      type: "REQUEST_SUCCESS",
+      status: response.status,
+      url: requestUrl,
+      method: method,
+    });
 
     return response;
   } catch (error) {
@@ -428,9 +399,8 @@ export async function makeAdtRequest(
           : JSON.stringify(error.response.data).slice(0, 200);
     }
 
-    if (process.env.DEBUG === "true") {
-      console.log(JSON.stringify(errorDetails));
-    }
+    // Log error using the MCP-compatible logger
+    logger.error(errorDetails.message, errorDetails);
 
     // If we get CSRF token validation errors (403 forbidden or other status codes containing CSRF error message),
     // try to fetch a new token and retry
@@ -443,17 +413,15 @@ export async function makeAdtRequest(
         error.message.includes("CSRF"));
 
     if (isCsrfError) {
-      if (process.env.DEBUG === "true") {
-        console.log(
-          JSON.stringify({
-            type: "CSRF_RETRY",
-            message:
-              "CSRF token validation failed, fetching new token and retrying request",
-            url: requestUrl,
-            method: method,
-          })
-        );
-      }
+      // Log CSRF retry using the MCP-compatible logger
+      logger.csrfToken(
+        "retry",
+        "CSRF token validation failed, fetching new token and retrying request",
+        {
+          url: requestUrl,
+          method: method,
+        }
+      );
 
       // Fetch new token with increased retry count for critical operations
       csrfToken = await fetchCsrfToken(requestUrl, 5, 2000);

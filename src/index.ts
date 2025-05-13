@@ -38,17 +38,15 @@ import {
 // Load environment variables from .env file
 dotenv.config({ path: path.resolve(__dirname, "../.env") });
 
-// Debug: Log loaded SAP_URL and SAP_CLIENT for troubleshooting in JSON format for MCP compatibility
-if (process.env.DEBUG === "true") {
-  console.log(
-    JSON.stringify({
-      type: "CONFIG_INFO",
-      message: "SAP configuration loaded",
-      SAP_URL: process.env.SAP_URL,
-      SAP_CLIENT: process.env.SAP_CLIENT || "(not set)",
-    })
-  );
-}
+// Import logger
+import { logger } from "./lib/logger";
+
+// Debug: Log loaded SAP_URL and SAP_CLIENT using the MCP-compatible logger
+logger.info("SAP configuration loaded", {
+  type: "CONFIG_INFO",
+  SAP_URL: process.env.SAP_URL,
+  SAP_CLIENT: process.env.SAP_CLIENT || "(not set)",
+});
 
 // Interface for SAP configuration
 export interface SapConfig {
