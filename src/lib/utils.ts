@@ -38,9 +38,25 @@ export function return_error(error: any) {
 let axiosInstance: AxiosInstance | null = null;
 export function createAxiosInstance() {
   if (!axiosInstance) {
+    // Respect TLS_REJECT_UNAUTHORIZED environment variable
+    // NODE_TLS_REJECT_UNAUTHORIZED=0 is the standard way to disable certificate validation
+    // but we also support our own TLS_REJECT_UNAUTHORIZED for backward compatibility
+    const rejectUnauthorized =
+      process.env.NODE_TLS_REJECT_UNAUTHORIZED === "1" ||
+      (process.env.TLS_REJECT_UNAUTHORIZED === "1" &&
+        process.env.NODE_TLS_REJECT_UNAUTHORIZED !== "0");
+
+    if (process.env.DEBUG === "true") {
+      console.log(
+        `[DEBUG] TLS certificate validation is ${
+          rejectUnauthorized ? "enabled" : "disabled"
+        }`
+      );
+    }
+
     axiosInstance = axios.create({
       httpsAgent: new Agent({
-        rejectUnauthorized: false, // Allow self-signed certificates
+        rejectUnauthorized: rejectUnauthorized,
       }),
     });
   }
@@ -113,86 +129,171 @@ export async function getAuthHeaders() {
   return headers;
 }
 
-async function fetchCsrfToken(url: string): Promise<string> {
-  try {
-    // Add /sap/bc/adt/discovery path to the URL if not present
-    // This is the standard endpoint for obtaining a CSRF token in SAP ABAP systems
-    let csrfUrl = url;
-    if (!url.includes("/sap/bc/adt/")) {
-      csrfUrl = `${url}/sap/bc/adt/discovery`;
-    }
-
+/**
+ * Fetches a CSRF token from the SAP ABAP system with retry mechanism
+ * @param url Base URL to fetch CSRF token from
+ * @param retryCount Number of retries (default: 3)
+ * @param retryDelay Delay between retries in ms (default: 1000)
+ * @returns Promise with the CSRF token string
+ */
+async function fetchCsrfToken(
+  url: string,
+  retryCount = 3,
+  retryDelay = 1000
+): Promise<string> {
+  // Function to log debug info in JSON format for MCP compatibility
+  const logDebug = (
+    type: "info" | "warn" | "error",
+    message: string,
+    data?: any
+  ) => {
     if (process.env.DEBUG === "true") {
-      console.log(`Fetching CSRF token from: ${csrfUrl}`);
+      const logObj = {
+        type: `CSRF_${type.toUpperCase()}`,
+        message,
+        ...data,
+      };
+      console.log(JSON.stringify(logObj));
     }
+  };
 
-    const response = await createAxiosInstance()({
-      method: "GET",
-      url: csrfUrl,
-      headers: {
-        ...(await getAuthHeaders()),
-        "x-csrf-token": "fetch",
-        Accept: "application/xml",
-      },
-    });
+  // Add /sap/bc/adt/discovery path to the URL if not present
+  // This is the standard endpoint for obtaining a CSRF token in SAP ABAP systems
+  let csrfUrl = url;
+  if (!url.includes("/sap/bc/adt/")) {
+    csrfUrl = `${url}/sap/bc/adt/discovery`;
+  }
 
-    const token = response.headers["x-csrf-token"];
-    if (!token) {
-      throw new Error("No CSRF token in response headers");
-    }
+  logDebug("info", `Fetching CSRF token from: ${csrfUrl}`);
 
-    // Extract and store cookies
-    if (response.headers["set-cookie"]) {
-      cookies = response.headers["set-cookie"].join("; ");
-    }
-
-    return token;
-  } catch (error) {
-    // Output error details for debugging
-    if (error instanceof AxiosError) {
-      if (process.env.DEBUG === "true") {
-        console.error(`CSRF token error: ${error.message}`);
-        if (error.response) {
-          console.error(`Status: ${error.response.status}`);
-          console.error(`Headers: ${JSON.stringify(error.response.headers)}`);
-          console.error(`Data: ${error.response.data?.slice(0, 200)}...`);
-        }
+  for (let attempt = 0; attempt <= retryCount; attempt++) {
+    try {
+      // Only log retry attempts after the first attempt
+      if (attempt > 0) {
+        logDebug(
+          "info",
+          `Retry attempt ${attempt}/${retryCount} for CSRF token`
+        );
       }
-      // If 405 — not a critical error, CSRF token is often still returned (SAP specifics)
-      if (
-        error.response?.status === 405 &&
-        error.response?.headers["x-csrf-token"]
-      ) {
-        if (process.env.DEBUG === "true") {
-          console.warn(
-            "CSRF: SAP returned 405 (Method Not Allowed) — not critical, token may be in the header."
-          );
+
+      const response = await createAxiosInstance()({
+        method: "GET",
+        url: csrfUrl,
+        headers: {
+          ...(await getAuthHeaders()),
+          "x-csrf-token": "fetch",
+          Accept: "application/xml",
+        },
+        // Set a timeout to prevent hanging requests
+        timeout: 10000,
+      });
+
+      const token = response.headers["x-csrf-token"];
+      if (!token) {
+        logDebug("warn", "No CSRF token in response headers", {
+          headers: response.headers,
+          status: response.status,
+        });
+
+        if (attempt < retryCount) {
+          await new Promise((resolve) => setTimeout(resolve, retryDelay));
+          continue;
         }
-        const token = error.response.headers["x-csrf-token"];
-        if (token) {
+        throw new Error("No CSRF token in response headers");
+      }
+
+      // Extract and store cookies
+      if (response.headers["set-cookie"]) {
+        cookies = response.headers["set-cookie"].join("; ");
+        logDebug("info", "Cookies extracted from response", {
+          cookieLength: cookies.length,
+        });
+      }
+
+      logDebug("info", "CSRF token successfully obtained");
+      return token;
+    } catch (error) {
+      // Output error details for debugging
+      if (error instanceof AxiosError) {
+        logDebug("error", `CSRF token error: ${error.message}`, {
+          url: csrfUrl,
+          status: error.response?.status,
+          attempt: attempt + 1,
+          maxAttempts: retryCount + 1,
+        });
+
+        // If 405 — not a critical error, CSRF token is often still returned (SAP specifics)
+        if (
+          error.response?.status === 405 &&
+          error.response?.headers["x-csrf-token"]
+        ) {
+          logDebug(
+            "warn",
+            "CSRF: SAP returned 405 (Method Not Allowed) — not critical, token found in header"
+          );
+
+          const token = error.response.headers["x-csrf-token"];
+          if (token) {
+            if (error.response.headers["set-cookie"]) {
+              cookies = error.response.headers["set-cookie"].join("; ");
+            }
+            return token;
+          }
+        }
+
+        // Check response headers for CSRF token even on other errors
+        if (error.response?.headers["x-csrf-token"]) {
+          logDebug(
+            "warn",
+            `Got CSRF token despite error (status: ${error.response?.status})`
+          );
+
+          const token = error.response.headers["x-csrf-token"];
           if (error.response.headers["set-cookie"]) {
             cookies = error.response.headers["set-cookie"].join("; ");
           }
           return token;
         }
-      }
-      // Check response headers for CSRF token even on other errors
-      if (error.response?.headers["x-csrf-token"]) {
-        const token = error.response.headers["x-csrf-token"];
-        if (error.response.headers["set-cookie"]) {
-          cookies = error.response.headers["set-cookie"].join("; ");
-        }
-        return token;
-      }
-    }
 
-    // For both basic and JWT, a real CSRF token is still required
-    throw new Error(
-      `Failed to fetch CSRF token: ${
-        error instanceof Error ? error.message : String(error)
-      }`
-    );
+        // Log detailed error information
+        if (error.response) {
+          logDebug("error", "CSRF error details", {
+            status: error.response.status,
+            statusText: error.response.statusText,
+            headers: Object.keys(error.response.headers),
+            data:
+              typeof error.response.data === "string"
+                ? error.response.data.slice(0, 200)
+                : JSON.stringify(error.response.data).slice(0, 200),
+          });
+        } else if (error.request) {
+          logDebug("error", "CSRF request error - no response received", {
+            request: error.request.path,
+          });
+        }
+      } else {
+        logDebug("error", "CSRF non-axios error", {
+          error: error instanceof Error ? error.message : String(error),
+        });
+      }
+
+      // If we haven't exhausted our retries, wait and try again
+      if (attempt < retryCount) {
+        await new Promise((resolve) => setTimeout(resolve, retryDelay));
+        continue;
+      }
+
+      // For both basic and JWT, a real CSRF token is still required
+      throw new Error(
+        `Failed to fetch CSRF token after ${retryCount + 1} attempts: ${
+          error instanceof Error ? error.message : String(error)
+        }`
+      );
+    }
   }
+
+  // This should never happen, but TypeScript requires a return statement
+  throw new Error("CSRF token fetch failed unexpectedly");
 }
 
 export async function makeAdtRequest(
@@ -213,13 +314,24 @@ export async function makeAdtRequest(
   }
 
   // For POST/PUT requests, obtain CSRF token
-  if ((method === "POST" || method === "PUT") && !csrfToken) {
+  if (method === "POST" || method === "PUT") {
     try {
+      // Always fetch a new CSRF token for writes to ensure it's fresh
+      // This helps with compatibility issues between different MCP clients
       csrfToken = await fetchCsrfToken(requestUrl);
     } catch (error) {
-      throw new Error(
-        "CSRF token is required for POST/PUT requests but could not be fetched"
-      );
+      const errorMsg =
+        "CSRF token is required for POST/PUT requests but could not be fetched";
+      if (process.env.DEBUG === "true") {
+        console.log(
+          JSON.stringify({
+            type: "ERROR",
+            message: errorMsg,
+            cause: error instanceof Error ? error.message : String(error),
+          })
+        );
+      }
+      throw new Error(errorMsg);
     }
   }
 
@@ -256,37 +368,100 @@ export async function makeAdtRequest(
     requestConfig.data = data;
   }
 
-  console.log(`Executing request to: ${requestUrl} (method: ${method})`);
+  // Use JSON.stringify for logging to ensure MCP compatibility
+  if (process.env.DEBUG === "true") {
+    console.log(
+      JSON.stringify({
+        type: "REQUEST_INFO",
+        message: `Executing ${method} request to: ${requestUrl}`,
+        url: requestUrl,
+        method: method,
+      })
+    );
+  }
 
   try {
     const response = await createAxiosInstance()(requestConfig);
-    return response;
-  } catch (error) {
-    // Log error details
-    if (error instanceof AxiosError) {
-      console.error(`Request error: ${error.message}`);
-      if (error.response) {
-        console.error(`Status: ${error.response.status}`);
-        console.error(
-          `Data: ${
-            typeof error.response.data === "string"
-              ? error.response.data.slice(0, 200)
-              : JSON.stringify(error.response.data).slice(0, 200)
-          }...`
-        );
-      }
+
+    // Log success in JSON format
+    if (process.env.DEBUG === "true") {
+      console.log(
+        JSON.stringify({
+          type: "REQUEST_SUCCESS",
+          status: response.status,
+          url: requestUrl,
+          method: method,
+        })
+      );
     }
 
-    // If we get a 403 with "CSRF token validation failed", try to fetch a new token and retry
-    if (
+    return response;
+  } catch (error) {
+    // Log error details in JSON format for MCP compatibility
+    const errorDetails: {
+      type: string;
+      message: string;
+      url: string;
+      method: string;
+      status?: number;
+      data?: string | undefined;
+    } = {
+      type: "REQUEST_ERROR",
+      message: error instanceof Error ? error.message : String(error),
+      url: requestUrl,
+      method: method,
+      status: error instanceof AxiosError ? error.response?.status : undefined,
+      data: undefined,
+    };
+
+    if (error instanceof AxiosError && error.response) {
+      errorDetails.data =
+        typeof error.response.data === "string"
+          ? error.response.data.slice(0, 200)
+          : JSON.stringify(error.response.data).slice(0, 200);
+    }
+
+    if (process.env.DEBUG === "true") {
+      console.log(JSON.stringify(errorDetails));
+    }
+
+    // If we get CSRF token validation errors (403 forbidden or other status codes containing CSRF error message),
+    // try to fetch a new token and retry
+    const isCsrfError =
       error instanceof AxiosError &&
-      error.response?.status === 403 &&
-      error.response.data?.includes("CSRF")
-    ) {
-      csrfToken = await fetchCsrfToken(requestUrl);
+      ((error.response?.status === 403 &&
+        error.response.data?.includes("CSRF")) ||
+        (error.response?.data?.includes("CSRF token") &&
+          error.response.data?.includes("invalid")) ||
+        error.message.includes("CSRF"));
+
+    if (isCsrfError) {
+      if (process.env.DEBUG === "true") {
+        console.log(
+          JSON.stringify({
+            type: "CSRF_RETRY",
+            message:
+              "CSRF token validation failed, fetching new token and retrying request",
+            url: requestUrl,
+            method: method,
+          })
+        );
+      }
+
+      // Fetch new token with increased retry count for critical operations
+      csrfToken = await fetchCsrfToken(requestUrl, 5, 2000);
       requestConfig.headers["x-csrf-token"] = csrfToken;
+
+      // Ensure cookies are included in retry
+      if (cookies) {
+        requestConfig.headers["Cookie"] = cookies;
+      }
+
+      // Return the retry attempt
       return await createAxiosInstance()(requestConfig);
     }
+
+    // Re-throw the original error if it wasn't a CSRF issue or retry failed
     throw error;
   }
 }
