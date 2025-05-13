@@ -38,6 +38,10 @@ import {
 // Load environment variables from .env file
 dotenv.config({ path: path.resolve(__dirname, "../.env") });
 
+// Debug: Log loaded SAP_URL and SAP_CLIENT for troubleshooting
+console.log("[DEBUG] SAP_URL:", process.env.SAP_URL);
+console.log("[DEBUG] SAP_CLIENT:", process.env.SAP_CLIENT);
+
 // Interface for SAP configuration
 export interface SapConfig {
   url: string;
@@ -60,11 +64,14 @@ export function getConfig(): SapConfig {
   const client = process.env.SAP_CLIENT;
   const authType = process.env.SAP_AUTH_TYPE || "basic";
 
-  // Check if required environment variables are set
-  if (!url || !client) {
+  // Enhanced check for SAP_URL
+  if (!url || !/^https?:\/\//.test(url)) {
     throw new Error(
-      `Missing required environment variables. Required variables:\n- SAP_URL\n- SAP_CLIENT\n- SAP_AUTH_TYPE (optional, defaults to 'basic')`
+      `Missing or invalid SAP_URL. Got: '${url}'.\nRequired variables:\n- SAP_URL (must be a valid URL, e.g. https://<host>)\n- SAP_CLIENT\n- SAP_AUTH_TYPE (optional, defaults to 'basic')`
     );
+  }
+  if (!client) {
+    throw new Error(`Missing required environment variable: SAP_CLIENT.`);
   }
 
   // Config object

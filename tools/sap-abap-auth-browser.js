@@ -46,97 +46,50 @@ function readServiceKey(filePath) {
  */
 function updateEnvFile(updates) {
   try {
-    // Check if .env file exists
-    if (!fs.existsSync(ENV_FILE_PATH)) {
-      console.error(`.env file not found at: ${ENV_FILE_PATH}`);
-      console.log("Creating a new .env file...");
-
-      // Create a basic .env file
-      const defaultEnv = `SAP_URL=https://your-abap-system.com
-SAP_CLIENT=100
-SAP_LANGUAGE=en
-TLS_REJECT_UNAUTHORIZED=0
-
-# Authentication type: basic or xsuaa
-SAP_AUTH_TYPE=xsuaa
-
-# For JWT (XSUAA) authentication
-SAP_JWT_TOKEN=your_jwt_token_here
-
-# For basic authentication
-# SAP_USERNAME=your_username
-# SAP_PASSWORD=your_password
-`;
-      fs.writeFileSync(ENV_FILE_PATH, defaultEnv, "utf8");
+    // Always remove the old .env file if it exists
+    if (fs.existsSync(ENV_FILE_PATH)) {
+      fs.unlinkSync(ENV_FILE_PATH);
     }
-
-    // Read current .env file
-    let envContent = fs.readFileSync(ENV_FILE_PATH, "utf8");
-
-    // Update values in the .env file
-    Object.entries(updates).forEach(([key, value]) => {
-      // Check if the key exists in the file
-      const regex = new RegExp(`^${key}=.*$`, "m");
-
-      if (regex.test(envContent)) {
-        // Update existing value
-        envContent = envContent.replace(regex, `${key}=${value}`);
-      } else {
-        // Add new value
-        envContent += `\n${key}=${value}`;
-      }
-    });
-
-    // Save the updated .env file
-    fs.writeFileSync(ENV_FILE_PATH, envContent, "utf8");
-    console.log(".env file updated successfully.");
+    let lines = [];
+    if (updates.SAP_AUTH_TYPE === "xsuaa") {
+      // xsuaa: write only relevant params
+      const xsuaaAllowed = [
+        "SAP_URL",
+        "SAP_CLIENT",
+        "SAP_LANGUAGE",
+        "TLS_REJECT_UNAUTHORIZED",
+        "SAP_AUTH_TYPE",
+        "SAP_JWT_TOKEN",
+      ];
+      xsuaaAllowed.forEach((key) => {
+        if (updates[key]) lines.push(`${key}=${updates[key]}`);
+      });
+      lines.push("");
+      lines.push("# For JWT (XSUAA) authentication");
+      lines.push("# SAP_USERNAME=your_username");
+      lines.push("# SAP_PASSWORD=your_password");
+    } else {
+      // basic: write only relevant params
+      const basicAllowed = [
+        "SAP_URL",
+        "SAP_CLIENT",
+        "SAP_LANGUAGE",
+        "TLS_REJECT_UNAUTHORIZED",
+        "SAP_AUTH_TYPE",
+        "SAP_USERNAME",
+        "SAP_PASSWORD",
+      ];
+      basicAllowed.forEach((key) => {
+        if (updates[key]) lines.push(`${key}=${updates[key]}`);
+      });
+      lines.push("");
+      lines.push("# For JWT (XSUAA) authentication (not used for basic)");
+      lines.push("# SAP_JWT_TOKEN=your_jwt_token_here");
+    }
+    fs.writeFileSync(ENV_FILE_PATH, lines.join("\n") + "\n", "utf8");
+    console.log(".env file created successfully.");
   } catch (error) {
     console.error(`Error updating .env file: ${error.message}`);
-    process.exit(1);
-  }
-}
-
-/**
- * Gets the ABAP system API URL from the service key
- * @param {Object} serviceKey SAP BTP service key object
- * @returns {string} ABAP system API URL
- */
-function getAbapUrl(serviceKey) {
-  try {
-    // Check various possible service key structures
-    if (serviceKey.url) {
-      return serviceKey.url;
-    } else if (serviceKey.endpoints && serviceKey.endpoints.api) {
-      return serviceKey.endpoints.api;
-    } else if (serviceKey.abap && serviceKey.abap.url) {
-      return serviceKey.abap.url;
-    } else {
-      throw new Error("Could not find ABAP system URL in service key");
-    }
-  } catch (error) {
-    console.error(`Error getting ABAP system URL: ${error.message}`);
-    process.exit(1);
-  }
-}
-
-/**
- * Gets the ABAP system client from the service key
- * @param {Object} serviceKey SAP BTP service key object
- * @returns {string} ABAP system client
- */
-function getAbapClient(serviceKey) {
-  try {
-    // Check various possible service key structures
-    if (serviceKey.sapClient) {
-      return serviceKey.sapClient;
-    } else if (serviceKey.abap && serviceKey.abap.sapClient) {
-      return serviceKey.abap.sapClient;
-    } else {
-      // Default for cloud systems
-      return "100";
-    }
-  } catch (error) {
-    console.error(`Error getting ABAP system client: ${error.message}`);
     process.exit(1);
   }
 }
@@ -278,14 +231,15 @@ async function main() {
   program
     .name("sap-abap-auth-browser")
     .description(
-      "CLI utility for authentication in SAP ABAP systems via browser"
+      "CLI utility for authentication in SAP BTP ABAP Environment (Steampunk) via browser."
     )
-    .version("1.0.0");
+    .version("1.0.0")
+    .helpOption("-h, --help", "Show help for all commands and options");
 
   program
     .command("auth")
     .description(
-      "Authenticate in SAP ABAP system via browser and update .env file (JWT/XSUAA)"
+      "Authenticate in SAP BTP ABAP Environment (Steampunk) via browser and update .env file (JWT/XSUAA)"
     )
     .requiredOption(
       "-k, --key <path>",
@@ -293,9 +247,10 @@ async function main() {
     )
     .option(
       "-b, --browser <browser>",
-      "Browser to open (chrome, edge, firefox, system)",
+      "Browser to open (chrome, edge, firefox, system). Default: system",
       "system"
     )
+    .helpOption("-h, --help", "Show help for the auth command")
     .action(async (options) => {
       try {
         console.log("Starting authentication process...");
@@ -307,8 +262,10 @@ async function main() {
           options.browser,
           "xsuaa"
         );
-        const abapUrl = getAbapUrl(serviceKey);
-        const abapClient = getAbapClient(serviceKey);
+        const abapUrl =
+          serviceKey.url || serviceKey.abap?.url || serviceKey.sap_url;
+        const abapClient =
+          serviceKey.client || serviceKey.abap?.client || serviceKey.sap_client;
         // Collect all relevant parameters from service key
         const envUpdates = {
           SAP_URL: abapUrl,
@@ -323,20 +280,6 @@ async function main() {
         } else if (serviceKey.abap && serviceKey.abap.language) {
           envUpdates.SAP_LANGUAGE = serviceKey.abap.language;
         }
-        // UAA details
-        if (serviceKey.uaa) {
-          if (serviceKey.uaa.clientid)
-            envUpdates.UAA_CLIENTID = serviceKey.uaa.clientid;
-          if (serviceKey.uaa.clientsecret)
-            envUpdates.UAA_CLIENTSECRET = serviceKey.uaa.clientsecret;
-          if (serviceKey.uaa.url) envUpdates.UAA_URL = serviceKey.uaa.url;
-          if (serviceKey.uaa.tokenendpoint)
-            envUpdates.UAA_TOKENENDPOINT = serviceKey.uaa.tokenendpoint;
-        }
-        // Endpoints
-        if (serviceKey.endpoints && serviceKey.endpoints.api) {
-          envUpdates.ENDPOINTS_API = serviceKey.endpoints.api;
-        }
         updateEnvFile(envUpdates);
         console.log("Authentication completed successfully!");
         process.exit(0);
@@ -345,6 +288,12 @@ async function main() {
         process.exit(1);
       }
     });
+
+  // Show help if no arguments are provided
+  if (process.argv.length <= 2) {
+    program.outputHelp();
+    process.exit(0);
+  }
 
   program.parse();
 }
