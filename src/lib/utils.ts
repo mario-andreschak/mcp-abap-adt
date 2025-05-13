@@ -48,9 +48,13 @@ export function createAxiosInstance() {
 
     if (process.env.DEBUG === "true") {
       console.log(
-        `[DEBUG] TLS certificate validation is ${
-          rejectUnauthorized ? "enabled" : "disabled"
-        }`
+        JSON.stringify({
+          type: "TLS_CONFIG",
+          message: `TLS certificate validation is ${
+            rejectUnauthorized ? "enabled" : "disabled"
+          }`,
+          rejectUnauthorized: rejectUnauthorized,
+        })
       );
     }
 
@@ -107,10 +111,13 @@ export async function getAuthHeaders() {
     config = getConfig();
   }
 
-  // Base headers that are always needed
-  const headers: Record<string, string> = {
-    "X-SAP-Client": config.client,
-  };
+  // Initialize headers
+  const headers: Record<string, string> = {};
+
+  // Add client header if it's available
+  if (config.client) {
+    headers["X-SAP-Client"] = config.client;
+  }
 
   // Add authentication headers based on auth type
   if (config.authType === "basic" && config.username && config.password) {
@@ -182,7 +189,7 @@ async function fetchCsrfToken(
         headers: {
           ...(await getAuthHeaders()),
           "x-csrf-token": "fetch",
-          Accept: "application/xml",
+          Accept: "application/atomsvc+xml", // SAP ADT requires this specific Accept header
         },
         // Set a timeout to prevent hanging requests
         timeout: 10000,

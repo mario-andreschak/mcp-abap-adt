@@ -38,14 +38,22 @@ import {
 // Load environment variables from .env file
 dotenv.config({ path: path.resolve(__dirname, "../.env") });
 
-// Debug: Log loaded SAP_URL and SAP_CLIENT for troubleshooting
-console.log("[DEBUG] SAP_URL:", process.env.SAP_URL);
-console.log("[DEBUG] SAP_CLIENT:", process.env.SAP_CLIENT);
+// Debug: Log loaded SAP_URL and SAP_CLIENT for troubleshooting in JSON format for MCP compatibility
+if (process.env.DEBUG === "true") {
+  console.log(
+    JSON.stringify({
+      type: "CONFIG_INFO",
+      message: "SAP configuration loaded",
+      SAP_URL: process.env.SAP_URL,
+      SAP_CLIENT: process.env.SAP_CLIENT || "(not set)",
+    })
+  );
+}
 
 // Interface for SAP configuration
 export interface SapConfig {
   url: string;
-  client: string;
+  client?: string; // Made optional since it's not needed for XSUAA
   // Authentication options
   authType: "basic" | "xsuaa";
   username?: string;
@@ -67,19 +75,27 @@ export function getConfig(): SapConfig {
   // Enhanced check for SAP_URL
   if (!url || !/^https?:\/\//.test(url)) {
     throw new Error(
-      `Missing or invalid SAP_URL. Got: '${url}'.\nRequired variables:\n- SAP_URL (must be a valid URL, e.g. https://<host>)\n- SAP_CLIENT\n- SAP_AUTH_TYPE (optional, defaults to 'basic')`
+      `Missing or invalid SAP_URL. Got: '${url}'.\nRequired variables:\n- SAP_URL (must be a valid URL, e.g. https://<host>)\n- SAP_AUTH_TYPE (optional, defaults to 'basic')`
     );
   }
-  if (!client) {
-    throw new Error(`Missing required environment variable: SAP_CLIENT.`);
+
+  // Client is only required for basic auth
+  if (authType === "basic" && !client) {
+    throw new Error(
+      `Missing required environment variable: SAP_CLIENT. This is required for basic authentication.`
+    );
   }
 
   // Config object
   const config: SapConfig = {
     url,
-    client,
     authType: authType as "basic" | "xsuaa",
   };
+
+  // Add client only if it's provided
+  if (client) {
+    config.client = client;
+  }
 
   // For basic auth, username and password are required
   if (authType === "basic") {
