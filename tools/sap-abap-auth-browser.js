@@ -51,9 +51,9 @@ function updateEnvFile(updates) {
       fs.unlinkSync(ENV_FILE_PATH);
     }
     let lines = [];
-    if (updates.SAP_AUTH_TYPE === "xsuaa") {
-      // xsuaa: write only relevant params
-      const xsuaaAllowed = [
+    if (updates.SAP_AUTH_TYPE === "jwt") {
+      // jwt: write only relevant params
+      const jwtAllowed = [
         "SAP_URL",
         "SAP_CLIENT",
         "SAP_LANGUAGE",
@@ -61,11 +61,11 @@ function updateEnvFile(updates) {
         "SAP_AUTH_TYPE",
         "SAP_JWT_TOKEN",
       ];
-      xsuaaAllowed.forEach((key) => {
+      jwtAllowed.forEach((key) => {
         if (updates[key]) lines.push(`${key}=${updates[key]}`);
       });
       lines.push("");
-      lines.push("# For JWT (XSUAA) authentication");
+      lines.push("# For JWT authentication");
       lines.push("# SAP_USERNAME=your_username");
       lines.push("# SAP_PASSWORD=your_password");
     } else {
@@ -83,7 +83,7 @@ function updateEnvFile(updates) {
         if (updates[key]) lines.push(`${key}=${updates[key]}`);
       });
       lines.push("");
-      lines.push("# For JWT (XSUAA) authentication (not used for basic)");
+      lines.push("# For JWT authentication (not used for basic)");
       lines.push("# SAP_JWT_TOKEN=your_jwt_token_here");
     }
     fs.writeFileSync(ENV_FILE_PATH, lines.join("\n") + "\n", "utf8");
@@ -95,12 +95,12 @@ function updateEnvFile(updates) {
 }
 
 /**
- * Builds the XSUAA (OAuth2) authentication URL
+ * Builds the JWT (OAuth2) authentication URL
  * @param {Object} serviceKey SAP BTP service key object
  * @param {number} port Redirect URL port
  * @returns {string} Authentication URL
  */
-function getXsuaaAuthorizationUrl(serviceKey, port = 3001) {
+function getJwtAuthorizationUrl(serviceKey, port = 3001) {
   const { url, clientid } = serviceKey.uaa;
   const redirectUri = `http://localhost:${port}/callback`;
   return `${url}/oauth/authorize?client_id=${encodeURIComponent(
@@ -112,10 +112,10 @@ function getXsuaaAuthorizationUrl(serviceKey, port = 3001) {
  * Starts a local server to intercept the authentication response
  * @param {Object} serviceKey SAP BTP service key object
  * @param {string} browser Browser to open
- * @param {string} flow Flow type: xsuaa (OAuth2)
+ * @param {string} flow Flow type: jwt (OAuth2)
  * @returns {Promise<string>} Promise that resolves to the token
  */
-async function startAuthServer(serviceKey, browser = "system", flow = "xsuaa") {
+async function startAuthServer(serviceKey, browser = "system", flow = "jwt") {
   return new Promise((resolve, reject) => {
     const app = express();
     const server = http.createServer(app);
@@ -123,9 +123,9 @@ async function startAuthServer(serviceKey, browser = "system", flow = "xsuaa") {
     let serverInstance = null;
 
     // Choose the authorization URL
-    const authorizationUrl = getXsuaaAuthorizationUrl(serviceKey, PORT);
+    const authorizationUrl = getJwtAuthorizationUrl(serviceKey, PORT);
 
-    // XSUAA OAuth2 flow (get code, exchange for token)
+    // JWT OAuth2 flow (get code, exchange for token)
     app.get("/callback", async (req, res) => {
       try {
         const { code } = req.query;
@@ -135,7 +135,7 @@ async function startAuthServer(serviceKey, browser = "system", flow = "xsuaa") {
         }
         console.log("Authorization code received");
         res.send(
-          `<html><body style='font-family:sans-serif;text-align:center;margin-top:100px;'><h1>✅ Authentication successful!</h1><p>You can close this window.</p></body></html>`
+          `<html><body style=\'font-family:sans-serif;text-align:center;margin-top:100px;\'><h1>✅ Authentication successful!</h1><p>You can close this window.</p></body></html>`
         );
         try {
           const token = await exchangeCodeForToken(serviceKey, code);
@@ -239,7 +239,7 @@ async function main() {
   program
     .command("auth")
     .description(
-      "Authenticate in SAP BTP ABAP Environment (Steampunk) via browser and update .env file (JWT/XSUAA)"
+      "Authenticate in SAP BTP ABAP Environment (Steampunk) via browser and update .env file (JWT)"
     )
     .requiredOption(
       "-k, --key <path>",
@@ -256,11 +256,11 @@ async function main() {
         console.log("Starting authentication process...");
         const serviceKey = readServiceKey(options.key);
         console.log("Service key read successfully.");
-        // Start the server for XSUAA authentication
+        // Start the server for JWT authentication
         const token = await startAuthServer(
           serviceKey,
           options.browser,
-          "xsuaa"
+          "jwt"
         );
         const abapUrl =
           serviceKey.url || serviceKey.abap?.url || serviceKey.sap_url;
@@ -271,7 +271,7 @@ async function main() {
           SAP_URL: abapUrl,
           SAP_CLIENT: abapClient,
           TLS_REJECT_UNAUTHORIZED: "0",
-          SAP_AUTH_TYPE: "xsuaa",
+          SAP_AUTH_TYPE: "jwt",
           SAP_JWT_TOKEN: token,
         };
         // Optional: language

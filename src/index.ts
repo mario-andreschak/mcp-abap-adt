@@ -51,9 +51,9 @@ logger.info("SAP configuration loaded", {
 // Interface for SAP configuration
 export interface SapConfig {
   url: string;
-  client?: string; // Made optional since it's not needed for XSUAA
+  client?: string; // Made optional since it's not needed for JWT
   // Authentication options
-  authType: "basic" | "xsuaa";
+  authType: "basic" | "jwt";
   username?: string;
   password?: string;
   jwtToken?: string;
@@ -87,7 +87,7 @@ export function getConfig(): SapConfig {
   // Config object
   const config: SapConfig = {
     url,
-    authType: authType as "basic" | "xsuaa",
+    authType: authType === "xsuaa" ? "jwt" : (authType as "basic" | "jwt"),
   };
 
   // Add client only if it's provided
@@ -109,13 +109,13 @@ export function getConfig(): SapConfig {
     config.username = username;
     config.password = password;
   }
-  // For XSUAA/JWT, the token is required
-  else if (authType === "xsuaa") {
+  // For JWT, the token is required
+  else if (authType === "xsuaa" || authType === "jwt") {
     const jwtToken = process.env.SAP_JWT_TOKEN;
 
     if (!jwtToken) {
       throw new Error(
-        `JWT/XSUAA authentication requires a token. Missing variable:\n- SAP_JWT_TOKEN`
+        `JWT authentication requires a token. Missing variable:\n- SAP_JWT_TOKEN`
       );
     }
     config.jwtToken = jwtToken;

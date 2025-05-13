@@ -48,7 +48,7 @@ if (authType === "basic") {
   authHeaders.Authorization = `Basic ${Buffer.from(
     `${username}:${password}`
   ).toString("base64")}`;
-} else if (authType === "xsuaa") {
+} else if (authType === "xsuaa" || authType === "jwt") {
   const jwtToken = process.env.SAP_JWT_TOKEN;
 
   if (!jwtToken) {
@@ -58,9 +58,7 @@ if (authType === "basic") {
 
   authHeaders.Authorization = `Bearer ${jwtToken}`;
 } else {
-  console.error(
-    `Error: Unknown auth type: ${authType}. Use 'basic' or 'xsuaa'`
-  );
+  console.error(`Error: Unknown auth type: ${authType}. Use 'basic' or 'jwt'`);
   process.exit(1);
 }
 

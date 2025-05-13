@@ -118,8 +118,8 @@ export async function getAuthHeaders() {
       "base64"
     );
     headers["Authorization"] = `Basic ${auth}`;
-  } else if (config.authType === "xsuaa" && config.jwtToken) {
-    // XSUAA JWT Bearer authentication
+  } else if (config.authType === "jwt" && config.jwtToken) {
+    // JWT Bearer authentication
     headers["Authorization"] = `Bearer ${config.jwtToken}`;
   } else {
     throw new Error("Invalid authentication configuration");
