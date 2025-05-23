@@ -35,11 +35,36 @@ import {
   return_response,
 } from "./lib/utils";
 
-// Load environment variables from .env file
-dotenv.config({ path: path.resolve(__dirname, "../.env") });
-
 // Import logger
 import { logger } from "./lib/logger";
+
+// --- ENV FILE LOADING LOGIC ---
+import fs from "fs";
+
+// Parse --env=... from process.argv
+let envFilePath: string | undefined = undefined;
+for (const arg of process.argv) {
+  if (arg.startsWith("--env=")) {
+    envFilePath = arg.slice("--env=".length);
+    break;
+  }
+}
+
+if (!envFilePath) {
+  // Default to ../.env if exists
+  const defaultEnvPath = path.resolve(__dirname, "../.env");
+  if (fs.existsSync(defaultEnvPath)) {
+    envFilePath = defaultEnvPath;
+  }
+}
+
+if (envFilePath) {
+  dotenv.config({ path: envFilePath });
+} else {
+  // No .env file found, rely on process.env only
+  // (getConfig will throw if required variables are missing)
+}
+// --- END ENV FILE LOADING LOGIC ---
 
 // Debug: Log loaded SAP_URL and SAP_CLIENT using the MCP-compatible logger
 logger.info("SAP configuration loaded", {

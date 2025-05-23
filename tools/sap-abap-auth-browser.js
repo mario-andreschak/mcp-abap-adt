@@ -101,9 +101,11 @@ function updateEnvFile(updates) {
  * @returns {string} Authentication URL
  */
 function getJwtAuthorizationUrl(serviceKey, port = 3001) {
-  const { url, clientid } = serviceKey.uaa;
+  // Use serviceKey.uaa.url (OAuth endpoint) for OAuth2 authorization URL (correct for BTP ABAP)
+  const oauthUrl = serviceKey.uaa?.url;
+  const clientid = serviceKey.uaa?.clientid;
   const redirectUri = `http://localhost:${port}/callback`;
-  return `${url}/oauth/authorize?client_id=${encodeURIComponent(
+  return `${oauthUrl}/oauth/authorize?client_id=${encodeURIComponent(
     clientid
   )}&response_type=code&redirect_uri=${encodeURIComponent(redirectUri)}`;
 }
@@ -253,27 +255,41 @@ async function main() {
     .helpOption("-h, --help", "Show help for the auth command")
     .action(async (options) => {
       try {
+        if (!options.key) {
+          console.error("Service key file (--key) is required for authentication. Please provide a valid service key JSON file.");
+          process.exit(1);
+        }
         console.log("Starting authentication process...");
         const serviceKey = readServiceKey(options.key);
         console.log("Service key read successfully.");
+        // Validate required fields in service key
+        const abapUrl = serviceKey.url || serviceKey.abap?.url || serviceKey.sap_url;
+        if (!abapUrl) {
+          console.error("SAP_URL is missing in the service key. Please check your service key JSON file.");
+          process.exit(1);
+        }
         // Start the server for JWT authentication
         const token = await startAuthServer(
           serviceKey,
           options.browser,
           "jwt"
         );
-        const abapUrl =
-          serviceKey.url || serviceKey.abap?.url || serviceKey.sap_url;
-        const abapClient =
-          serviceKey.client || serviceKey.abap?.client || serviceKey.sap_client;
+        if (!token) {
+          console.error("JWT token was not obtained. Authentication failed.");
+          process.exit(1);
+        }
         // Collect all relevant parameters from service key
         const envUpdates = {
           SAP_URL: abapUrl,
-          SAP_CLIENT: abapClient,
           TLS_REJECT_UNAUTHORIZED: "0",
           SAP_AUTH_TYPE: "jwt",
           SAP_JWT_TOKEN: token,
         };
+        // Optional: client
+        const abapClient = serviceKey.client || serviceKey.abap?.client || serviceKey.sap_client;
+        if (abapClient) {
+          envUpdates.SAP_CLIENT = abapClient;
+        }
         // Optional: language
         if (serviceKey.language) {
           envUpdates.SAP_LANGUAGE = serviceKey.language;
@@ -284,19 +300,22 @@ async function main() {
         console.log("Authentication completed successfully!");
         process.exit(0);
       } catch (error) {
-        console.error(`Authentication error: ${error.message}`);
+        console.error(`Error during authentication: ${error.message}`);
         process.exit(1);
       }
     });
 
-  // Show help if no arguments are provided
-  if (process.argv.length <= 2) {
-    program.outputHelp();
-    process.exit(0);
-  }
+  // Parse and handle command-line arguments
+  program.parse(process.argv);
 
-  program.parse();
+  // If no arguments were provided, show help
+  if (process.argv.length === 2) {
+    program.help();
+  }
 }
 
-// Run the main function
-main();
+// Execute the main function
+main().catch((error) => {
+  console.error(`Unexpected error: ${error.message}`);
+  process.exit(1);
+});
