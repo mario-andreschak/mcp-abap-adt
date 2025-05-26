@@ -59,6 +59,8 @@ child.stdout.on('data', (data) => {
       responseReceived = true;
       console.log('\nTest completed successfully. Stopping server...');
       child.kill();
+      // Exit the Node.js process immediately
+      process.exit(0);
     } else {
       console.log("\nReceived JSON response:");
       console.log(JSON.stringify(jsonData, null, 2));
