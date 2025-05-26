@@ -51,18 +51,26 @@ for (const arg of process.argv) {
 }
 
 if (!envFilePath) {
-  // Default to ../.env if exists
+  // Default to ../.env if exists (always resolve absolute path)
   const defaultEnvPath = path.resolve(__dirname, "../.env");
-  if (fs.existsSync(defaultEnvPath)) {
-    envFilePath = defaultEnvPath;
-  }
+  envFilePath = defaultEnvPath;
+  process.stderr.write(`[MCP-ENV] WARNING: --env not specified, using default: ${envFilePath}\n`);
 }
 
-if (envFilePath) {
+// Перетворюємо шлях на абсолютний, якщо він не абсолютний
+if (envFilePath && !path.isAbsolute(envFilePath)) {
+  envFilePath = path.resolve(process.cwd(), envFilePath);
+}
+
+// Логування шляху до .env
+process.stderr.write(`[MCP-ENV] Using .env path: ${envFilePath}\n`);
+
+if (envFilePath && fs.existsSync(envFilePath)) {
   dotenv.config({ path: envFilePath });
 } else {
-  // No .env file found, rely on process.env only
-  // (getConfig will throw if required variables are missing)
+  logger.error(".env file not found at provided path", { path: envFilePath });
+  process.stderr.write(`ERROR: .env file not found at: ${envFilePath}\n`);
+  process.exit(1);
 }
 // --- END ENV FILE LOADING LOGIC ---
 
@@ -71,6 +79,11 @@ logger.info("SAP configuration loaded", {
   type: "CONFIG_INFO",
   SAP_URL: process.env.SAP_URL,
   SAP_CLIENT: process.env.SAP_CLIENT || "(not set)",
+  SAP_AUTH_TYPE: process.env.SAP_AUTH_TYPE || "(not set)",
+  SAP_JWT_TOKEN: process.env.SAP_JWT_TOKEN ? "[set]" : "(not set)",
+  ENV_PATH: envFilePath,
+  CWD: process.cwd(),
+  DIRNAME: __dirname,
 });
 
 // Interface for SAP configuration
