@@ -41,32 +41,68 @@ import { logger } from "./lib/logger";
 // --- ENV FILE LOADING LOGIC ---
 import fs from "fs";
 
-// Parse --env=... from process.argv
-let envFilePath: string | undefined = undefined;
-for (const arg of process.argv) {
-  if (arg.startsWith("--env=")) {
-    envFilePath = arg.slice("--env=".length);
-    break;
+/**
+ * Parses command line arguments to find env file path
+ * Supports both formats:
+ * 1. --env=/path/to/.env
+ * 2. --env /path/to/.env
+ */
+function parseEnvArg(): string | undefined {
+  const args = process.argv;
+  for (let i = 0; i < args.length; i++) {
+    // Format: --env=/path/to/.env
+    if (args[i].startsWith("--env=")) {
+      return args[i].slice("--env=".length);
+    }
+    // Format: --env /path/to/.env
+    else if (args[i] === "--env" && i + 1 < args.length) {
+      return args[i + 1];
+    }
+  }
+  return undefined;
+}
+
+// Find .env file path from arguments
+let envFilePath = parseEnvArg();
+
+// If no --env provided, try default locations
+if (!envFilePath) {
+  // List of possible default locations, in order of preference
+  const possiblePaths = [
+    // 1. .env in current working directory
+    path.resolve(process.cwd(), '.env'),
+    // 2. .env in project root (relative to dist/index.js)
+    path.resolve(__dirname, "../.env")
+  ];
+  
+  // Find the first existing .env file
+  for (const possiblePath of possiblePaths) {
+    if (fs.existsSync(possiblePath)) {
+      envFilePath = possiblePath;
+      process.stderr.write(`[MCP-ENV] No --env specified, using found .env: ${envFilePath}\n`);
+      break;
+    }
+  }
+  
+  // If still not found, default to project root
+  if (!envFilePath) {
+    envFilePath = path.resolve(__dirname, "../.env");
+    process.stderr.write(`[MCP-ENV] WARNING: No .env file found, will use path: ${envFilePath}\n`);
   }
 }
 
-if (!envFilePath) {
-  // Default to ../.env if exists (always resolve absolute path)
-  const defaultEnvPath = path.resolve(__dirname, "../.env");
-  envFilePath = defaultEnvPath;
-  process.stderr.write(`[MCP-ENV] WARNING: --env not specified, using default: ${envFilePath}\n`);
-}
-
-// Перетворюємо шлях на абсолютний, якщо він не абсолютний
-if (envFilePath && !path.isAbsolute(envFilePath)) {
+// Always convert to absolute path
+if (!path.isAbsolute(envFilePath)) {
   envFilePath = path.resolve(process.cwd(), envFilePath);
 }
 
-// Логування шляху до .env
+// Log the path being used
 process.stderr.write(`[MCP-ENV] Using .env path: ${envFilePath}\n`);
 
-if (envFilePath && fs.existsSync(envFilePath)) {
+// Load environment variables from the .env file
+if (fs.existsSync(envFilePath)) {
   dotenv.config({ path: envFilePath });
+  process.stderr.write(`[MCP-ENV] Successfully loaded environment from: ${envFilePath}\n`);
 } else {
   logger.error(".env file not found at provided path", { path: envFilePath });
   process.stderr.write(`ERROR: .env file not found at: ${envFilePath}\n`);

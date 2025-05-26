@@ -48,16 +48,19 @@ if (!path.isAbsolute(envPath)) {
   envPath = path.resolve(process.cwd(), envPath);
 }
 
-// Check if the environment file exists
-if (!fs.existsSync(envPath)) {
-  console.error(`Error: Environment file not found: ${envPath}`);
-  console.log('Use --help for usage information');
-  process.exit(1);
-}
-
 // Absolute path to dist/index.js
 // This will always be relative to this script, so we can run from anywhere
 const serverPath = path.resolve(__dirname, '../dist/index.js');
+
+// Check if server file exists
+if (!fs.existsSync(serverPath)) {
+  console.error(`Error: Server not found at: ${serverPath}`);
+  console.error(`Make sure to build the project with 'npm run build' first.`);
+  process.exit(1);
+}
+
+// We don't need to check if the environment file exists here
+// The server will handle that and provide appropriate error messages
 
 // Functions for pretty output
 const printBanner = (text) => {
