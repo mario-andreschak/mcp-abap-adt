@@ -5,7 +5,7 @@ import { AxiosResponse } from "axios";
 import { getConfig, SapConfig } from "../index"; // getConfig needs to be exported from index.ts
 import { logger } from "./logger"; // Import the MCP-compatible logger
 
-export { McpError, ErrorCode, AxiosResponse };
+export { McpError, ErrorCode, AxiosResponse, logger };
 
 export function return_response(response: AxiosResponse) {
   return {

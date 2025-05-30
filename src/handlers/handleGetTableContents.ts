@@ -7,12 +7,11 @@ export async function handleGetTableContents(args: any) {
             throw new McpError(ErrorCode.InvalidParams, 'Table name is required');
         }
         const maxRows = args.max_rows || 100;
-        //NOTE: This service requires a custom service implementation
-        const url = `${await getBaseUrl()}/z_mcp_abap_adt/z_tablecontent/${args.table_name}?maxRows=${maxRows}`;
+        // Use ADT data preview service to get table contents
+        const url = `${await getBaseUrl()}/sap/bc/adt/datapreview/ddic?rowNumber=${maxRows}&ddicEntityName=${args.table_name}`;
         const response = await makeAdtRequest(url, 'GET', 30000);
         return return_response(response);
     } catch (error) {
-        // Specific error message for GetTableContents since it requires custom implementation
         return return_error(error);
     }
 }

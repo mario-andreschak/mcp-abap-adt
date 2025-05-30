@@ -24,6 +24,7 @@ import { handleGetTypeInfo } from "./handlers/handleGetTypeInfo";
 import { handleGetInterface } from "./handlers/handleGetInterface";
 import { handleGetTransaction } from "./handlers/handleGetTransaction";
 import { handleSearchObject } from "./handlers/handleSearchObject";
+import { handleGetEnhancements } from "./handlers/handleGetEnhancements";
 
 // Import shared utility functions and types
 import {
@@ -433,6 +434,20 @@ export class mcp_abap_adt_server {
               required: ["interface_name"],
             },
           },
+          {
+            name: "GetEnhancements",
+            description: "Retrieve enhancement elements for ABAP programs or includes. Automatically detects object type and handles context appropriately.",
+            inputSchema: {
+              type: "object",
+              properties: {
+                object_name: {
+                  type: "string",
+                  description: "Name of the ABAP program or include (e.g., 'SD_SALES_DOCUMENT_VIEW' for program, 'mv45afzz' for include)",
+                },
+              },
+              required: ["object_name"],
+            },
+          },
         ],
       };
     });
@@ -466,6 +481,8 @@ export class mcp_abap_adt_server {
           return await handleGetInterface(request.params.arguments);
         case "GetTransaction":
           return await handleGetTransaction(request.params.arguments);
+        case "GetEnhancements":
+          return await handleGetEnhancements(request.params.arguments);
         default:
           throw new McpError(
             ErrorCode.MethodNotFound,
