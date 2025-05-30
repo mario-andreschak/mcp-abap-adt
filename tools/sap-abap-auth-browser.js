@@ -118,7 +118,7 @@ function getJwtAuthorizationUrl(serviceKey, port = 3001) {
  * @param {string} flow Flow type: jwt (OAuth2)
  * @returns {Promise<string>} Promise that resolves to the token
  */
-async function startAuthServer(serviceKey, browser = "system", flow = "jwt") {
+async function startAuthServer(serviceKey, browser = undefined, flow = "jwt") {
   return new Promise((resolve, reject) => {
     const app = express();
     const server = http.createServer(app);
@@ -137,9 +137,70 @@ async function startAuthServer(serviceKey, browser = "system", flow = "jwt") {
           return reject(new Error("Authorization code missing"));
         }
         console.log("Authorization code received");
-        res.send(
-          `<html><body style=\'font-family:sans-serif;text-align:center;margin-top:100px;\'><h1>✅ Authentication successful!</h1><p>You can close this window.</p></body></html>`
-        );
+        res.send(`<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SAP BTP Authentication</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            text-align: center;
+            margin: 0;
+            padding: 50px 20px;
+            background: linear-gradient(135deg, #0070f3 0%, #00d4ff 100%);
+            color: white;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+        .container {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 40px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            max-width: 500px;
+            width: 100%;
+        }
+        .success-icon {
+            font-size: 4rem;
+            margin-bottom: 20px;
+            color: #4ade80;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+        h1 {
+            margin: 0 0 20px 0;
+            font-size: 2rem;
+            font-weight: 300;
+        }
+        p {
+            margin: 0;
+            font-size: 1.1rem;
+            opacity: 0.9;
+            line-height: 1.5;
+        }
+        .sap-logo {
+            margin-top: 30px;
+            font-weight: bold;
+            opacity: 0.7;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="success-icon">✓</div>
+        <h1>Authentication Successful!</h1>
+        <p>You have successfully authenticated with SAP BTP.</p>
+        <p>You can now close this browser window.</p>
+        <div class="sap-logo">SAP Business Technology Platform</div>
+    </div>
+</body>
+</html>`);
         try {
           const token = await exchangeCodeForToken(serviceKey, code);
           server.close(() => {
@@ -158,14 +219,18 @@ async function startAuthServer(serviceKey, browser = "system", flow = "jwt") {
 
     serverInstance = server.listen(PORT, () => {
       console.log(`Authentication server started on port ${PORT}`);
-      
+
       const browserApp = BROWSER_MAP[browser];
-      if (browser === "none" || browserApp === null) {
-        console.log("\nBrowser not specified. Please manually open the following URL:");
+      if (!browser || browser === "none" || browserApp === null) {
+        console.log(
+          "\nBrowser not specified. Please manually open the following URL:"
+        );
         console.log("");
         console.log(`🔗 ${authorizationUrl}`);
         console.log("");
-        console.log("Copy and paste this URL into your browser to authenticate.\n");
+        console.log(
+          "Copy and paste this URL into your browser to authenticate.\n"
+        );
       } else {
         console.log("Opening browser for authentication...");
         if (browserApp) {
@@ -259,31 +324,31 @@ async function main() {
     )
     .option(
       "-b, --browser <browser>",
-      "Browser to open (chrome, edge, firefox, system, none). Use 'none' to display URL for manual copy. Default: system",
-      "system"
+      "Browser to open (chrome, edge, firefox, system, none). Use 'none' or omit to display URL for manual copy."
     )
     .helpOption("-h, --help", "Show help for the auth command")
     .action(async (options) => {
       try {
         if (!options.key) {
-          console.error("Service key file (--key) is required for authentication. Please provide a valid service key JSON file.");
+          console.error(
+            "Service key file (--key) is required for authentication. Please provide a valid service key JSON file."
+          );
           process.exit(1);
         }
         console.log("Starting authentication process...");
         const serviceKey = readServiceKey(options.key);
         console.log("Service key read successfully.");
         // Validate required fields in service key
-        const abapUrl = serviceKey.url || serviceKey.abap?.url || serviceKey.sap_url;
+        const abapUrl =
+          serviceKey.url || serviceKey.abap?.url || serviceKey.sap_url;
         if (!abapUrl) {
-          console.error("SAP_URL is missing in the service key. Please check your service key JSON file.");
+          console.error(
+            "SAP_URL is missing in the service key. Please check your service key JSON file."
+          );
           process.exit(1);
         }
         // Start the server for JWT authentication
-        const token = await startAuthServer(
-          serviceKey,
-          options.browser,
-          "jwt"
-        );
+        const token = await startAuthServer(serviceKey, options.browser, "jwt");
         if (!token) {
           console.error("JWT token was not obtained. Authentication failed.");
           process.exit(1);
@@ -296,7 +361,8 @@ async function main() {
           SAP_JWT_TOKEN: token,
         };
         // Optional: client
-        const abapClient = serviceKey.client || serviceKey.abap?.client || serviceKey.sap_client;
+        const abapClient =
+          serviceKey.client || serviceKey.abap?.client || serviceKey.sap_client;
         if (abapClient) {
           envUpdates.SAP_CLIENT = abapClient;
         }
