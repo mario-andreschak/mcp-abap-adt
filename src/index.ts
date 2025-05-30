@@ -25,6 +25,7 @@ import { handleGetInterface } from "./handlers/handleGetInterface";
 import { handleGetTransaction } from "./handlers/handleGetTransaction";
 import { handleSearchObject } from "./handlers/handleSearchObject";
 import { handleGetEnhancements } from "./handlers/handleGetEnhancements";
+import { handleGetSqlQuery } from "./handlers/handleGetSqlQuery";
 
 // Import shared utility functions and types
 import {
@@ -452,6 +453,25 @@ export class mcp_abap_adt_server {
               required: ["object_name"],
             },
           },
+          {
+            name: "GetSqlQuery",
+            description: "Execute freestyle SQL queries via SAP ADT Data Preview API. Supports SELECT, WITH statements and other read-only SQL operations.",
+            inputSchema: {
+              type: "object",
+              properties: {
+                sql_query: {
+                  type: "string",
+                  description: "SQL query to execute (e.g., 'SELECT * FROM mara WHERE matnr LIKE 'TEST%'')",
+                },
+                row_number: {
+                  type: "number",
+                  description: "Maximum number of rows to return",
+                  default: 100,
+                },
+              },
+              required: ["sql_query"],
+            },
+          },
         ],
       };
     });
@@ -487,6 +507,8 @@ export class mcp_abap_adt_server {
           return await handleGetTransaction(request.params.arguments);
         case "GetEnhancements":
           return await handleGetEnhancements(request.params.arguments);
+        case "GetSqlQuery":
+          return await handleGetSqlQuery(request.params.arguments);
         default:
           throw new McpError(
             ErrorCode.MethodNotFound,

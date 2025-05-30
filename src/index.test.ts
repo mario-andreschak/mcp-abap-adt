@@ -14,6 +14,7 @@ import { handleGetInterface } from "./handlers/handleGetInterface";
 import { handleGetTransaction } from "./handlers/handleGetTransaction";
 import { handleSearchObject } from "./handlers/handleSearchObject";
 import { handleGetEnhancements, parseEnhancementsFromXml } from "./handlers/handleGetEnhancements";
+import { handleGetSqlQuery } from "./handlers/handleGetSqlQuery";
 import { cleanup } from "./lib/utils";
 import { logger } from "./lib/logger";
 
@@ -309,6 +310,46 @@ define table t000 {
       expect(result[1].name).toBe("enhancement_2");
       expect(result[1].type).toBe("enhancement");
       expect(result[1].sourceCode).toBe("DAPLORT ZP from enhancement");
+    });
+  });
+
+  describe("handleGetSqlQuery", () => {
+    it("should successfully execute SQL query", async () => {
+      const result = await handleGetSqlQuery({
+        sql_query: "SELECT * FROM t000",
+        row_number: 10,
+      });
+      expect(result.isError).toBe(false);
+      expect(Array.isArray(result.content)).toBe(true);
+      expect(result.content.length).toBeGreaterThan(0);
+      expect(result.content[0].type).toBe("text");
+      
+      // Parse the response and check structure
+      const parsedResponse = JSON.parse(result.content[0].text);
+      expect(parsedResponse.sql_query).toBe("SELECT * FROM t000");
+      expect(parsedResponse.row_number).toBe(10);
+      expect(Array.isArray(parsedResponse.columns)).toBe(true);
+      expect(Array.isArray(parsedResponse.rows)).toBe(true);
+    });
+
+    it("should handle SQL query without row_number parameter", async () => {
+      const result = await handleGetSqlQuery({
+        sql_query: "SELECT mandt FROM t000",
+      });
+      expect(result.isError).toBe(false);
+      expect(Array.isArray(result.content)).toBe(true);
+      expect(result.content.length).toBeGreaterThan(0);
+      
+      // Parse the response and check default row_number
+      const parsedResponse = JSON.parse(result.content[0].text);
+      expect(parsedResponse.sql_query).toBe("SELECT mandt FROM t000");
+      expect(parsedResponse.row_number).toBe(100); // Default value
+    });
+
+    it("should throw error for missing sql_query parameter", async () => {
+      const result = await handleGetSqlQuery({});
+      expect(result.isError).toBe(true);
+      expect(result.content[0].text).toContain("SQL query is required");
     });
   });
 });
