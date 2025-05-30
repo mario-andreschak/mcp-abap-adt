@@ -4,7 +4,7 @@ import { makeAdtRequest, return_error, return_response, getBaseUrl, logger } fro
 /**
  * Interface for enhancement implementation data
  */
-interface EnhancementImplementation {
+export interface EnhancementImplementation {
     name: string;
     type: string;
     sourceCode?: string;
@@ -14,7 +14,7 @@ interface EnhancementImplementation {
 /**
  * Interface for parsed enhancement response
  */
-interface EnhancementResponse {
+export interface EnhancementResponse {
     object_name: string;
     object_type: 'program' | 'include';
     context?: string;
@@ -27,51 +27,51 @@ interface EnhancementResponse {
  * @param xmlData - Raw XML response from ADT
  * @returns Array of enhancement implementations
  */
-function parseEnhancementsFromXml(xmlData: string): EnhancementImplementation[] {
+export function parseEnhancementsFromXml(xmlData: string): EnhancementImplementation[] {
     const enhancements: EnhancementImplementation[] = [];
     
     try {
-        // Extract enhancement implementation elements
-        // Look for enhancement implementation nodes
-        const enhRegex = /<enh:implementation[^>]*name="([^"]*)"[^>]*type="([^"]*)"[^>]*>/g;
+        // Extract <enh:source> elements which contain the base64 encoded enhancement source code
+        const sourceRegex = /<enh:source[^>]*>([^<]*)<\/enh:source>/g;
         let match;
+        let index = 0;
         
-        while ((match = enhRegex.exec(xmlData)) !== null) {
+        while ((match = sourceRegex.exec(xmlData)) !== null) {
             const enhancement: EnhancementImplementation = {
-                name: match[1] || '',
-                type: match[2] || '',
+                name: `enhancement_${index + 1}`, // Default name if not found in attributes
+                type: 'enhancement',
             };
             
-            // Find the start position of this enhancement implementation
-            const enhStart = match.index;
+            // Try to find enhancement name and type from parent elements or attributes
+            const sourceStart = match.index;
             
-            // Find the corresponding closing tag
-            const enhEnd = xmlData.indexOf('</enh:implementation>', enhStart);
-            if (enhEnd === -1) continue;
+            // Look backwards for parent enhancement element with name/type attributes
+            const beforeSource = xmlData.substring(0, sourceStart);
+            const enhNameMatch = beforeSource.match(/adtcore:name="([^"]*)"[^>]*$/);
+            const enhTypeMatch = beforeSource.match(/adtcore:type="([^"]*)"[^>]*$/);
             
-            // Extract the content between the tags
-            const enhContent = xmlData.substring(enhStart, enhEnd + '</enh:implementation>'.length);
-            
-            // Extract description if available
-            const descMatch = enhContent.match(/<enh:description[^>]*>([^<]*)<\/enh:description>/);
-            if (descMatch && descMatch[1]) {
-                enhancement.description = descMatch[1];
+            if (enhNameMatch && enhNameMatch[1]) {
+                enhancement.name = enhNameMatch[1];
+            }
+            if (enhTypeMatch && enhTypeMatch[1]) {
+                enhancement.type = enhTypeMatch[1];
             }
             
-            // Extract source code from <enh:source> tags (base64 encoded)
-            const sourceMatch = enhContent.match(/<enh:source[^>]*>([^<]*)<\/enh:source>/);
-            if (sourceMatch && sourceMatch[1]) {
+            // Extract and decode the base64 source code
+            const base64Source = match[1];
+            if (base64Source) {
                 try {
                     // Decode base64 source code
-                    const decodedSource = Buffer.from(sourceMatch[1], 'base64').toString('utf-8');
+                    const decodedSource = Buffer.from(base64Source, 'base64').toString('utf-8');
                     enhancement.sourceCode = decodedSource;
                 } catch (decodeError) {
                     logger.warn(`Failed to decode source code for enhancement ${enhancement.name}:`, decodeError);
-                    enhancement.sourceCode = sourceMatch[1]; // Keep original if decode fails
+                    enhancement.sourceCode = base64Source; // Keep original if decode fails
                 }
             }
             
             enhancements.push(enhancement);
+            index++;
         }
         
         logger.info(`Parsed ${enhancements.length} enhancement implementations`);

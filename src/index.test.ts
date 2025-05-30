@@ -13,6 +13,7 @@ import { handleGetTypeInfo } from "./handlers/handleGetTypeInfo";
 import { handleGetInterface } from "./handlers/handleGetInterface";
 import { handleGetTransaction } from "./handlers/handleGetTransaction";
 import { handleSearchObject } from "./handlers/handleSearchObject";
+import { handleGetEnhancements, parseEnhancementsFromXml } from "./handlers/handleGetEnhancements";
 import { cleanup } from "./lib/utils";
 import { logger } from "./lib/logger";
 
@@ -160,6 +161,74 @@ describe("mcp_abap_adt_server - Integration Tests", () => {
       expect(Array.isArray(result.content)).toBe(true);
       expect(result.content.length).toBeGreaterThan(0);
       expect(result.content[0].type).toBe("text");
+    });
+  });
+
+  describe("handleGetEnhancements", () => {
+    it("should successfully retrieve enhancement details for a program", async () => {
+      const result = await handleGetEnhancements({ 
+        object_name: "SD_SALES_DOCUMENT_VIEW" 
+      });
+      // Check if it's not an error response
+      expect('isError' in result ? result.isError : false).toBe(false);
+      expect(Array.isArray(result.content)).toBe(true);
+      expect(result.content.length).toBeGreaterThan(0);
+      expect(result.content[0].type).toBe("text");
+      
+      // Parse the JSON response to verify enhancement data structure
+      const responseData = JSON.parse(result.content[0].text);
+      expect(responseData).toHaveProperty('object_name');
+      expect(responseData).toHaveProperty('object_type');
+      expect(responseData).toHaveProperty('enhancements');
+      expect(Array.isArray(responseData.enhancements)).toBe(true);
+    });
+
+    it("should successfully retrieve enhancement details for an include with manual program context", async () => {
+      const result = await handleGetEnhancements({ 
+        object_name: "mv45afzz",
+        program: "SAPMV45A"
+      });
+      // Check if it's not an error response
+      expect('isError' in result ? result.isError : false).toBe(false);
+      expect(Array.isArray(result.content)).toBe(true);
+      expect(result.content.length).toBeGreaterThan(0);
+      expect(result.content[0].type).toBe("text");
+      
+      // Parse the JSON response to verify enhancement data structure
+      const responseData = JSON.parse(result.content[0].text);
+      expect(responseData).toHaveProperty('object_name');
+      expect(responseData.object_name).toBe('mv45afzz');
+      expect(responseData).toHaveProperty('object_type');
+      expect(responseData.object_type).toBe('include');
+    });
+
+    it("should parse enhancement XML and decode base64 source code correctly", () => {
+      const sampleXml = `<?xml version="1.0" encoding="UTF-8"?>
+<enh:enhancements xmlns:enh="http://www.sap.com/adt/enhancements">
+    <enh:element enh:name="ENH_001" enh:type="implementation">
+        <enh:source>SEVMTE8gV09STEQh</enh:source>
+        <enh:description>Test Enhancement 1</enh:description>
+    </enh:element>
+    <enh:element enh:name="ENH_002" enh:type="implementation">
+        <enh:source>REFQTE9SVCBaUCBmcm9tIGVuaGFuY2VtZW50</enh:source>
+        <enh:description>Test Enhancement 2</enh:description>
+    </enh:element>
+</enh:enhancements>`;
+
+      const result = parseEnhancementsFromXml(sampleXml);
+      
+      expect(Array.isArray(result)).toBe(true);
+      expect(result.length).toBe(2);
+      
+      // Check first enhancement
+      expect(result[0].name).toBe("enhancement_1");
+      expect(result[0].type).toBe("enhancement");
+      expect(result[0].sourceCode).toBe("HELLO WORLD!");
+      
+      // Check second enhancement
+      expect(result[1].name).toBe("enhancement_2");
+      expect(result[1].type).toBe("enhancement");
+      expect(result[1].sourceCode).toBe("DAPLORT ZP from enhancement");
     });
   });
 });
