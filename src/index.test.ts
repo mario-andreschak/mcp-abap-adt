@@ -32,8 +32,13 @@ describe("mcp_abap_adt_server - Integration Tests", () => {
     // Clean up server instance and utils
     logger.info("Cleaning up after tests", { type: "TEST_CLEANUP" });
     cleanup();
-    // Add a small delay to ensure all async operations complete
-    await new Promise((resolve) => setTimeout(resolve, 100));
+    // Add a longer delay to ensure all async operations complete
+    await new Promise((resolve) => setTimeout(resolve, 500));
+    
+    // Force garbage collection if available
+    if (global.gc) {
+      global.gc();
+    }
   });
 
   describe("handleGetProgram", () => {
@@ -88,6 +93,81 @@ describe("mcp_abap_adt_server - Integration Tests", () => {
       expect(Array.isArray(result.content)).toBe(true);
       expect(result.content.length).toBeGreaterThan(0);
       expect(result.content[0].type).toBe("text");
+    });
+  });
+
+  describe("handleGetTableContents", () => {
+    it("should successfully retrieve table contents", async () => {
+      const result = await handleGetTableContents({ 
+        table_name: "T000",
+        max_rows: 10 
+      });
+      expect(result.isError).toBe(false);
+      expect(Array.isArray(result.content)).toBe(true);
+      expect(result.content.length).toBeGreaterThan(0);
+      expect(result.content[0].type).toBe("text");
+    });
+
+    it("should use default max_rows when not specified", async () => {
+      const result = await handleGetTableContents({ 
+        table_name: "T000"
+      });
+      expect(result.isError).toBe(false);
+      expect(Array.isArray(result.content)).toBe(true);
+      expect(result.content.length).toBeGreaterThan(0);
+      expect(result.content[0].type).toBe("text");
+    }, 15000); // Increase timeout to 15 seconds for this specific test
+
+    it("should return error when table_name is missing", async () => {
+      const result = await handleGetTableContents({});
+      expect(result.isError).toBe(true);
+      expect(Array.isArray(result.content)).toBe(true);
+      expect(result.content[0].text).toContain("Table name is required");
+    });
+
+    // Add test to verify SQL generation format
+    it('should generate correct SQL SELECT statement format', async () => {
+        // Mock the makeAdtRequest to capture the SQL statement
+        let capturedSql = '';
+        const originalMakeAdtRequest = require('./lib/utils').makeAdtRequest;
+        
+        // Mock only the table structure call
+        require('./lib/utils').makeAdtRequest = jest.fn()
+            .mockImplementationOnce(() => {
+                // First call - table structure
+                return Promise.resolve({
+                    data: `@EndUserText.label : 'Clients'
+@AbapCatalog.enhancement.category : #NOT_EXTENSIBLE
+@AbapCatalog.tableCategory : #TRANSPARENT
+@AbapCatalog.deliveryClass : #C
+@AbapCatalog.dataMaintenance : #ALLOWED
+define table t000 {
+  key mandt  : mandt not null;
+  mtext      : mtext_d not null;
+  ort01      : ort01 not null;
+  mwaer      : mwaer not null;
+  adrnr      : char10 not null;
+  cccategory : cccategory not null;
+}`
+                });
+            })
+            .mockImplementationOnce((url, method, timeout, payload) => {
+                // Second call - table contents with SQL payload
+                capturedSql = payload;
+                return Promise.resolve({
+                    status: 200,
+                    data: '<?xml version="1.0" encoding="utf-8"?><dataPreview:tableData>...</dataPreview:tableData>'
+                });
+            });
+
+        const result = await handleGetTableContents({ table_name: 'T000', max_rows: 5 });
+        
+        expect(result.isError).toBe(false);
+        expect(capturedSql).toContain('SELECT T000~MANDT, T000~MTEXT, T000~ORT01, T000~MWAER, T000~ADRNR, T000~CCCATEGORY FROM T000');
+        expect(capturedSql).not.toContain('SELECT *');
+        
+        // Restore original function
+        require('./lib/utils').makeAdtRequest = originalMakeAdtRequest;
     });
   });
 

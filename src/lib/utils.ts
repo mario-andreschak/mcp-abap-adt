@@ -62,17 +62,13 @@ export function createAxiosInstance() {
 // Cleanup function for tests
 export function cleanup() {
   if (axiosInstance) {
-    // Clear any interceptors
-    const reqInterceptor = axiosInstance.interceptors.request.use(
-      (config) => config
-    );
-    const resInterceptor = axiosInstance.interceptors.response.use(
-      (response) => response
-    );
-    axiosInstance.interceptors.request.eject(reqInterceptor);
-    axiosInstance.interceptors.response.eject(resInterceptor);
+    // Clear all existing interceptors
+    axiosInstance.interceptors.request.clear();
+    axiosInstance.interceptors.response.clear();
+    
+    // Destroy the axios instance
+    axiosInstance = null;
   }
-  axiosInstance = null;
   config = undefined;
   csrfToken = null;
   cookies = null;
@@ -340,6 +336,14 @@ export async function makeAdtRequest(
   if (!requestHeaders["Accept"]) {
     requestHeaders["Accept"] =
       "application/xml, application/json, text/plain, */*";
+  }
+
+  // Add Content-Type for POST/PUT requests with data
+  if ((method === "POST" || method === "PUT") && data) {
+    if (typeof data === "string" && !requestHeaders["Content-Type"]) {
+      // For SQL queries and plain text data
+      requestHeaders["Content-Type"] = "text/plain; charset=utf-8";
+    }
   }
 
   const requestConfig: any = {
