@@ -436,13 +436,17 @@ export class mcp_abap_adt_server {
           },
           {
             name: "GetEnhancements",
-            description: "Retrieve enhancement elements for ABAP programs or includes. Automatically detects object type and handles context appropriately.",
+            description: "Retrieve enhancement elements for ABAP programs or includes. Automatically detects object type and handles context appropriately. Returns parsed enhancement implementations with their source code.",
             inputSchema: {
               type: "object",
               properties: {
                 object_name: {
                   type: "string",
                   description: "Name of the ABAP program or include (e.g., 'SD_SALES_DOCUMENT_VIEW' for program, 'mv45afzz' for include)",
+                },
+                program: {
+                  type: "string",
+                  description: "Optional: For includes, manually specify the parent program name if automatic context detection fails (e.g., 'SAPMV45A')",
                 },
               },
               required: ["object_name"],
