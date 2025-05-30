@@ -11,12 +11,13 @@ const http = require("http");
 // Path to the .env file relative to the project root
 const ENV_FILE_PATH = path.resolve(process.cwd(), ".env");
 
-// Browser selection via --browser option (chrome, edge, firefox, system)
+// Browser selection via --browser option (chrome, edge, firefox, system, none)
 const BROWSER_MAP = {
   chrome: "chrome",
   edge: "msedge",
   firefox: "firefox",
   system: undefined, // system default
+  none: null, // no browser, manual URL copy
 };
 
 /**
@@ -157,12 +158,21 @@ async function startAuthServer(serviceKey, browser = "system", flow = "jwt") {
 
     serverInstance = server.listen(PORT, () => {
       console.log(`Authentication server started on port ${PORT}`);
-      console.log("Opening browser for authentication...");
-      const browserApp = BROWSER_MAP[browser] || undefined;
-      if (browserApp) {
-        open(authorizationUrl, { app: { name: browserApp } });
+      
+      const browserApp = BROWSER_MAP[browser];
+      if (browser === "none" || browserApp === null) {
+        console.log("\nBrowser not specified. Please manually open the following URL:");
+        console.log("");
+        console.log(`🔗 ${authorizationUrl}`);
+        console.log("");
+        console.log("Copy and paste this URL into your browser to authenticate.\n");
       } else {
-        open(authorizationUrl);
+        console.log("Opening browser for authentication...");
+        if (browserApp) {
+          open(authorizationUrl, { app: { name: browserApp } });
+        } else {
+          open(authorizationUrl);
+        }
       }
     });
 
@@ -249,7 +259,7 @@ async function main() {
     )
     .option(
       "-b, --browser <browser>",
-      "Browser to open (chrome, edge, firefox, system). Default: system",
+      "Browser to open (chrome, edge, firefox, system, none). Use 'none' to display URL for manual copy. Default: system",
       "system"
     )
     .helpOption("-h, --help", "Show help for the auth command")
