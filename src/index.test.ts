@@ -128,12 +128,12 @@ describe("mcp_abap_adt_server - Integration Tests", () => {
 
     // Add test to verify SQL generation format
     it('should generate correct SQL SELECT statement format', async () => {
-        // Mock the makeAdtRequest to capture the SQL statement
+        // Mock the makeAdtRequestWithTimeout to capture the SQL statement
         let capturedSql = '';
-        const originalMakeAdtRequest = require('./lib/utils').makeAdtRequest;
+        const originalMakeAdtRequestWithTimeout = require('./lib/utils').makeAdtRequestWithTimeout;
         
         // Mock only the table structure call
-        require('./lib/utils').makeAdtRequest = jest.fn()
+        require('./lib/utils').makeAdtRequestWithTimeout = jest.fn()
             .mockImplementationOnce(() => {
                 // First call - table structure
                 return Promise.resolve({
@@ -157,7 +157,7 @@ define table t000 {
                 capturedSql = payload;
                 return Promise.resolve({
                     status: 200,
-                    data: '<?xml version="1.0" encoding="utf-8"?><dataPreview:tableData>...</dataPreview:tableData>'
+                    data: '<?xml version="1.0" encoding="utf-8"?><dataPreview:tableData xmlns:dataPreview="http://www.sap.com/adt/datapreview"><dataPreview:totalRows>0</dataPreview:totalRows><dataPreview:queryExecutionTime>0.1</dataPreview:queryExecutionTime><dataPreview:metadata dataPreview:name="MANDT" dataPreview:type="CLNT"/><dataPreview:metadata dataPreview:name="MTEXT" dataPreview:type="CHAR"/><dataPreview:columns><dataPreview:data>100</dataPreview:data></dataPreview:columns><dataPreview:columns><dataPreview:data>Test</dataPreview:data></dataPreview:columns></dataPreview:tableData>'
                 });
             });
 
@@ -168,7 +168,7 @@ define table t000 {
         expect(capturedSql).not.toContain('SELECT *');
         
         // Restore original function
-        require('./lib/utils').makeAdtRequest = originalMakeAdtRequest;
+        require('./lib/utils').makeAdtRequestWithTimeout = originalMakeAdtRequestWithTimeout;
     });
   });
 
