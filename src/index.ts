@@ -26,6 +26,7 @@ import { handleGetInterface } from "./handlers/handleGetInterface";
 import { handleGetTransaction } from "./handlers/handleGetTransaction";
 import { handleSearchObject } from "./handlers/handleSearchObject";
 import { handleGetEnhancements } from "./handlers/handleGetEnhancements";
+import { handleGetEnhancementByName } from "./handlers/handleGetEnhancementByName";
 import { handleGetSqlQuery } from "./handlers/handleGetSqlQuery";
 
 // Import shared utility functions and types
@@ -503,6 +504,24 @@ export class mcp_abap_adt_server {
               required: ["object_name", "object_type"],
             },
           },
+          {
+            name: "GetEnhancementByName",
+            description: "📝 ENHANCEMENT BY NAME: Retrieve source code of a specific enhancement implementation by its name and enhancement spot. Use this when you know the exact enhancement spot and implementation name.",
+            inputSchema: {
+              type: "object",
+              properties: {
+                enhancement_spot: {
+                  type: "string",
+                  description: "Name of the enhancement spot (e.g., 'enhoxhh')",
+                },
+                enhancement_name: {
+                  type: "string",
+                  description: "Name of the specific enhancement implementation (e.g., 'zpartner_update_pai')",
+                },
+              },
+              required: ["enhancement_spot", "enhancement_name"],
+            },
+          },
         ],
       };
     });
@@ -538,6 +557,8 @@ export class mcp_abap_adt_server {
           return await handleGetTransaction(request.params.arguments);
         case "GetEnhancements":
           return await handleGetEnhancements(request.params.arguments);
+        case "GetEnhancementByName":
+          return await handleGetEnhancementByName(request.params.arguments);
         case "GetSqlQuery":
           return await handleGetSqlQuery(request.params.arguments);
         case "GetIncludesList":

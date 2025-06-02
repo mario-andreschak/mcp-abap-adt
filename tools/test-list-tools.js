@@ -50,14 +50,6 @@ child.stdout.on('data', (data) => {
           jsonData.result.tools.forEach((tool, index) => {
             console.log(`${index + 1}. ${tool.name} - ${tool.description}`);
           });
-          
-          // Check if our new tool is in the list
-          const hasGetIncludesList = jsonData.result.tools.some(tool => tool.name === 'GetIncludesList');
-          if (hasGetIncludesList) {
-            console.log('\n🎉 GetIncludesList tool found in the list!');
-          } else {
-            console.log('\n❌ GetIncludesList tool NOT found in the list!');
-          }
         }
       }
       

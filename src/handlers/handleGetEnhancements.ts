@@ -17,7 +17,7 @@ export interface EnhancementImplementation {
  */
 export interface EnhancementResponse {
     object_name: string;
-    object_type: 'program' | 'include';
+    object_type: 'program' | 'include' | 'class';
     context?: string;
     enhancements: EnhancementImplementation[];
     raw_xml?: string;
@@ -112,14 +112,33 @@ export function parseEnhancementsFromXml(xmlData: string): EnhancementImplementa
 }
 
 /**
- * Determines if an object is a program or include and returns appropriate URL path
+ * Determines if an object is a program, include, or class and returns appropriate URL path
  * @param objectName - Name of the object
  * @param manualProgramContext - Optional manual program context for includes
  * @returns Object with type, basePath, and context (if needed)
  */
-async function determineObjectTypeAndPath(objectName: string, manualProgramContext?: string): Promise<{type: 'program' | 'include', basePath: string, context?: string}> {
+async function determineObjectTypeAndPath(objectName: string, manualProgramContext?: string): Promise<{type: 'program' | 'include' | 'class', basePath: string, context?: string}> {
     try {
-        // First try as a program
+        // First try as a class
+        const classUrl = `${await getBaseUrl()}/sap/bc/adt/oo/classes/${objectName}`;
+        try {
+            const response = await makeAdtRequestWithTimeout(classUrl, 'GET', 'csrf', {
+                'Accept': 'application/vnd.sap.adt.oo.classes.v4+xml'
+            });
+            
+            if (response.status === 200) {
+                logger.info(`${objectName} is a class`);
+                return {
+                    type: 'class',
+                    basePath: `/sap/bc/adt/oo/classes/${objectName}/source/main/enhancements/elements`
+                };
+            }
+        } catch (classError) {
+            // If class request fails, try as program
+            logger.info(`${objectName} is not a class, trying as program...`);
+        }
+        
+        // Try as a program
         const programUrl = `${await getBaseUrl()}/sap/bc/adt/programs/programs/${objectName}`;
         try {
             const response = await makeAdtRequestWithTimeout(programUrl, 'GET', 'csrf', {
@@ -178,7 +197,7 @@ async function determineObjectTypeAndPath(objectName: string, manualProgramConte
         
         throw new McpError(
             ErrorCode.InvalidParams, 
-            `Could not determine object type for: ${objectName}. Object is neither a valid program nor include.`
+            `Could not determine object type for: ${objectName}. Object is neither a valid class, program, nor include.`
         );
         
     } catch (error) {
