@@ -1,5 +1,5 @@
 import { McpError, ErrorCode, AxiosResponse } from '../lib/utils';
-import { makeAdtRequest, return_error, return_response, getBaseUrl } from '../lib/utils';
+import { makeAdtRequestWithTimeout, return_error, return_response, getBaseUrl } from '../lib/utils';
 
 async function fetchSource(name: string, type: 'program' | 'include'): Promise<string | null> {
     const baseUrl = await getBaseUrl();
@@ -16,7 +16,7 @@ async function fetchSource(name: string, type: 'program' | 'include'): Promise<s
     try {
         // Request plain text source code. ADT /source/main endpoint usually provides this.
         // Added 'Content-Type': 'application/octet-stream' as ADT sometimes expects it.
-        const response = await makeAdtRequest(url, 'GET', 30000, undefined, { 'Accept': 'text/plain', 'Content-Type': 'application/octet-stream' });
+        const response = await makeAdtRequestWithTimeout(url, 'GET', 'default', undefined, { 'Accept': 'text/plain', 'Content-Type': 'application/octet-stream' });
 
         if (response && response.data && typeof response.data === 'string') {
             return response.data;

@@ -7,6 +7,43 @@ import { logger } from "./logger"; // Import the MCP-compatible logger
 
 export { McpError, ErrorCode, AxiosResponse, logger };
 
+// Timeout configuration
+export interface TimeoutConfig {
+  default: number;
+  csrf: number;
+  long: number;
+}
+
+/**
+ * Get timeout configuration from environment variables with fallback defaults
+ * @returns TimeoutConfig object with timeout values in milliseconds
+ */
+export function getTimeoutConfig(): TimeoutConfig {
+  const defaultTimeout = parseInt(process.env.SAP_TIMEOUT_DEFAULT || '45000', 10);
+  const csrfTimeout = parseInt(process.env.SAP_TIMEOUT_CSRF || '15000', 10);
+  const longTimeout = parseInt(process.env.SAP_TIMEOUT_LONG || '60000', 10);
+
+  return {
+    default: defaultTimeout,
+    csrf: csrfTimeout,
+    long: longTimeout
+  };
+}
+
+/**
+ * Get timeout value for specific operation type
+ * @param type - Type of operation: 'default', 'csrf', 'long', or custom number
+ * @returns Timeout value in milliseconds
+ */
+export function getTimeout(type: 'default' | 'csrf' | 'long' | number = 'default'): number {
+  if (typeof type === 'number') {
+    return type;
+  }
+  
+  const config = getTimeoutConfig();
+  return config[type];
+}
+
 export function return_response(response: AxiosResponse) {
   return {
     isError: false,
@@ -166,7 +203,7 @@ async function fetchCsrfToken(
           Accept: "application/atomsvc+xml", // SAP ADT requires this specific Accept header
         },
         // Set a timeout to prevent hanging requests
-        timeout: 10000,
+        timeout: getTimeout('csrf'),
       });
 
       const token = response.headers["x-csrf-token"];
@@ -279,6 +316,26 @@ async function fetchCsrfToken(
 
   // This should never happen, but TypeScript requires a return statement
   throw new Error("CSRF token fetch failed unexpectedly");
+}
+
+/**
+ * Simplified ADT request function that uses configurable timeouts
+ * @param url Request URL
+ * @param method HTTP method
+ * @param timeoutType Timeout type ('default', 'csrf', 'long') or custom number in ms
+ * @param data Optional request data
+ * @param params Optional request parameters
+ * @returns Promise with the response
+ */
+export async function makeAdtRequestWithTimeout(
+  url: string,
+  method: string,
+  timeoutType: 'default' | 'csrf' | 'long' | number = 'default',
+  data?: any,
+  params?: any
+) {
+  const timeout = getTimeout(timeoutType);
+  return makeAdtRequest(url, method, timeout, data, params);
 }
 
 export async function makeAdtRequest(

@@ -108,6 +108,11 @@ npx -y @smithery/cli install @mario-andreschak/mcp-abap-adt --client cline
         SAP_CLIENT=100                            # Your SAP client
         SAP_AUTH_TYPE=xsuaa
         SAP_JWT_TOKEN=your_jwt_token_here         # JWT токен, отриманий через sap-abap-auth-browser.js
+        
+        # Optional timeout configuration (in milliseconds)
+        SAP_TIMEOUT_DEFAULT=45000                 # Default timeout (45 seconds)
+        SAP_TIMEOUT_CSRF=15000                    # CSRF token timeout (15 seconds)
+        SAP_TIMEOUT_LONG=60000                    # Long operations timeout (60 seconds)
         ```
 
         For basic authorization:
@@ -118,6 +123,11 @@ npx -y @smithery/cli install @mario-andreschak/mcp-abap-adt --client cline
         SAP_AUTH_TYPE=basic
         SAP_USERNAME=your_username                # Your SAP username
         SAP_PASSWORD=your_password                # Your SAP password
+        
+        # Optional timeout configuration (in milliseconds)
+        SAP_TIMEOUT_DEFAULT=45000                 # Default timeout (45 seconds)
+        SAP_TIMEOUT_CSRF=15000                    # CSRF token timeout (15 seconds)
+        SAP_TIMEOUT_LONG=60000                    # Long operations timeout (60 seconds)
         ```
 
         **Important:** Never share your `.env` file with anyone, and never commit it to a Git repository!

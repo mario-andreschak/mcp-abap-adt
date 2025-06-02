@@ -1,5 +1,5 @@
 import { McpError, ErrorCode } from '../lib/utils';
-import { makeAdtRequest, return_error, return_response, getBaseUrl, logger } from '../lib/utils';
+import { makeAdtRequestWithTimeout, return_error, return_response, getBaseUrl, logger } from '../lib/utils';
 import { handleGetIncludesList } from './handleGetIncludesList';
 
 /**
@@ -122,7 +122,7 @@ async function determineObjectTypeAndPath(objectName: string, manualProgramConte
         // First try as a program
         const programUrl = `${await getBaseUrl()}/sap/bc/adt/programs/programs/${objectName}`;
         try {
-            const response = await makeAdtRequest(programUrl, 'GET', 10000, {
+            const response = await makeAdtRequestWithTimeout(programUrl, 'GET', 'csrf', {
                 'Accept': 'application/vnd.sap.adt.programs.v3+xml'
             });
             
@@ -140,7 +140,7 @@ async function determineObjectTypeAndPath(objectName: string, manualProgramConte
         
         // Try as include
         const includeUrl = `${await getBaseUrl()}/sap/bc/adt/programs/includes/${objectName}`;
-        const response = await makeAdtRequest(includeUrl, 'GET', 10000, {
+        const response = await makeAdtRequestWithTimeout(includeUrl, 'GET', 'csrf', {
             'Accept': 'application/vnd.sap.adt.programs.includes.v2+xml'
         });
         
@@ -216,7 +216,7 @@ async function getEnhancementsForSingleObject(objectName: string, manualProgramC
     
     logger.info(`Final enhancement URL: ${url}`);
     
-    const response = await makeAdtRequest(url, 'GET', 30000);
+    const response = await makeAdtRequestWithTimeout(url, 'GET', 'default');
     
     if (response.status === 200 && response.data) {
         // Parse the XML to extract enhancement implementations

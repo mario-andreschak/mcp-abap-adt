@@ -1,5 +1,5 @@
 import { McpError, ErrorCode } from '../lib/utils';
-import { makeAdtRequest, return_error, return_response, getBaseUrl, logger } from '../lib/utils';
+import { makeAdtRequestWithTimeout, return_error, return_response, getBaseUrl, logger } from '../lib/utils';
 
 /**
  * Interface for SQL query execution response
@@ -146,7 +146,7 @@ export async function handleGetSqlQuery(args: any) {
         logger.info(`Making SQL query request to: ${url}`);
         
         // Execute POST request with SQL query in body
-        const response = await makeAdtRequest(url, 'POST', 30000, sqlQuery);
+        const response = await makeAdtRequestWithTimeout(url, 'POST', 'long', sqlQuery);
         
         if (response.status === 200 && response.data) {
             logger.info('SQL query request completed successfully', { status: response.status });

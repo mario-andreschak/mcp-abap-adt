@@ -29,7 +29,7 @@
  */
 
 import { McpError, ErrorCode, AxiosResponse, logger } from '../lib/utils';
-import { makeAdtRequest, return_error, return_response, getBaseUrl } from '../lib/utils';
+import { makeAdtRequestWithTimeout, return_error, return_response, getBaseUrl } from '../lib/utils';
 
 /**
  * Parse SAP ADT XML response and convert to JSON format with rows
@@ -155,7 +155,7 @@ export async function handleGetTableContents(args: any) {
         let tableFields: string[] = [];
         
         try {
-            const structureResponse = await makeAdtRequest(tableStructureUrl, 'GET', 30000);
+            const structureResponse = await makeAdtRequestWithTimeout(tableStructureUrl, 'GET', 'default');
             
             // Parse table structure to extract field names
             const structureText = structureResponse.data;
@@ -220,7 +220,7 @@ export async function handleGetTableContents(args: any) {
             try {
                 // Try getting table metadata via different endpoint
                 const metadataUrl = `${await getBaseUrl()}/sap/bc/adt/ddic/tables/${tableName}`;
-                const metadataResponse = await makeAdtRequest(metadataUrl, 'GET', 30000);
+                const metadataResponse = await makeAdtRequestWithTimeout(metadataUrl, 'GET', 'default');
                 
                 // Parse XML metadata to extract field names
                 const xmlText = metadataResponse.data;
@@ -260,7 +260,7 @@ export async function handleGetTableContents(args: any) {
         // Use ADT data preview service to get table contents
         const url = `${await getBaseUrl()}/sap/bc/adt/datapreview/ddic?rowNumber=${maxRows}&ddicEntityName=${tableName}`;
         
-        const response = await makeAdtRequest(url, 'POST', 30000, selectStatement);
+        const response = await makeAdtRequestWithTimeout(url, 'POST', 'long', selectStatement);
         
         logger.info('Table contents request completed', { status: response.status });
         

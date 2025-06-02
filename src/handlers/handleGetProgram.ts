@@ -1,5 +1,5 @@
 import { McpError, ErrorCode, AxiosResponse } from '../lib/utils';
-import { makeAdtRequest, return_error, return_response, getBaseUrl } from '../lib/utils';
+import { makeAdtRequestWithTimeout, return_error, return_response, getBaseUrl } from '../lib/utils';
 
 export async function handleGetProgram(args: any) {
     try {
@@ -8,7 +8,7 @@ export async function handleGetProgram(args: any) {
         }
         const url = `${await getBaseUrl()}/sap/bc/adt/programs/programs/${args.program_name}/source/main`;
 
-        const response = await makeAdtRequest(url, 'GET', 30000);
+        const response = await makeAdtRequestWithTimeout(url, 'GET', 'default');
         return return_response(response);
     }
     catch (error) {
