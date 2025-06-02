@@ -40,18 +40,33 @@ async function fetchSource(name: string, type: 'program' | 'include'): Promise<s
 }
 
 function parseIncludes(sourceCode: string): string[] {
-    // Regex для знаходження "INCLUDE <name>." statements.
-    // Обробляє включення з різними форматами імен (альфа-цифрові, підкреслення, у < > або ' ')
-    // Обробляє коментарі (що починаються з " або *) в кінці рядка
-    const includePattern = /^\s*INCLUDE\s+([A-Z0-9_<>']+)\s*\.\s*(?:\"|\*.*)?$/gim;
     const includes: string[] = [];
-    let match;
-    while ((match = includePattern.exec(sourceCode)) !== null) {
-        let includeName = match[1];
-        // Нормалізація імені включення: видалення <, >, ' символів та перетворення у верхній регістр
-        includeName = includeName.replace(/[<>']/g, '').toUpperCase();
-        includes.push(includeName);
+    
+    // Розділимо код на рядки і проаналізуємо кожен рядок окремо
+    const lines = sourceCode.split('\n');
+    
+    for (let i = 0; i < lines.length; i++) {
+        const line = lines[i];
+        
+        // Видаляємо всі пробіли та табуляції для аналізу
+        const cleanLine = line.replace(/\s+/g, ' ').trim().toUpperCase();
+        
+        // Перевіряємо, чи рядок починається з INCLUDE
+        if (cleanLine.startsWith('INCLUDE ') && cleanLine.includes('.')) {
+            // Витягуємо назву між INCLUDE і крапкою
+            const match = cleanLine.match(/^INCLUDE\s+([A-Z0-9_<>']+)\s*\./);
+            if (match) {
+                let includeName = match[1];
+                // Нормалізація імені включення: видалення <, >, ' символів
+                includeName = includeName.replace(/[<>']/g, '');
+                if (!includes.includes(includeName)) {
+                    includes.push(includeName);
+                    console.log(`DEBUG: Found include: ${includeName} from line ${i+1}: ${line.trim()}`);
+                }
+            }
+        }
     }
+    
     return includes;
 }
 

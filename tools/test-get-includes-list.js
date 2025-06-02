@@ -4,9 +4,22 @@
 const { spawn } = require('child_process');
 const path = require('path');
 
+// Parse command line arguments
+const args = process.argv.slice(2);
+if (args.length < 2) {
+  console.error('Usage: node test-get-includes-list.js <object_name> <object_type> [env_file]');
+  console.error('Example: node test-get-includes-list.js RM07DOCS program');
+  console.error('Example: node test-get-includes-list.js RM07DOCS program ../e19.env');
+  process.exit(1);
+}
+
+const objectName = args[0];
+const objectType = args[1];
+const envFile = args[2] || '.env';
+
 // Absolute path to dist/index.js
 const serverPath = path.resolve(__dirname, '../dist/index.js');
-const envPath = path.resolve(__dirname, '../.env');
+const envPath = path.resolve(__dirname, '..', envFile);
 
 // Functions for pretty output
 const printBanner = (text) => {
@@ -31,7 +44,9 @@ const formatJSON = (json) => {
 // Variable to track if response was received
 let responseReceived = false;
 
-printBanner('GET INCLUDES LIST TEST');
+printBanner(`GET INCLUDES LIST TEST - ${objectName} (${objectType})`);
+console.log(`Testing with: ${objectName} as ${objectType}`);
+console.log(`Using env file: ${envPath}`);
 console.log('Starting MCP server in stdio mode...');
 
 const child = spawn('node', [serverPath, `--env=${envPath}`], {
@@ -79,7 +94,7 @@ child.on('close', (code) => {
   console.log(`MCP server exited with code: ${code}`);
 });
 
-// Send real MCP request to get includes list for a test program
+// Send real MCP request to get includes list for specified program/include
 function sendGetIncludesListRequest() {
   const request = {
     jsonrpc: "2.0",
@@ -88,13 +103,13 @@ function sendGetIncludesListRequest() {
     params: {
       name: "GetIncludesList",
       arguments: {
-        object_name: "RSPARAM",  // Common SAP program that likely has includes
-        object_type: "program"
+        object_name: objectName,
+        object_type: objectType
       }
     }
   };
   child.stdin.write(JSON.stringify(request) + "\n");
-  console.log("[TEST] Sent MCP request for includes list in program RSPARAM");
+  console.log(`[TEST] Sent MCP request for includes list in ${objectType} ${objectName}`);
 }
 
 // Give the server 2 seconds to start, then send the request
