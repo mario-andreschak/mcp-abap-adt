@@ -29,7 +29,7 @@
  */
 
 import { McpError, ErrorCode, AxiosResponse, logger } from '../lib/utils';
-import { makeAdtRequestWithTimeout, return_error, return_response, getBaseUrl } from '../lib/utils';
+import { makeAdtRequestWithTimeout, return_error, return_response, getBaseUrl, encodeSapObjectName } from '../lib/utils';
 
 /**
  * Parse SAP ADT XML response and convert to JSON format with rows
@@ -148,7 +148,7 @@ export async function handleGetTableContents(args: any) {
         logger.info('Making table contents request', { tableName, maxRows });
         
         // First, get the table structure to know all fields
-        const tableStructureUrl = `${await getBaseUrl()}/sap/bc/adt/ddic/tables/${tableName}/source/main`;
+        const tableStructureUrl = `${await getBaseUrl()}/sap/bc/adt/ddic/tables/${encodeSapObjectName(tableName)}/source/main`;
         
         logger.info('Getting table structure first', { tableStructureUrl });
         
@@ -219,7 +219,7 @@ export async function handleGetTableContents(args: any) {
             // If we can't get structure from main source, try alternative endpoints
             try {
                 // Try getting table metadata via different endpoint
-                const metadataUrl = `${await getBaseUrl()}/sap/bc/adt/ddic/tables/${tableName}`;
+                const metadataUrl = `${await getBaseUrl()}/sap/bc/adt/ddic/tables/${encodeSapObjectName(tableName)}`;
                 const metadataResponse = await makeAdtRequestWithTimeout(metadataUrl, 'GET', 'default');
                 
                 // Parse XML metadata to extract field names
@@ -258,7 +258,7 @@ export async function handleGetTableContents(args: any) {
         logger.info('Making request with SQL payload', { selectStatement });
         
         // Use ADT data preview service to get table contents
-        const url = `${await getBaseUrl()}/sap/bc/adt/datapreview/ddic?rowNumber=${maxRows}&ddicEntityName=${tableName}`;
+        const url = `${await getBaseUrl()}/sap/bc/adt/datapreview/ddic?rowNumber=${maxRows}&ddicEntityName=${encodeSapObjectName(tableName)}`;
         
         const response = await makeAdtRequestWithTimeout(url, 'POST', 'long', selectStatement);
         

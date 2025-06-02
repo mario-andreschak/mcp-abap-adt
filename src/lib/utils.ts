@@ -7,6 +7,17 @@ import { logger } from "./logger"; // Import the MCP-compatible logger
 
 export { McpError, ErrorCode, AxiosResponse, logger };
 
+/**
+ * Encodes SAP object names for use in URLs
+ * Handles namespaces with forward slashes that need to be URL encoded
+ * @param objectName - The SAP object name (e.g., '/1CPR/CL_000_0SAP2_FAG')
+ * @returns URL-encoded object name
+ */
+export function encodeSapObjectName(objectName: string): string {
+  // URL encode the object name to handle namespaces with forward slashes
+  return encodeURIComponent(objectName);
+}
+
 // Timeout configuration
 export interface TimeoutConfig {
   default: number;

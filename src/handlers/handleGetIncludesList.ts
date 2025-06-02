@@ -1,5 +1,5 @@
 import { McpError, ErrorCode, AxiosResponse } from '../lib/utils';
-import { makeAdtRequestWithTimeout, return_error, return_response, getBaseUrl } from '../lib/utils';
+import { makeAdtRequestWithTimeout, return_error, return_response, getBaseUrl, encodeSapObjectName } from '../lib/utils';
 
 async function fetchSource(name: string, type: 'program' | 'include'): Promise<string | null> {
     const baseUrl = await getBaseUrl();
@@ -8,9 +8,9 @@ async function fetchSource(name: string, type: 'program' | 'include'): Promise<s
     const upperName = name.toUpperCase();
 
     if (type === 'program') {
-        url = `${baseUrl}/sap/bc/adt/programs/programs/${upperName}/source/main`;
+        url = `${baseUrl}/sap/bc/adt/programs/programs/${encodeSapObjectName(upperName)}/source/main`;
     } else { // 'include'
-        url = `${baseUrl}/sap/bc/adt/programs/includes/${upperName}/source/main`;
+        url = `${baseUrl}/sap/bc/adt/programs/includes/${encodeSapObjectName(upperName)}/source/main`;
     }
 
     try {

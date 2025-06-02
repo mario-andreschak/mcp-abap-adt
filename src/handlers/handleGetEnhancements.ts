@@ -1,5 +1,5 @@
 import { McpError, ErrorCode } from '../lib/utils';
-import { makeAdtRequestWithTimeout, return_error, return_response, getBaseUrl, logger } from '../lib/utils';
+import { makeAdtRequestWithTimeout, return_error, return_response, getBaseUrl, logger, encodeSapObjectName } from '../lib/utils';
 import { handleGetIncludesList } from './handleGetIncludesList';
 
 /**
@@ -120,7 +120,7 @@ export function parseEnhancementsFromXml(xmlData: string): EnhancementImplementa
 async function determineObjectTypeAndPath(objectName: string, manualProgramContext?: string): Promise<{type: 'program' | 'include' | 'class', basePath: string, context?: string}> {
     try {
         // First try as a class
-        const classUrl = `${await getBaseUrl()}/sap/bc/adt/oo/classes/${objectName}`;
+        const classUrl = `${await getBaseUrl()}/sap/bc/adt/oo/classes/${encodeSapObjectName(objectName)}`;
         try {
             const response = await makeAdtRequestWithTimeout(classUrl, 'GET', 'csrf', {
                 'Accept': 'application/vnd.sap.adt.oo.classes.v4+xml'
@@ -130,7 +130,7 @@ async function determineObjectTypeAndPath(objectName: string, manualProgramConte
                 logger.info(`${objectName} is a class`);
                 return {
                     type: 'class',
-                    basePath: `/sap/bc/adt/oo/classes/${objectName}/source/main/enhancements/elements`
+                    basePath: `/sap/bc/adt/oo/classes/${encodeSapObjectName(objectName)}/source/main/enhancements/elements`
                 };
             }
         } catch (classError) {
@@ -139,7 +139,7 @@ async function determineObjectTypeAndPath(objectName: string, manualProgramConte
         }
         
         // Try as a program
-        const programUrl = `${await getBaseUrl()}/sap/bc/adt/programs/programs/${objectName}`;
+        const programUrl = `${await getBaseUrl()}/sap/bc/adt/programs/programs/${encodeSapObjectName(objectName)}`;
         try {
             const response = await makeAdtRequestWithTimeout(programUrl, 'GET', 'csrf', {
                 'Accept': 'application/vnd.sap.adt.programs.v3+xml'
@@ -149,7 +149,7 @@ async function determineObjectTypeAndPath(objectName: string, manualProgramConte
                 logger.info(`${objectName} is a program`);
                 return {
                     type: 'program',
-                    basePath: `/sap/bc/adt/programs/programs/${objectName}/source/main/enhancements/elements`
+                    basePath: `/sap/bc/adt/programs/programs/${encodeSapObjectName(objectName)}/source/main/enhancements/elements`
                 };
             }
         } catch (programError) {
@@ -158,7 +158,7 @@ async function determineObjectTypeAndPath(objectName: string, manualProgramConte
         }
         
         // Try as include
-        const includeUrl = `${await getBaseUrl()}/sap/bc/adt/programs/includes/${objectName}`;
+        const includeUrl = `${await getBaseUrl()}/sap/bc/adt/programs/includes/${encodeSapObjectName(objectName)}`;
         const response = await makeAdtRequestWithTimeout(includeUrl, 'GET', 'csrf', {
             'Accept': 'application/vnd.sap.adt.programs.includes.v2+xml'
         });
@@ -190,7 +190,7 @@ async function determineObjectTypeAndPath(objectName: string, manualProgramConte
             
             return {
                 type: 'include',
-                basePath: `/sap/bc/adt/programs/includes/${objectName}/source/main/enhancements/elements`,
+                basePath: `/sap/bc/adt/programs/includes/${encodeSapObjectName(objectName)}/source/main/enhancements/elements`,
                 context: context
             };
         }

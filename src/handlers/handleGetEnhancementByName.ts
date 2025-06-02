@@ -1,5 +1,5 @@
 import { McpError, ErrorCode } from '../lib/utils';
-import { makeAdtRequestWithTimeout, return_error, getBaseUrl, logger } from '../lib/utils';
+import { makeAdtRequestWithTimeout, return_error, getBaseUrl, logger, encodeSapObjectName } from '../lib/utils';
 
 /**
  * Interface for enhancement by name response
@@ -80,7 +80,7 @@ export async function handleGetEnhancementByName(args: any) {
         
         // Build the ADT URL for the specific enhancement
         // Format: /sap/bc/adt/enhancements/{enhancement_spot}/{enhancement_name}/source/main
-        const url = `${await getBaseUrl()}/sap/bc/adt/enhancements/${enhancementSpot}/${enhancementName}/source/main`;
+        const url = `${await getBaseUrl()}/sap/bc/adt/enhancements/${encodeSapObjectName(enhancementSpot)}/${encodeSapObjectName(enhancementName)}/source/main`;
         
         logger.info(`Enhancement URL: ${url}`);
         
