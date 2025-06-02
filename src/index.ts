@@ -20,6 +20,7 @@ import { handleGetStructure } from "./handlers/handleGetStructure";
 import { handleGetTableContents } from "./handlers/handleGetTableContents";
 import { handleGetPackage } from "./handlers/handleGetPackage";
 import { handleGetInclude } from "./handlers/handleGetInclude";
+import { handleGetIncludesList } from "./handlers/handleGetIncludesList";
 import { handleGetTypeInfo } from "./handlers/handleGetTypeInfo";
 import { handleGetInterface } from "./handlers/handleGetInterface";
 import { handleGetTransaction } from "./handlers/handleGetTransaction";
@@ -142,9 +143,13 @@ export interface SapConfig {
  * @throws {Error} If any required environment variable is missing.
  */
 export function getConfig(): SapConfig {
-  const url = process.env.SAP_URL;
-  const client = process.env.SAP_CLIENT;
-  const authType = process.env.SAP_AUTH_TYPE || "basic";
+  // Clean all environment variables from comments (everything after # symbol)
+  const rawUrl = process.env.SAP_URL;
+  const url = rawUrl ? rawUrl.split('#')[0].trim() : rawUrl;
+  const rawClient = process.env.SAP_CLIENT;
+  const client = rawClient ? rawClient.split('#')[0].trim() : rawClient;
+  const rawAuthType = process.env.SAP_AUTH_TYPE || "basic";
+  const authType = rawAuthType.split('#')[0].trim();
 
   // Enhanced check for SAP_URL
   if (!url || !/^https?:\/\//.test(url)) {
@@ -173,8 +178,10 @@ export function getConfig(): SapConfig {
 
   // For basic auth, username and password are required
   if (authType === "basic") {
-    const username = process.env.SAP_USERNAME;
-    const password = process.env.SAP_PASSWORD;
+    const rawUsername = process.env.SAP_USERNAME;
+    const username = rawUsername ? rawUsername.split('#')[0].trim() : rawUsername;
+    const rawPassword = process.env.SAP_PASSWORD;
+    const password = rawPassword ? rawPassword.split('#')[0].trim() : rawPassword;
 
     if (!username || !password) {
       throw new Error(
@@ -187,7 +194,8 @@ export function getConfig(): SapConfig {
   }
   // For JWT, the token is required
   else if (authType === "xsuaa" || authType === "jwt") {
-    const jwtToken = process.env.SAP_JWT_TOKEN;
+    const rawJwtToken = process.env.SAP_JWT_TOKEN;
+    const jwtToken = rawJwtToken ? rawJwtToken.split('#')[0].trim() : rawJwtToken;
 
     if (!jwtToken) {
       throw new Error(
@@ -472,6 +480,25 @@ export class mcp_abap_adt_server {
               required: ["sql_query"],
             },
           },
+          {
+            name: "GetIncludesList",
+            description: "Recursively retrieve all includes within a given ABAP program or include based on code analysis",
+            inputSchema: {
+              type: "object",
+              properties: {
+                object_name: {
+                  type: "string",
+                  description: "Name of the ABAP program or include to search within",
+                },
+                object_type: {
+                  type: "string",
+                  enum: ["program", "include"],
+                  description: "Type of the ABAP object (program or include)",
+                },
+              },
+              required: ["object_name", "object_type"],
+            },
+          },
         ],
       };
     });
@@ -509,6 +536,8 @@ export class mcp_abap_adt_server {
           return await handleGetEnhancements(request.params.arguments);
         case "GetSqlQuery":
           return await handleGetSqlQuery(request.params.arguments);
+        case "GetIncludesList":
+          return await handleGetIncludesList(request.params.arguments);
         default:
           throw new McpError(
             ErrorCode.MethodNotFound,
