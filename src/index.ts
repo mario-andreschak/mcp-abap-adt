@@ -457,6 +457,10 @@ export class mcp_abap_adt_server {
                   type: "string",
                   description: "Optional: For includes, manually specify the parent program name if automatic context detection fails (e.g., 'SAPMV45A')",
                 },
+                include_nested: {
+                  type: "boolean",
+                  description: "Optional: If true, also searches for enhancements in all nested includes recursively. Default is false.",
+                },
               },
               required: ["object_name"],
             },

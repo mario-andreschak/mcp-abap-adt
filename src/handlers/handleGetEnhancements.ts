@@ -1,5 +1,6 @@
 import { McpError, ErrorCode } from '../lib/utils';
 import { makeAdtRequest, return_error, return_response, getBaseUrl, logger } from '../lib/utils';
+import { handleGetIncludesList } from './handleGetIncludesList';
 
 /**
  * Interface for enhancement implementation data
@@ -47,8 +48,35 @@ export function parseEnhancementsFromXml(xmlData: string): EnhancementImplementa
             
             // Look backwards for parent enhancement element with name/type attributes
             const beforeSource = xmlData.substring(0, sourceStart);
-            const enhNameMatch = beforeSource.match(/adtcore:name="([^"]*)"[^>]*$/);
-            const enhTypeMatch = beforeSource.match(/adtcore:type="([^"]*)"[^>]*$/);
+            
+            // Try multiple patterns to find enhancement name
+            // Pattern 1: adtcore:name attribute
+            let enhNameMatch = beforeSource.match(/adtcore:name="([^"]*)"[^>]*$/);
+            // Pattern 2: enh:name attribute  
+            if (!enhNameMatch) {
+                enhNameMatch = beforeSource.match(/enh:name="([^"]*)"[^>]*$/);
+            }
+            // Pattern 3: name attribute
+            if (!enhNameMatch) {
+                enhNameMatch = beforeSource.match(/name="([^"]*)"[^>]*$/);
+            }
+            // Pattern 4: Look for enhancement implementation name in nearby elements
+            if (!enhNameMatch) {
+                // Look for enhancement implementation tag with name
+                const enhImplMatch = beforeSource.match(/<[^>]*enhancement[^>]*name="([^"]*)"[^>]*>/i);
+                if (enhImplMatch && enhImplMatch[1]) {
+                    enhNameMatch = [enhImplMatch[0], enhImplMatch[1]];
+                }
+            }
+            
+            // Try multiple patterns to find enhancement type
+            let enhTypeMatch = beforeSource.match(/adtcore:type="([^"]*)"[^>]*$/);
+            if (!enhTypeMatch) {
+                enhTypeMatch = beforeSource.match(/enh:type="([^"]*)"[^>]*$/);
+            }
+            if (!enhTypeMatch) {
+                enhTypeMatch = beforeSource.match(/type="([^"]*)"[^>]*$/);
+            }
             
             if (enhNameMatch && enhNameMatch[1]) {
                 enhancement.name = enhNameMatch[1];
@@ -166,10 +194,56 @@ async function determineObjectTypeAndPath(objectName: string, manualProgramConte
 }
 
 /**
+ * Gets enhancements for a single object (program or include)
+ * @param objectName - Name of the object
+ * @param manualProgramContext - Optional manual program context for includes
+ * @returns Enhancement response for the single object
+ */
+async function getEnhancementsForSingleObject(objectName: string, manualProgramContext?: string): Promise<EnhancementResponse> {
+    logger.info(`Getting enhancements for single object: ${objectName}`, manualProgramContext ? `with manual program context: ${manualProgramContext}` : '');
+    
+    // Determine object type and get appropriate path and context
+    const objectInfo = await determineObjectTypeAndPath(objectName, manualProgramContext);
+    
+    // Build URL based on object type
+    let url = `${await getBaseUrl()}${objectInfo.basePath}`;
+    
+    // Add context parameter only for includes
+    if (objectInfo.type === 'include' && objectInfo.context) {
+        url += `?context=${encodeURIComponent(objectInfo.context)}`;
+        logger.info(`Using context for include: ${objectInfo.context}`);
+    }
+    
+    logger.info(`Final enhancement URL: ${url}`);
+    
+    const response = await makeAdtRequest(url, 'GET', 30000);
+    
+    if (response.status === 200 && response.data) {
+        // Parse the XML to extract enhancement implementations
+        const enhancements = parseEnhancementsFromXml(response.data);
+        
+        const enhancementResponse: EnhancementResponse = {
+            object_name: objectName,
+            object_type: objectInfo.type,
+            context: objectInfo.context,
+            enhancements: enhancements,
+            raw_xml: response.data // Include raw XML for debugging if needed
+        };
+        
+        return enhancementResponse;
+    } else {
+        throw new McpError(ErrorCode.InternalError, `Failed to retrieve enhancements for ${objectName}. Status: ${response.status}`);
+    }
+}
+
+/**
  * Handler to retrieve enhancement implementations for ABAP programs/includes
  * Automatically determines if object is a program or include and handles accordingly
  * 
- * @param args - Tool arguments containing object_name and optional program parameter
+ * @param args - Tool arguments containing:
+ *   - object_name: Name of the ABAP object
+ *   - program: Optional manual program context for includes  
+ *   - include_nested: Optional boolean - if true, also searches enhancements in all nested includes
  * @returns Response with parsed enhancement data or error
  */
 export async function handleGetEnhancements(args: any) {
@@ -182,48 +256,85 @@ export async function handleGetEnhancements(args: any) {
         
         const objectName = args.object_name;
         const manualProgram = args.program; // Optional manual program context for includes
+        const includeNested = args.include_nested === true; // Optional boolean for recursive include search
         
-        logger.info(`Getting enhancements for object: ${objectName}`, manualProgram ? `with manual program context: ${manualProgram}` : '');
+        logger.info(`Getting enhancements for object: ${objectName}`, {
+            manualProgram: manualProgram || '(not provided)',
+            includeNested: includeNested
+        });
         
-        // Determine object type and get appropriate path and context
-        const objectInfo = await determineObjectTypeAndPath(objectName, manualProgram);
+        // Get enhancements for the main object
+        const mainEnhancementResponse = await getEnhancementsForSingleObject(objectName, manualProgram);
         
-        // Build URL based on object type
-        let url = `${await getBaseUrl()}${objectInfo.basePath}`;
-        
-        // Add context parameter only for includes
-        if (objectInfo.type === 'include' && objectInfo.context) {
-            url += `?context=${encodeURIComponent(objectInfo.context)}`;
-            logger.info(`Using context for include: ${objectInfo.context}`);
-        }
-        
-        logger.info(`Final enhancement URL: ${url}`);
-        
-        const response = await makeAdtRequest(url, 'GET', 30000);
-        
-        if (response.status === 200 && response.data) {
-            // Parse the XML to extract enhancement implementations
-            const enhancements = parseEnhancementsFromXml(response.data);
-            
-            const enhancementResponse: EnhancementResponse = {
-                object_name: objectName,
-                object_type: objectInfo.type,
-                context: objectInfo.context,
-                enhancements: enhancements,
-                raw_xml: response.data // Include raw XML for debugging if needed
-            };
-            
+        if (!includeNested) {
+            // Return only main object enhancements
             return {
                 content: [
                     {
                         type: "text",
-                        text: JSON.stringify(enhancementResponse, null, 2)
+                        text: JSON.stringify(mainEnhancementResponse, null, 2)
                     }
                 ]
             };
-        } else {
-            throw new McpError(ErrorCode.InternalError, `Failed to retrieve enhancements. Status: ${response.status}`);
         }
+        
+        // If include_nested is true, also get enhancements from all nested includes
+        logger.info('Searching for nested includes and their enhancements...');
+        
+        // Get all includes recursively
+        const includesResult = await handleGetIncludesList({
+            object_name: objectName,
+            object_type: mainEnhancementResponse.object_type
+        });
+        
+        // Parse the includes list from the result
+        let includesList: string[] = [];
+        if (includesResult.content && includesResult.content[0] && includesResult.content[0].text) {
+            const includesText = includesResult.content[0].text;
+            // Extract include names from the text response
+            const includesMatch = includesText.match(/Found \d+ includes[^:]*:\n(.+)/s);
+            if (includesMatch && includesMatch[1]) {
+                includesList = includesMatch[1].split('\n').map(line => line.trim()).filter(line => line.length > 0);
+            }
+        }
+        
+        logger.info(`Found ${includesList.length} nested includes:`, includesList);
+        
+        // Collect all enhancement responses
+        const allEnhancementResponses: EnhancementResponse[] = [mainEnhancementResponse];
+        
+        // Get enhancements for each include
+        for (const includeName of includesList) {
+            try {
+                logger.info(`Getting enhancements for nested include: ${includeName}`);
+                const includeEnhancements = await getEnhancementsForSingleObject(includeName, manualProgram);
+                allEnhancementResponses.push(includeEnhancements);
+            } catch (error) {
+                logger.warn(`Failed to get enhancements for include ${includeName}:`, error);
+                // Continue with other includes even if one fails
+            }
+        }
+        
+        // Create combined response
+        const combinedResponse = {
+            main_object: {
+                name: objectName,
+                type: mainEnhancementResponse.object_type
+            },
+            include_nested: true,
+            total_objects_analyzed: allEnhancementResponses.length,
+            total_enhancements_found: allEnhancementResponses.reduce((sum, resp) => sum + resp.enhancements.length, 0),
+            objects: allEnhancementResponses
+        };
+        
+        return {
+            content: [
+                {
+                    type: "text",
+                    text: JSON.stringify(combinedResponse, null, 2)
+                }
+            ]
+        };
         
     } catch (error) {
         return return_error(error);
