@@ -249,7 +249,7 @@ export class mcp_abap_adt_server {
           // Define available tools
           {
             name: "GetProgram",
-            description: "Retrieve ABAP program source code",
+            description: "Retrieve ABAP program source code. Returns only the main program source code without includes or enhancements. Use GetIncludesList to get all includes, or GetEnhancements with include_nested=true for comprehensive enhancement analysis.",
             inputSchema: {
               type: "object",
               properties: {
@@ -384,13 +384,13 @@ export class mcp_abap_adt_server {
           },
           {
             name: "GetInclude",
-            description: "Retrieve ABAP Include Source Code",
+            description: "📄 SINGLE INCLUDE SOURCE: Retrieve source code of a specific ABAP include file. Returns only the include's own source code without enhancements or nested analysis. Use GetEnhancements for enhancement analysis or GetIncludesList for complete include hierarchy.",
             inputSchema: {
               type: "object",
               properties: {
                 include_name: {
                   type: "string",
-                  description: "Name of the ABAP Include",
+                  description: "Name of the specific ABAP Include to retrieve",
                 },
               },
               required: ["include_name"],
@@ -445,13 +445,13 @@ export class mcp_abap_adt_server {
           },
           {
             name: "GetEnhancements",
-            description: "Retrieve enhancement elements for ABAP programs or includes. Automatically detects object type and handles context appropriately. Returns parsed enhancement implementations with their source code.",
+            description: "🔍 ENHANCEMENT ANALYSIS: Retrieve and analyze enhancement implementations in ABAP programs or includes. Automatically detects object type and extracts enhancement source code. Use include_nested=true for COMPREHENSIVE RECURSIVE SEARCH across all nested includes - this finds ALL enhancements in the entire program hierarchy.",
             inputSchema: {
               type: "object",
               properties: {
                 object_name: {
                   type: "string",
-                  description: "Name of the ABAP program or include (e.g., 'SD_SALES_DOCUMENT_VIEW' for program, 'mv45afzz' for include)",
+                  description: "Name of the ABAP program or include (e.g., 'RM07DOCS' for program, 'RM07DOCS_F01' for include)",
                 },
                 program: {
                   type: "string",
@@ -459,7 +459,7 @@ export class mcp_abap_adt_server {
                 },
                 include_nested: {
                   type: "boolean",
-                  description: "Optional: If true, also searches for enhancements in all nested includes recursively. Default is false.",
+                  description: "⭐ RECURSIVE ENHANCEMENT SEARCH: If true, performs comprehensive analysis - searches for enhancements in the main object AND all nested includes recursively. Perfect for complete enhancement audit of entire program hierarchy. Default is false (single object only).",
                 },
               },
               required: ["object_name"],
@@ -486,13 +486,13 @@ export class mcp_abap_adt_server {
           },
           {
             name: "GetIncludesList",
-            description: "Recursively retrieve all includes within a given ABAP program or include based on code analysis",
+            description: "📋 INCLUDE INVENTORY: Recursively discover and list ALL include files within an ABAP program or include. Performs code analysis to find include statements and builds a complete hierarchy. Use this when you need to understand the program structure or get a list of all includes (without their source code or enhancements).",
             inputSchema: {
               type: "object",
               properties: {
                 object_name: {
                   type: "string",
-                  description: "Name of the ABAP program or include to search within",
+                  description: "Name of the ABAP program or include to analyze for nested includes",
                 },
                 object_type: {
                   type: "string",
