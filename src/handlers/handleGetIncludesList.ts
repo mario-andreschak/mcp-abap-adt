@@ -89,7 +89,7 @@ function parseIncludeNamesFromXml(xmlData: string): string[] {
 
 export async function handleGetIncludesList(args: any) {
     try {
-        const { object_name, object_type } = args;
+        const { object_name, object_type, timeout } = args;
 
         if (!object_name || typeof object_name !== 'string' || object_name.trim() === '') {
             throw new McpError(ErrorCode.InvalidParams, 'Parameter "object_name" (string) is required and cannot be empty.');
@@ -97,6 +97,9 @@ export async function handleGetIncludesList(args: any) {
         if (!object_type || (object_type !== 'program' && object_type !== 'include')) {
             throw new McpError(ErrorCode.InvalidParams, 'Parameter "object_type" must be either "program" or "include".');
         }
+
+        // Default timeout: 30 seconds
+        const requestTimeout = timeout && typeof timeout === 'number' ? timeout : 30000;
 
         // For includes, we need to determine the parent program
         let parentName = object_name;
@@ -110,14 +113,19 @@ export async function handleGetIncludesList(args: any) {
             console.warn(`Include processing: assuming parent program for include ${object_name}`);
         }
 
-        // Step 1: Get root node structure to find includes node
-        const rootResponse = await fetchNodeStructure(
-            parentName.toUpperCase(),
-            parentTechName.toUpperCase(),
-            parentType,
-            '000000', // Root node
-            true // with descriptions
-        );
+        // Step 1: Get root node structure to find includes node (with timeout)
+        const rootResponse = await Promise.race([
+            fetchNodeStructure(
+                parentName.toUpperCase(),
+                parentTechName.toUpperCase(),
+                parentType,
+                '000000', // Root node
+                true // with descriptions
+            ),
+            new Promise<never>((_, reject) => 
+                setTimeout(() => reject(new Error(`Timeout after ${requestTimeout}ms while fetching root node structure for ${object_name}`)), requestTimeout)
+            )
+        ]);
 
         // Step 2: Parse response to find includes node ID
         const includesInfo = parseIncludesFromXml(rootResponse.data);
@@ -135,14 +143,19 @@ export async function handleGetIncludesList(args: any) {
             return return_response(mockResponse);
         }
 
-        // Step 3: Get includes list using the found node ID
-        const includesResponse = await fetchNodeStructure(
-            parentName.toUpperCase(),
-            parentTechName.toUpperCase(),
-            parentType,
-            includesNode.node_id,
-            true // with descriptions
-        );
+        // Step 3: Get includes list using the found node ID (with timeout)
+        const includesResponse = await Promise.race([
+            fetchNodeStructure(
+                parentName.toUpperCase(),
+                parentTechName.toUpperCase(),
+                parentType,
+                includesNode.node_id,
+                true // with descriptions
+            ),
+            new Promise<never>((_, reject) => 
+                setTimeout(() => reject(new Error(`Timeout after ${requestTimeout}ms while fetching includes list for ${object_name}`)), requestTimeout)
+            )
+        ]);
 
         // Step 4: Parse the includes response to extract include names
         const includeNames = parseIncludeNamesFromXml(includesResponse.data);

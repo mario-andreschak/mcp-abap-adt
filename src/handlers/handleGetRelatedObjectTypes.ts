@@ -72,30 +72,57 @@ function getObjectTypeFilter(filterType?: string): string[] {
     return filterMap[filterType.toLowerCase()] || [];
 }
 
+/**
+ * Determines the most likely SAP object type based on object name patterns
+ */
+function guessObjectType(objectName: string): string {
+    const name = objectName.toUpperCase();
+    
+    // Common SAP object type patterns
+    if (name.startsWith('CL_') || name.startsWith('/') && name.includes('/CL_')) {
+        return 'CLAS/OC'; // Class
+    }
+    if (name.startsWith('IF_') || name.startsWith('/') && name.includes('/IF_')) {
+        return 'INTF/OI'; // Interface
+    }
+    if (name.startsWith('SAPM')) {
+        return 'PROG/P'; // Program (SAPM prefix)
+    }
+    
+    // Function groups are typically 3-4 characters (SLIS, RSSB, etc.)
+    if (name.match(/^[A-Z]{3,4}$/)) {
+        return 'FUGR/F'; // Function Group
+    }
+    
+    // Programs are typically longer names
+    if (name.match(/^[A-Z]\w{4,}$/)) {
+        return 'PROG/P'; // Program
+    }
+    
+    // Default to program - most common case
+    return 'PROG/P';
+}
+
 export async function handleGetRelatedObjectTypes(args: any) {
     try {
-        const { parent_name, parent_tech_name, parent_type, object_filter, with_short_descriptions } = args;
+        const { object_name, object_filter, with_short_descriptions } = args;
 
-        if (!parent_name || typeof parent_name !== 'string' || parent_name.trim() === '') {
-            throw new McpError(ErrorCode.InvalidParams, 'Parameter "parent_name" (string) is required and cannot be empty.');
-        }
-        
-        if (!parent_tech_name || typeof parent_tech_name !== 'string' || parent_tech_name.trim() === '') {
-            throw new McpError(ErrorCode.InvalidParams, 'Parameter "parent_tech_name" (string) is required and cannot be empty.');
-        }
-        
-        if (!parent_type || typeof parent_type !== 'string' || parent_type.trim() === '') {
-            throw new McpError(ErrorCode.InvalidParams, 'Parameter "parent_type" (string) is required and cannot be empty.');
+        if (!object_name || typeof object_name !== 'string' || object_name.trim() === '') {
+            throw new McpError(ErrorCode.InvalidParams, 'Parameter "object_name" (string) is required and cannot be empty.');
         }
 
+        const objectNameUpper = object_name.toUpperCase();
         const withDescriptions = with_short_descriptions !== undefined ? Boolean(with_short_descriptions) : true;
         const filterTypes = getObjectTypeFilter(object_filter);
 
+        // Auto-determine object type
+        const objectType = guessObjectType(objectNameUpper);
+
         // Get root node structure to find available object types
         const rootResponse = await fetchNodeStructure(
-            parent_name.toUpperCase(),
-            parent_tech_name.toUpperCase(),
-            parent_type,
+            objectNameUpper,
+            objectNameUpper, // tech_name same as name
+            objectType,
             '000000', // Root node
             withDescriptions
         );
@@ -113,7 +140,7 @@ export async function handleGetRelatedObjectTypes(args: any) {
                 ? ` matching filter '${object_filter}'`
                 : '';
             const mockResponse = {
-                data: `No object types found${filterMessage} in ${parent_type} '${parent_name}'.`,
+                data: `No object types found${filterMessage} in ${objectType} '${objectNameUpper}'.`,
                 status: 200,
                 statusText: 'OK',
                 headers: {},
@@ -125,7 +152,7 @@ export async function handleGetRelatedObjectTypes(args: any) {
         // Create formatted response
         let responseText = '';
         const filterMessage = object_filter ? ` (filtered by: ${object_filter})` : '';
-        responseText = `Found ${filteredObjectTypes.length} object types in ${parent_type} '${parent_name}'${filterMessage}:\n\n`;
+        responseText = `Found ${filteredObjectTypes.length} object types in ${objectType} '${objectNameUpper}'${filterMessage}:\n\n`;
         
         // Group by category
         const categories = [...new Set(filteredObjectTypes.map(obj => obj.category))];

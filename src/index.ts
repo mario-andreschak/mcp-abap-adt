@@ -510,6 +510,10 @@ export class mcp_abap_adt_server {
                   enum: ["program", "include"],
                   description: "Type of the ABAP object (program or include)",
                 },
+                timeout: {
+                  type: "number",
+                  description: "⏱️ TIMEOUT CONTROL: Optional timeout in milliseconds for each ADT request. If any single request takes longer than this, it will fail with timeout error. Use shorter values for large programs to avoid timeouts. Default: 30000ms (30 seconds).",
+                },
               },
               required: ["object_name", "object_type"],
             },
@@ -530,75 +534,6 @@ export class mcp_abap_adt_server {
                 },
               },
               required: ["enhancement_spot", "enhancement_name"],
-            },
-          },
-          {
-            name: "GetRelatedObjectTypes",
-            description: "🔍 OBJECT TYPES DISCOVERY: Discover all types of objects related to a parent SAP object (program, function group, etc.). Returns available object types with their node IDs and categories. Use this first to see what types of objects are available, then use GetObjectsByType to get specific objects.",
-            inputSchema: {
-              type: "object",
-              properties: {
-                parent_name: {
-                  type: "string",
-                  description: "Name of the parent object (e.g., 'SAPMV45A')",
-                },
-                parent_tech_name: {
-                  type: "string",
-                  description: "Technical name of the parent object (usually same as parent_name)",
-                },
-                parent_type: {
-                  type: "string",
-                  description: "Type of the parent object (e.g., 'PROG/P' for programs)",
-                },
-                object_filter: {
-                  type: "string",
-                  description: "Optional filter to show only specific object types. Available filters: 'enhancement', 'include', 'screen', 'dialog', 'transaction', 'class', 'subroutine', 'module', 'macro', 'type', 'text', 'gui', 'event', 'field', 'typegroup'",
-                  enum: ["enhancement", "include", "screen", "dialog", "transaction", "class", "subroutine", "module", "macro", "type", "text", "gui", "event", "field", "typegroup"]
-                },
-                with_short_descriptions: {
-                  type: "boolean",
-                  description: "Whether to include short descriptions in the response",
-                  default: true,
-                },
-              },
-              required: ["parent_name", "parent_tech_name", "parent_type"],
-            },
-          },
-          {
-            name: "GetObjectsByType",
-            description: "📋 OBJECTS BY TYPE: Retrieve specific objects of a given type from a parent SAP object using the node_id from GetRelatedObjectTypes. Returns the actual list of objects (includes, enhancements, screens, etc.) for the specified type.",
-            inputSchema: {
-              type: "object",
-              properties: {
-                parent_name: {
-                  type: "string",
-                  description: "Name of the parent object (e.g., 'SAPMV45A')",
-                },
-                parent_tech_name: {
-                  type: "string",
-                  description: "Technical name of the parent object (usually same as parent_name)",
-                },
-                parent_type: {
-                  type: "string",
-                  description: "Type of the parent object (e.g., 'PROG/P' for programs)",
-                },
-                node_id: {
-                  type: "string",
-                  description: "Node ID of the object type to retrieve (get this from GetRelatedObjectTypes, e.g., '006450' for includes)",
-                },
-                format: {
-                  type: "string",
-                  description: "Output format: 'raw' for XML data, 'parsed' for formatted text with object details",
-                  enum: ["raw", "parsed"],
-                  default: "parsed"
-                },
-                with_short_descriptions: {
-                  type: "boolean",
-                  description: "Whether to include short descriptions in the response",
-                  default: true,
-                },
-              },
-              required: ["parent_name", "parent_tech_name", "parent_type", "node_id"],
             },
           },
         ],
@@ -642,10 +577,6 @@ export class mcp_abap_adt_server {
           return await handleGetSqlQuery(request.params.arguments);
         case "GetIncludesList":
           return await handleGetIncludesList(request.params.arguments);
-        case "GetRelatedObjectTypes":
-          return await handleGetRelatedObjectTypes(request.params.arguments);
-        case "GetObjectsByType":
-          return await handleGetObjectsByType(request.params.arguments);
         default:
           throw new McpError(
             ErrorCode.MethodNotFound,
