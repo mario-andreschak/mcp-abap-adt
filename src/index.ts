@@ -30,6 +30,7 @@ import { handleGetEnhancementByName } from "./handlers/handleGetEnhancementByNam
 import { handleGetSqlQuery } from "./handlers/handleGetSqlQuery";
 import { handleGetRelatedObjectTypes } from "./handlers/handleGetRelatedObjectTypes";
 import { handleGetObjectsByType } from "./handlers/handleGetObjectsByType";
+import { handleGetWhereUsed } from "./handlers/handleGetWhereUsed";
 
 // Import shared utility functions and types
 import {
@@ -536,6 +537,55 @@ export class mcp_abap_adt_server {
               required: ["enhancement_spot", "enhancement_name"],
             },
           },
+          {
+            name: "GetWhereUsed",
+            description: "🔍 WHERE USED ANALYSIS: Retrieve where-used references for ABAP objects via ADT usageReferences. Shows all places where a specific object (class, program, include, etc.) is used in the system.",
+            inputSchema: {
+              type: "object",
+              properties: {
+                object_name: {
+                  type: "string",
+                  description: "Name of the ABAP object to search usages for",
+                },
+                object_type: {
+                  type: "string",
+                  enum: ["class", "program", "include", "function", "interface"],
+                  description: "Type of the ABAP object",
+                },
+                start_position: {
+                  type: "object",
+                  description: "Optional starting position in the source code (row, col) for specific element search",
+                  properties: {
+                    row: {
+                      type: "number",
+                      description: "Row number in the source code"
+                    },
+                    col: {
+                      type: "number", 
+                      description: "Column number in the source code"
+                    }
+                  },
+                  required: ["row", "col"]
+                },
+                end_position: {
+                  type: "object",
+                  description: "Optional end position in the source code (row, col) for specific element search",
+                  properties: {
+                    row: {
+                      type: "number",
+                      description: "End row number in the source code"
+                    },
+                    col: {
+                      type: "number",
+                      description: "End column number in the source code"
+                    }
+                  },
+                  required: ["row", "col"]
+                }
+              },
+              required: ["object_name", "object_type"],
+            },
+          },
         ],
       };
     });
@@ -577,6 +627,8 @@ export class mcp_abap_adt_server {
           return await handleGetSqlQuery(request.params.arguments);
         case "GetIncludesList":
           return await handleGetIncludesList(request.params.arguments);
+        case "GetWhereUsed":
+          return await handleGetWhereUsed(request.params.arguments);
         default:
           throw new McpError(
             ErrorCode.MethodNotFound,
