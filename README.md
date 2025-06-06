@@ -252,7 +252,36 @@ Cline is a VS Code extension that uses MCP servers to provide language support. 
     - Cline should automatically connect to the server. You will see the Server appear in the "MCP Servers" Panel (in the Cline extension, you'll find different buttons on the top.)
     - Ask Cline to get the Sourcecode of a program and it should mention the MCP Server and should try to use the corresponding tools
 
-## 5. Troubleshooting
+## 5. Testing
+
+The project includes comprehensive test suites located in the `tests/` directory. These tests help verify functionality and performance of various MCP tools.
+
+### Running Tests
+
+```bash
+# Quick performance tests (recommended for development)
+node tests/test-rm07docs-fast.js
+
+# Comprehensive enhancement tests
+node tests/test-rm07docs-enhancements.js
+
+# Include list functionality
+node tests/test-get-includes-list.js
+
+# Large program handling
+node tests/test-sapmv45a-large-program-fixed.js
+```
+
+### Test Categories
+
+- **Enhancement Tests**: Verify enhancement discovery and analysis functionality
+- **Include Tests**: Test include list retrieval and hierarchy mapping
+- **Program Tests**: Test program retrieval and large program handling
+- **Infrastructure Tests**: Test CSRF, timeouts, and communication protocols
+
+For detailed information about available tests and their usage, see [tests/README.md](tests/README.md).
+
+## 6. Troubleshooting
 
 - **`node -v` or `npm -v` gives an error:**
   - Make sure Node.js is installed correctly. Try reinstalling it.
@@ -280,8 +309,13 @@ Cline is a VS Code extension that uses MCP servers to provide language support. 
   - Make sure that your SAP user has the necessary authorizations to access the ADT services.
   - Check that the required ADT services are activated in transaction `SICF`.
   - If you're using self-signed certificates or there is an issue with your SAP systems http config, make sure to set TLS_REJECT_UNAUTHORIZED as described above!
+- **Performance Issues:**
+  - Use the test suite to identify bottlenecks: `node tests/test-rm07docs-fast.js`
+  - Adjust timeout values in your `.env` file for slower systems
+  - Consider using `include_nested=false` for faster enhancement searches
+  - For large programs, increase timeout values or process includes individually
 
-## 6. Available Tools
+## 7. Available Tools
 
 This server provides the following tools, which can be used through Cline (or any other MCP client):
 

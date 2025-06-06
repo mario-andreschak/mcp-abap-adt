@@ -323,14 +323,19 @@ async function getIncludesListInternal(objectName: string, objectType: 'program'
             logger.warn(`Include processing: assuming parent program for include ${objectName}`);
         }
 
-        // Step 1: Get root node structure to find includes node
-        const rootResponse = await fetchNodeStructure(
-            parentName.toUpperCase(),
-            parentTechName.toUpperCase(),
-            parentType,
-            '000000', // Root node
-            true // with descriptions
-        );
+        // Step 1: Get root node structure to find includes node (with timeout)
+        const rootResponse = await Promise.race([
+            fetchNodeStructure(
+                parentName.toUpperCase(),
+                parentTechName.toUpperCase(),
+                parentType,
+                '000000', // Root node
+                true // with descriptions
+            ),
+            new Promise<never>((_, reject) => 
+                setTimeout(() => reject(new Error(`Timeout: Failed to get root node structure for ${objectName} within 10000ms`)), 10000)
+            )
+        ]);
 
         // Step 2: Parse response to find includes node ID
         const includesInfo = parseIncludesFromXml(rootResponse.data);
@@ -341,14 +346,19 @@ async function getIncludesListInternal(objectName: string, objectType: 'program'
             return [];
         }
 
-        // Step 3: Get includes list using the found node ID
-        const includesResponse = await fetchNodeStructure(
-            parentName.toUpperCase(),
-            parentTechName.toUpperCase(),
-            parentType,
-            includesNode.node_id,
-            true // with descriptions
-        );
+        // Step 3: Get includes list using the found node ID (with timeout)
+        const includesResponse = await Promise.race([
+            fetchNodeStructure(
+                parentName.toUpperCase(),
+                parentTechName.toUpperCase(),
+                parentType,
+                includesNode.node_id,
+                true // with descriptions
+            ),
+            new Promise<never>((_, reject) => 
+                setTimeout(() => reject(new Error(`Timeout: Failed to get includes list for ${objectName} within 10000ms`)), 10000)
+            )
+        ]);
 
         // Step 4: Parse the includes response to extract include names
         const includeNames = parseIncludeNamesFromXml(includesResponse.data);
@@ -458,12 +468,12 @@ export async function handleGetEnhancements(args: any) {
         // If include_nested is true, also get enhancements from all nested includes
         logger.info('Searching for nested includes and their enhancements...');
         
-        // Wrap the entire nested processing in a timeout
+        // Simplified nested processing - no recursion, just flat list
         const processNestedIncludes = async () => {
-            // Get all includes recursively using the internal SAP ADT API function
+            // Get flat list of all includes using the optimized GetIncludesList logic
             let includesList = await getIncludesListInternal(objectName, mainEnhancementResponse.object_type);
             
-            logger.info(`Found ${includesList.length} nested includes:`, includesList);
+            logger.info(`Found ${includesList.length} includes (flat list, no recursion):`, includesList);
             
             // Limit the number of includes to process to avoid timeout
             if (includesList.length > maxIncludes) {
@@ -474,73 +484,24 @@ export async function handleGetEnhancements(args: any) {
             // Collect all enhancement responses
             const allEnhancementResponses: EnhancementResponse[] = [mainEnhancementResponse];
             
-            // Add configuration for parallel processing
-            const maxConcurrentRequests = parseInt(process.env.MAX_CONCURRENT_ENHANCEMENT_REQUESTS || '3', 10);
-            const useParallelProcessing = process.env.USE_PARALLEL_ENHANCEMENT_PROCESSING === 'true';
-            
-            if (useParallelProcessing && includesList.length > 0) {
-                logger.info(`Processing ${includesList.length} includes in parallel with max concurrency: ${maxConcurrentRequests}`);
-                
-                // Process includes in batches to avoid overwhelming the server
-                for (let i = 0; i < includesList.length; i += maxConcurrentRequests) {
-                    const batch = includesList.slice(i, i + maxConcurrentRequests);
-                    logger.info(`Processing batch ${Math.floor(i / maxConcurrentRequests) + 1}: ${batch.join(', ')}`);
+            // Simple sequential processing with individual timeouts
+            for (const includeName of includesList) {
+                try {
+                    logger.info(`Getting enhancements for include: ${includeName}`);
                     
-                    const batchPromises = batch.map(async (includeName) => {
-                        try {
-                            // Create a promise with individual timeout for each include
-                            const includeEnhancementsPromise = getEnhancementsForSingleObject(includeName, manualProgram);
-                            
-                            const includeEnhancements = await createPromiseWithTimeout(
-                                includeEnhancementsPromise,
-                                requestTimeout,
-                                `Timeout: Failed to get enhancements for include ${includeName} within ${requestTimeout}ms`
-                            );
-                            
-                            return { success: true, includeName, data: includeEnhancements };
-                        } catch (error) {
-                            logger.warn(`Failed to get enhancements for include ${includeName}:`, error);
-                            return { success: false, includeName, error: error instanceof Error ? error.message : String(error) };
-                        }
-                    });
+                    // Create a promise with individual timeout for each include
+                    const includeEnhancementsPromise = getEnhancementsForSingleObject(includeName, manualProgram);
                     
-                    // Wait for all promises in the current batch to complete
-                    const batchResults = await Promise.allSettled(batchPromises);
+                    const includeEnhancements = await createPromiseWithTimeout(
+                        includeEnhancementsPromise,
+                        requestTimeout,
+                        `Timeout: Failed to get enhancements for include ${includeName} within ${requestTimeout}ms`
+                    );
                     
-                    // Process batch results
-                    for (const result of batchResults) {
-                        if (result.status === 'fulfilled' && result.value.success && result.value.data) {
-                            allEnhancementResponses.push(result.value.data);
-                        }
-                    }
-                    
-                    // Add a small delay between batches to be gentle on the server
-                    if (i + maxConcurrentRequests < includesList.length) {
-                        await new Promise(resolve => setTimeout(resolve, 1000));
-                    }
-                }
-            } else {
-                // Sequential processing (original behavior with individual timeouts)
-                
-                // Get enhancements for each include with individual timeout handling
-                for (const includeName of includesList) {
-                    try {
-                        logger.info(`Getting enhancements for nested include: ${includeName}`);
-                        
-                        // Create a promise with individual timeout for each include
-                        const includeEnhancementsPromise = getEnhancementsForSingleObject(includeName, manualProgram);
-                        
-                        const includeEnhancements = await createPromiseWithTimeout(
-                            includeEnhancementsPromise,
-                            requestTimeout,
-                            `Timeout: Failed to get enhancements for include ${includeName} within ${requestTimeout}ms`
-                        );
-                        
-                        allEnhancementResponses.push(includeEnhancements);
-                    } catch (error) {
-                        logger.warn(`Failed to get enhancements for include ${includeName}:`, error);
-                        // Continue with other includes even if one fails
-                    }
+                    allEnhancementResponses.push(includeEnhancements);
+                } catch (error) {
+                    logger.warn(`Failed to get enhancements for include ${includeName}:`, error);
+                    // Continue with other includes even if one fails
                 }
             }
             
