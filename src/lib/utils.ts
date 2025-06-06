@@ -457,8 +457,14 @@ export async function makeAdtRequest(
   // Add Content-Type for POST/PUT requests with data
   if ((method === "POST" || method === "PUT") && data) {
     if (typeof data === "string" && !requestHeaders["Content-Type"]) {
-      // For SQL queries and plain text data
-      requestHeaders["Content-Type"] = "text/plain; charset=utf-8";
+      // Check if this is a usageReferences request
+      if (requestUrl.includes('/usageReferences') && data.includes('usageReferenceRequest')) {
+        requestHeaders["Content-Type"] = "application/vnd.sap.adt.repository.usagereferences.request.v1+xml";
+        requestHeaders["Accept"] = "application/vnd.sap.adt.repository.usagereferences.result.v1+xml";
+      } else {
+        // For SQL queries and plain text data
+        requestHeaders["Content-Type"] = "text/plain; charset=utf-8";
+      }
     }
   }
 

@@ -465,6 +465,11 @@ export class mcp_abap_adt_server {
                   type: "boolean",
                   description: "⭐ RECURSIVE ENHANCEMENT SEARCH: If true, performs comprehensive analysis - searches for enhancements in the main object AND all nested includes recursively. Perfect for complete enhancement audit of entire program hierarchy. Default is false (single object only).",
                 },
+                detailed: {
+                  type: "boolean",
+                  description: "📄 OUTPUT CONTROL: If true, returns full enhancement source code and raw XML. If false (default), truncates long source code to 200 chars for quick overview.",
+                  default: false
+                },
                 timeout: {
                   type: "number",
                   description: "⏱️ SIMPLE TIMEOUT: Optional timeout in milliseconds for each ADT request. If any single request (main object or include) takes longer than this, it will fail with timeout error. Use shorter values for large programs to avoid timeouts. Default: 30000ms (30 seconds).",
@@ -511,6 +516,11 @@ export class mcp_abap_adt_server {
                   enum: ["program", "include"],
                   description: "Type of the ABAP object (program or include)",
                 },
+                detailed: {
+                  type: "boolean",
+                  description: "📄 OUTPUT FORMAT: If true, returns structured JSON with metadata and raw XML. If false (default), returns simple text list format.",
+                  default: false
+                },
                 timeout: {
                   type: "number",
                   description: "⏱️ TIMEOUT CONTROL: Optional timeout in milliseconds for each ADT request. If any single request takes longer than this, it will fail with timeout error. Use shorter values for large programs to avoid timeouts. Default: 30000ms (30 seconds).",
@@ -539,7 +549,7 @@ export class mcp_abap_adt_server {
           },
           {
             name: "GetWhereUsed",
-            description: "🔍 WHERE USED ANALYSIS: Retrieve where-used references for ABAP objects via ADT usageReferences. Shows all places where a specific object (class, program, include, etc.) is used in the system.",
+            description: "🔍 WHERE USED ANALYSIS: Retrieve where-used references for ABAP objects via ADT usageReferences. Shows all places where a specific object (class, program, include, etc.) is used in the system. By default returns minimal relevant results, use detailed=true for complete analysis.",
             inputSchema: {
               type: "object",
               properties: {
@@ -549,38 +559,13 @@ export class mcp_abap_adt_server {
                 },
                 object_type: {
                   type: "string",
-                  enum: ["class", "program", "include", "function", "interface"],
+                  enum: ["class", "program", "include", "function", "interface", "package"],
                   description: "Type of the ABAP object",
                 },
-                start_position: {
-                  type: "object",
-                  description: "Optional starting position in the source code (row, col) for specific element search",
-                  properties: {
-                    row: {
-                      type: "number",
-                      description: "Row number in the source code"
-                    },
-                    col: {
-                      type: "number", 
-                      description: "Column number in the source code"
-                    }
-                  },
-                  required: ["row", "col"]
-                },
-                end_position: {
-                  type: "object",
-                  description: "Optional end position in the source code (row, col) for specific element search",
-                  properties: {
-                    row: {
-                      type: "number",
-                      description: "End row number in the source code"
-                    },
-                    col: {
-                      type: "number",
-                      description: "End column number in the source code"
-                    }
-                  },
-                  required: ["row", "col"]
+                detailed: {
+                  type: "boolean",
+                  description: "📊 FILTERING CONTROL: If true, returns ALL references including packages, internal class components, and system objects. If false (default), returns only relevant direct usages, enhancements, and class sections for quick overview.",
+                  default: false
                 }
               },
               required: ["object_name", "object_type"],

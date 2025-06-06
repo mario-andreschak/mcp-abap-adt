@@ -89,7 +89,7 @@ function parseIncludeNamesFromXml(xmlData: string): string[] {
 
 export async function handleGetIncludesList(args: any) {
     try {
-        const { object_name, object_type, timeout } = args;
+        const { object_name, object_type, timeout, detailed } = args;
 
         if (!object_name || typeof object_name !== 'string' || object_name.trim() === '') {
             throw new McpError(ErrorCode.InvalidParams, 'Parameter "object_name" (string) is required and cannot be empty.');
@@ -100,6 +100,7 @@ export async function handleGetIncludesList(args: any) {
 
         // Default timeout: 30 seconds
         const requestTimeout = timeout && typeof timeout === 'number' ? timeout : 30000;
+        const isDetailed = detailed === true;
 
         // For includes, we need to determine the parent program
         let parentName = object_name;
@@ -160,20 +161,42 @@ export async function handleGetIncludesList(args: any) {
         // Step 4: Parse the includes response to extract include names
         const includeNames = parseIncludeNamesFromXml(includesResponse.data);
         
-        // Create formatted response similar to the original recursive method
-        const responseData = includeNames.length > 0 
-            ? `Found ${includeNames.length} includes in ${object_type} '${object_name}':\n${includeNames.join('\n')}`
-            : `No includes found in ${object_type} '${object_name}'.`;
-        
-        const mockResponse = {
-            data: responseData,
-            status: 200,
-            statusText: 'OK',
-            headers: {},
-            config: {}
-        } as any;
+        if (isDetailed) {
+            // Return detailed JSON response
+            const detailedResponse = {
+                object_name: object_name,
+                object_type: object_type,
+                detailed: true,
+                total_includes: includeNames.length,
+                includes: includeNames,
+                includes_node_info: includesNode,
+                raw_xml: includesResponse.data
+            };
+            
+            return {
+                content: [
+                    {
+                        type: "text",
+                        text: JSON.stringify(detailedResponse, null, 2)
+                    }
+                ]
+            };
+        } else {
+            // Return minimal text response (original format)
+            const responseData = includeNames.length > 0 
+                ? `Found ${includeNames.length} includes in ${object_type} '${object_name}':\n${includeNames.join('\n')}`
+                : `No includes found in ${object_type} '${object_name}'.`;
+            
+            const mockResponse = {
+                data: responseData,
+                status: 200,
+                statusText: 'OK',
+                headers: {},
+                config: {}
+            } as any;
 
-        return return_response(mockResponse);
+            return return_response(mockResponse);
+        }
 
     } catch (error) {
         return return_error(error);

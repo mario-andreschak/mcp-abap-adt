@@ -20,6 +20,8 @@ export interface EnhancementResponse {
     context?: string;
     enhancements: EnhancementImplementation[];
     raw_xml?: string;
+    detailed?: boolean;
+    total_enhancements?: number;
 }
 
 /**
@@ -416,6 +418,56 @@ async function getEnhancementsForSingleObject(objectName: string, manualProgramC
 }
 
 /**
+ * Filters enhancement response to show minimal information
+ */
+function filterMinimalEnhancements(response: any): any {
+    if (response.objects) {
+        // For nested results, filter each object
+        const filteredObjects = response.objects
+            .filter((obj: any) => obj.enhancements && obj.enhancements.length > 0) // Only objects with enhancements
+            .map((obj: any) => ({
+                object_name: obj.object_name,
+                object_type: obj.object_type,
+                enhancements: obj.enhancements.map((enh: any) => ({
+                    name: enh.name,
+                    type: enh.type,
+                    // Include source code only if it's short (< 500 chars) or first 200 chars
+                    sourceCode: enh.sourceCode ? 
+                        (enh.sourceCode.length <= 500 ? enh.sourceCode : enh.sourceCode.substring(0, 200) + '...[truncated]') 
+                        : undefined
+                }))
+            }));
+        
+        return {
+            ...response,
+            detailed: false,
+            total_objects_with_enhancements: filteredObjects.length,
+            total_objects_analyzed: response.total_objects_analyzed,
+            filtered_out: response.total_objects_analyzed - filteredObjects.length,
+            objects: filteredObjects
+        };
+    } else {
+        // For single object results
+        const filteredEnhancements = response.enhancements ? response.enhancements.map((enh: any) => ({
+            name: enh.name,
+            type: enh.type,
+            sourceCode: enh.sourceCode ? 
+                (enh.sourceCode.length <= 500 ? enh.sourceCode : enh.sourceCode.substring(0, 200) + '...[truncated]') 
+                : undefined
+        })) : [];
+        
+        return {
+            object_name: response.object_name,
+            object_type: response.object_type,
+            context: response.context,
+            detailed: false,
+            total_enhancements: filteredEnhancements.length,
+            enhancements: filteredEnhancements
+        };
+    }
+}
+
+/**
  * Handler to retrieve enhancement implementations for ABAP programs/includes
  * Automatically determines if object is a program or include and handles accordingly
  * 
@@ -423,6 +475,7 @@ async function getEnhancementsForSingleObject(objectName: string, manualProgramC
  *   - object_name: Name of the ABAP object
  *   - program: Optional manual program context for includes  
  *   - include_nested: Optional boolean - if true, also searches enhancements in all nested includes
+ *   - detailed: Optional boolean - if false (default), returns minimal info; if true, returns full details including raw XML
  *   - timeout: Optional timeout in milliseconds for each ADT request (default: 30000ms = 30s)
  *   - max_includes: Optional maximum number of includes to process (default: 50)
  * @returns Response with parsed enhancement data or error
@@ -438,6 +491,7 @@ export async function handleGetEnhancements(args: any) {
         const objectName = args.object_name;
         const manualProgram = args.program; // Optional manual program context for includes
         const includeNested = args.include_nested === true; // Optional boolean for recursive include search
+        const isDetailed = args.detailed === true; // Optional boolean for detailed output
         
         // Simple timeout logic: one timeout for all ADT requests
         const requestTimeout = args.timeout ? parseInt(args.timeout, 10) : 30000; // Timeout for each ADT request (default: 30s)
@@ -455,11 +509,21 @@ export async function handleGetEnhancements(args: any) {
         
         if (!includeNested) {
             // Return only main object enhancements
+            let response = mainEnhancementResponse;
+            
+            // Apply filtering if not detailed
+            if (!isDetailed) {
+                response = filterMinimalEnhancements(response);
+            } else {
+                // Add detailed flag for consistency
+                response = { ...response, detailed: true };
+            }
+            
             return {
                 content: [
                     {
                         type: "text",
-                        text: JSON.stringify(mainEnhancementResponse, null, 2)
+                        text: JSON.stringify(response, null, 2)
                     }
                 ]
             };
@@ -537,7 +601,7 @@ export async function handleGetEnhancements(args: any) {
         }
         
         // Create combined response
-        const combinedResponse = {
+        let combinedResponse: any = {
             main_object: {
                 name: objectName,
                 type: mainEnhancementResponse.object_type
@@ -547,6 +611,14 @@ export async function handleGetEnhancements(args: any) {
             total_enhancements_found: allEnhancementResponses.reduce((sum, resp) => sum + resp.enhancements.length, 0),
             objects: allEnhancementResponses
         };
+        
+        // Apply filtering if not detailed
+        if (!isDetailed) {
+            combinedResponse = filterMinimalEnhancements(combinedResponse);
+        } else {
+            // Add detailed flag for consistency
+            combinedResponse = { ...combinedResponse, detailed: true };
+        }
         
         return {
             content: [

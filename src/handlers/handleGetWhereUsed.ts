@@ -1,15 +1,5 @@
-import { McpError, ErrorCode, AxiosResponse } from '../lib/utils';
-import { makeAdtRequestWithTimeout, return_error, return_response, getBaseUrl, encodeSapObjectName } from '../lib/utils';
-
-interface StartPosition {
-    row: number;
-    col: number;
-}
-
-interface EndPosition {
-    row: number;
-    col: number;
-}
+import { McpError, ErrorCode } from '../lib/utils';
+import { makeAdtRequestWithTimeout, return_error, getBaseUrl, encodeSapObjectName } from '../lib/utils';
 
 interface WhereUsedReference {
     name: string;
@@ -20,41 +10,15 @@ interface WhereUsedReference {
     canHaveChildren?: boolean;
     usageInformation?: string;
     objectIdentifier?: string;
+    originalName?: string; // For storing original name when resolved
 }
 
 interface WhereUsedArgs {
     object_name: string;
-    object_type: 'class' | 'program' | 'include' | 'function' | 'interface';
-    start_position?: StartPosition;
-    end_position?: EndPosition;
+    object_type: 'class' | 'program' | 'include' | 'function' | 'interface' | 'package';
+    detailed?: boolean;
 }
 
-/**
- * Fetches a CSRF token by doing a plain-text GET on the discovery endpoint
- */
-async function fetchCsrfToken(): Promise<string> {
-    const baseUrl = await getBaseUrl();
-    const srcUrl = `${baseUrl}/sap/bc/adt/discovery`;
-    
-    try {
-        const response = await makeAdtRequestWithTimeout(
-            srcUrl,
-            'GET',
-            'csrf',
-            undefined,
-            undefined
-        );
-        
-        const token = response.headers['x-csrf-token'];
-        if (!token) {
-            throw new McpError(ErrorCode.InternalError, 'Failed to fetch CSRF token');
-        }
-        
-        return token;
-    } catch (error) {
-        throw new McpError(ErrorCode.InternalError, `Failed to fetch CSRF token: ${error instanceof Error ? error.message : String(error)}`);
-    }
-}
 
 /**
  * Builds the URI for the object based on its type and name
@@ -73,9 +37,157 @@ function buildObjectUri(objectName: string, objectType: string): string {
             return `/sap/bc/adt/functions/groups/${encodedName}`;
         case 'interface':
             return `/sap/bc/adt/oo/interfaces/${encodedName}`;
+        case 'package':
+            return `/sap/bc/adt/packages/${encodedName}`;
         default:
             throw new McpError(ErrorCode.InvalidParams, `Unsupported object type: ${objectType}`);
     }
+}
+
+/**
+ * Resolves object identifier to human-readable name using quickSearch API
+ */
+async function resolveObjectIdentifier(objectIdentifier: string): Promise<string | null> {
+    try {
+        const baseUrl = await getBaseUrl();
+        const query = encodeURIComponent(`${objectIdentifier}*`);
+        const endpoint = `${baseUrl}/sap/bc/adt/repository/informationsystem/search?operation=quickSearch&query=${query}&maxResults=1`;
+        
+        const response = await makeAdtRequestWithTimeout(endpoint, 'GET', 'default');
+        
+        // Parse XML response to extract description
+        const descriptionMatch = response.data.match(/adtcore:description="([^"]*)"/);
+        if (descriptionMatch) {
+            return descriptionMatch[1];
+        }
+        
+        return null;
+    } catch (error) {
+        // If resolution fails, return null (we'll use original name)
+        return null;
+    }
+}
+
+/**
+ * Checks if a reference is internal class structure (self-reference)
+ */
+function isInternalClassStructure(ref: WhereUsedReference): boolean {
+    // Check objectIdentifier for self-references
+    if (ref.objectIdentifier) {
+        // Pattern: CL_BUS_ABSTRACT_MAIN_SCREEN===CP means it's the class itself
+        // Pattern: CL_BUS_ABSTRACT_MAIN_SCREEN===CO means it's used somewhere else
+        if (ref.objectIdentifier.includes('===CP') || ref.objectIdentifier.includes('===CI') || ref.objectIdentifier.includes('===CU')) {
+            return true; // Internal structure
+        }
+    }
+    
+    // Check if parentUri points to the same class as the reference
+    if (ref.parentUri && ref.uri) {
+        const parentClass = ref.parentUri.match(/\/classes\/([^\/]+)/)?.[1];
+        const refClass = ref.uri.match(/\/classes\/([^\/]+)/)?.[1];
+        
+        if (parentClass && refClass && parentClass === refClass) {
+            // Additional check: if it's a method/attribute within the same class
+            if (ref.uri.includes('#type=CLAS%2FOM') || ref.uri.includes('#type=CLAS%2FOA')) {
+                return true; // Internal method or attribute
+            }
+        }
+    }
+    
+    return false;
+}
+
+/**
+ * Enhances references with resolved names for better readability
+ */
+async function enhanceReferencesWithNames(references: WhereUsedReference[]): Promise<WhereUsedReference[]> {
+    const enhancedReferences = [...references];
+    
+    // Process references that have cryptic names but objectIdentifiers
+    for (let i = 0; i < enhancedReferences.length; i++) {
+        const ref = enhancedReferences[i];
+        
+        // If name is empty or cryptic and we have objectIdentifier, try to resolve it
+        if (ref.objectIdentifier && (!ref.name || ref.name.length === 0)) {
+            const resolvedName = await resolveObjectIdentifier(ref.objectIdentifier);
+            if (resolvedName) {
+                enhancedReferences[i] = {
+                    ...ref,
+                    name: resolvedName,
+                    originalName: ref.name // Keep original for reference
+                };
+            }
+        }
+    }
+    
+    return enhancedReferences;
+}
+
+/**
+ * Filters references to show only the most relevant ones (excludes packages and internal components)
+ */
+function filterMinimalReferences(references: WhereUsedReference[]): WhereUsedReference[] {
+    return references.filter(ref => {
+        // PRIORITY 1: Always show enhancement implementations (most important for developers)
+        if (ref.type === 'ENHO/XHH') {
+            return true;
+        }
+        
+        // PRIORITY 2: Show main results that are marked as important (but not packages)
+        if (ref.isResult === true && ref.type !== 'DEVC/K') {
+            return true;
+        }
+        
+        // PRIORITY 3: Show function modules with direct usage (real implementations)
+        if (ref.type === 'FUGR/FF' && ref.usageInformation && ref.usageInformation.includes('gradeDirect')) {
+            return true;
+        }
+        
+        // HIDE EVERYTHING ELSE IN MINIMAL MODE:
+        
+        // Hide ALL packages - they're organizational, not functional usage
+        if (ref.type === 'DEVC/K') {
+            return false;
+        }
+        
+        // Hide internal class structure (self-references)
+        if (isInternalClassStructure(ref)) {
+            return false;
+        }
+        
+        // Hide ALL class internal structure (sections, methods, attributes)
+        if (ref.name === 'Public Section' || ref.name === 'Private Section' || ref.name === 'Protected Section') {
+            return false;
+        }
+        
+        // Hide ALL internal class components
+        if (ref.type && ref.type.startsWith('CLAS/')) {
+            return false;
+        }
+        
+        // Hide ALL items with empty type (usually internal structure)
+        if (!ref.type) {
+            return false;
+        }
+        
+        // Hide function groups (show only specific functions)
+        if (ref.type === 'FUGR/F') {
+            return false;
+        }
+        
+        // Hide programs unless they're marked as main results
+        if (ref.type === 'PROG/P' && !ref.isResult) {
+            return false;
+        }
+        
+        // Hide includes unless they're marked as main results
+        if (ref.type === 'PROG/I' && !ref.isResult) {
+            return false;
+        }
+        
+        // Show only if it's a main result or enhancement
+        return ref.isResult === true || ref.type === 'ENHO/XHH';
+    });
 }
 
 /**
@@ -154,72 +266,63 @@ export async function handleGetWhereUsed(args: any) {
             throw new McpError(ErrorCode.InvalidParams, 'Object type is required');
         }
         
-        const validTypes = ['class', 'program', 'include', 'function', 'interface'];
+        const validTypes = ['class', 'program', 'include', 'function', 'interface', 'package'];
         if (!validTypes.includes(args.object_type)) {
             throw new McpError(ErrorCode.InvalidParams, `Object type must be one of: ${validTypes.join(', ')}`);
         }
         
         const typedArgs = args as WhereUsedArgs;
         
-        // 1. Fetch CSRF token
-        const csrfToken = await fetchCsrfToken();
+        // 1. Build the object URI
+        const objectUri = buildObjectUri(typedArgs.object_name, typedArgs.object_type);
         
-        // 2. Build the object URI
-        let objectUri = buildObjectUri(typedArgs.object_name, typedArgs.object_type);
-        
-        // 3. If start_position is provided, add fragment for specific position search
-        if (typedArgs.start_position) {
-            const { row, col } = typedArgs.start_position;
-            if (typeof row !== 'number' || typeof col !== 'number') {
-                throw new McpError(ErrorCode.InvalidParams, 'Start position must include numeric row and col values');
-            }
-            
-            let fragment = `start=${row},${col}`;
-            if (typedArgs.end_position) {
-                const { row: erow, col: ecol } = typedArgs.end_position;
-                if (typeof erow !== 'number' || typeof ecol !== 'number') {
-                    throw new McpError(ErrorCode.InvalidParams, 'End position must include numeric row and col values if provided');
-                }
-                fragment += `;end=${erow},${ecol}`;
-            }
-            
-            // For classes, add source/main path and fragment
-            if (typedArgs.object_type === 'class') {
-                objectUri += '/source/main?version=active#' + fragment;
-            } else {
-                objectUri += '#' + fragment;
-            }
-        }
-        
-        // 4. Prepare the usageReferences request
+        // 2. Prepare the usageReferences request
         const baseUrl = await getBaseUrl();
-        const endpoint = `${baseUrl}/sap/bc/adt/repository/informationsystem/usageReferences`;
+        const endpoint = `${baseUrl}/sap/bc/adt/repository/informationsystem/usageReferences?uri=${encodeURIComponent(objectUri)}`;
         
         const requestBody = '<?xml version="1.0" encoding="UTF-8"?><usagereferences:usageReferenceRequest xmlns:usagereferences="http://www.sap.com/adt/ris/usageReferences"><usagereferences:affectedObjects/></usagereferences:usageReferenceRequest>';
         
-        // 5. Make the POST request
+        // 3. Make the POST request
         const response = await makeAdtRequestWithTimeout(
             endpoint,
             'POST',
             'default',
-            requestBody,
-            {
-                uri: objectUri
-            }
+            requestBody
         );
         
-        // 6. Parse the XML response
-        const references = parseWhereUsedResponse(response.data);
+        // 5. Parse the XML response
+        const allReferences = parseWhereUsedResponse(response.data);
         
-        // 7. Format the response
+        // 6. Filter references if detailed=false (default)
+        const isDetailed = typedArgs.detailed === true;
+        let references = allReferences;
+        
+        if (!isDetailed) {
+            references = filterMinimalReferences(allReferences);
+        }
+        
+        // 7. Format the response based on detailed mode
+        let formattedReferences;
+        if (isDetailed) {
+            // Detailed mode: show all fields
+            formattedReferences = references;
+        } else {
+            // Minimal mode: show only name and type
+            formattedReferences = references.map(ref => ({
+                name: ref.name,
+                type: ref.type
+            }));
+        }
+        
         const formattedResponse = {
             object_name: typedArgs.object_name,
             object_type: typedArgs.object_type,
             object_uri: objectUri,
-            start_position: typedArgs.start_position,
-            end_position: typedArgs.end_position,
-            references: references,
-            total_references: references.length
+            detailed: isDetailed,
+            total_references: references.length,
+            total_found: allReferences.length,
+            filtered_out: isDetailed ? 0 : allReferences.length - references.length,
+            references: formattedReferences
         };
         
         return {
