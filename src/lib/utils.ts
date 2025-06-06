@@ -349,6 +349,54 @@ export async function makeAdtRequestWithTimeout(
   return makeAdtRequest(url, method, timeout, data, params);
 }
 
+/**
+ * Fetches node structure from SAP ADT repository
+ * @param parentName Parent object name
+ * @param parentTechName Parent technical name
+ * @param parentType Parent object type (e.g., 'PROG/P')
+ * @param nodeKey Node key to fetch (e.g., '000000' for root, '006450' for includes)
+ * @param withShortDescriptions Whether to include short descriptions
+ * @returns Promise with the response containing node structure
+ */
+export async function fetchNodeStructure(
+  parentName: string,
+  parentTechName: string,
+  parentType: string,
+  nodeKey: string,
+  withShortDescriptions: boolean = true
+): Promise<AxiosResponse> {
+  const baseUrl = await getBaseUrl();
+  const url = `${baseUrl}/sap/bc/adt/repository/nodestructure`;
+  
+  // Prepare query parameters
+  const params = {
+    parent_name: parentName,
+    parent_tech_name: parentTechName,
+    parent_type: parentType,
+    withShortDescriptions: withShortDescriptions.toString()
+  };
+
+  // Prepare XML body
+  const xmlBody = `<?xml version="1.0" encoding="UTF-8"?><asx:abap xmlns:asx="http://www.sap.com/abapxml" version="1.0">
+<asx:values>
+<DATA>
+<TV_NODEKEY>${nodeKey}</TV_NODEKEY>
+</DATA>
+</asx:values>
+</asx:abap>`;
+
+  // Make POST request with XML body
+  const response = await makeAdtRequestWithTimeout(
+    url,
+    'POST',
+    'default',
+    xmlBody,
+    params
+  );
+
+  return response;
+}
+
 export async function makeAdtRequest(
   url: string,
   method: string,

@@ -7,16 +7,18 @@ const path = require('path');
 // Parse command line arguments
 const args = process.argv.slice(2);
 if (args.length < 1) {
-  console.error('Usage: node test-get-enhancements.js <object_name> [program] [include_nested] [view_code] [env_file]');
+  console.error('Usage: node test-get-enhancements.js <object_name> [program] [include_nested] [view_code] [timeout] [env_file]');
   console.error('Example: node test-get-enhancements.js RM07DOCS');
   console.error('Example: node test-get-enhancements.js RM07DOCS "" true false');
   console.error('Example: node test-get-enhancements.js mv45afzz SAPMV45A false true');
+  console.error('Example: node test-get-enhancements.js SAPMV45A "" true false 10000');
   console.error('');
   console.error('Parameters:');
   console.error('  object_name    - Name of the ABAP program or include');
   console.error('  program        - Optional program context for includes (use "" to skip)');
   console.error('  include_nested - true/false to include nested enhancements (default: false)');
   console.error('  view_code      - true/false to display enhancement source code (default: false)');
+  console.error('  timeout        - Optional timeout in milliseconds (default: 30000)');
   console.error('  env_file       - Environment file to use (default: .env)');
   process.exit(1);
 }
@@ -25,7 +27,8 @@ const objectName = args[0];
 const program = args[1] && args[1] !== "" ? args[1] : undefined;
 const includeNested = args[2] === 'true';
 const viewCode = args[3] === 'true';
-const envFile = args[4] || '.env';
+const timeout = args[4] && !isNaN(parseInt(args[4])) ? parseInt(args[4]) : undefined;
+const envFile = args[5] || '.env';
 
 // Absolute path to dist/index.js
 const serverPath = path.resolve(__dirname, '../dist/index.js');
@@ -318,6 +321,10 @@ function sendGetEnhancementsRequest() {
   
   if (includeNested) {
     requestArgs.include_nested = includeNested;
+  }
+  
+  if (timeout) {
+    requestArgs.timeout = timeout;
   }
   
   const request = {

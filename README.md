@@ -8,6 +8,17 @@ This project provides a server that allows you to interact with SAP ABAP systems
   <img width="380" height="200" src="https://glama.ai/mcp/servers/gwkh12xlu7/badge" alt="ABAP ADT MCP server" />
 </a>
 
+## 🆕 What's New in BTP Branch
+
+This branch includes several powerful new features:
+
+- **🔍 Enhancement Analysis Tools**: `GetEnhancements`, `GetEnhancementByName` - Comprehensive enhancement discovery and analysis
+- **📋 Include Management**: `GetIncludesList` - Recursive include discovery and hierarchy mapping  
+- **🚀 SAP BTP Support**: JWT/XSUAA authentication with browser-based token helper
+- **💾 Freestyle SQL**: `GetSqlQuery` - Execute custom SQL queries via ADT Data Preview API
+- **⚙️ Advanced Configuration**: Configurable timeouts, flexible .env loading, enhanced logging
+- **🛠️ Developer Tools**: New testing utilities and improved error handling
+
 This guide is designed for beginners, so we'll walk through everything step-by-step. We'll cover:
 
 1.  **Prerequisites:** What you need before you start.
@@ -134,6 +145,53 @@ npx -y @smithery/cli install @mario-andreschak/mcp-abap-adt --client cline
 
         > ⚠️ Only two authorization types are supported: basic (username+password) and JWT (XSUAA, SAP_JWT_TOKEN). SSO/cookie flow is not supported.
 
+### 🚀 SAP BTP Authentication Helper (NEW!)
+
+For **SAP BTP ABAP Environment (Steampunk)** users, we provide a convenient browser-based authentication tool that automatically obtains JWT tokens and configures your `.env` file:
+
+```bash
+node tools/sap-abap-auth-browser.js auth --key path/to/your/service-key.json --browser chrome
+```
+
+**Parameters:**
+- `--key <path>`: Path to your SAP BTP service key JSON file (required)
+- `--browser <browser>`: Browser to open (chrome, edge, firefox, system, none). Use 'none' to get URL for manual copy
+
+**What it does:**
+1. Reads your SAP BTP service key
+2. Opens your browser for OAuth2 authentication
+3. Automatically exchanges the authorization code for a JWT token
+4. Creates/updates your `.env` file with the correct configuration
+
+**Example:**
+```bash
+# Using Chrome browser
+node tools/sap-abap-auth-browser.js auth --key ./my-service-key.json --browser chrome
+
+# Manual URL copy (no browser opening)
+node tools/sap-abap-auth-browser.js auth --key ./my-service-key.json --browser none
+```
+
+This tool is especially useful for SAP BTP environments where you need JWT authentication instead of basic username/password.
+
+### ⚙️ Advanced Configuration Options (NEW!)
+
+**Timeout Configuration:**
+The server now supports configurable timeouts for different types of operations. You can customize these in your `.env` file:
+
+- `SAP_TIMEOUT_DEFAULT=45000` - Default timeout for most operations (45 seconds)
+- `SAP_TIMEOUT_CSRF=15000` - Timeout for CSRF token requests (15 seconds)  
+- `SAP_TIMEOUT_LONG=60000` - Timeout for long-running operations like SQL queries and table contents (60 seconds)
+
+**Enhanced .env File Loading:**
+The server now supports flexible .env file loading:
+- Automatic detection of .env files in current directory or project root
+- Custom .env file path via `--env` parameter: `node dist/index.js --env=/path/to/custom.env`
+- Better error handling and logging for configuration issues
+
+**Improved Logging:**
+Enhanced logging system provides better debugging information and operation tracking.
+
 ## 3. Running the Server
 
 To be fair, you usually dont usually "run" this server on it's own. It is supposed to be integrated into an MCP Client like Cline or Claude Desktop. But you _can_ manually run the server in two main ways:
@@ -242,5 +300,7 @@ This server provides the following tools, which can be used through Cline (or an
 | `SearchObject`     | Search for ABAP objects using quick search. | `query` (string), `maxResults` (number, optional, default 100)    | `@tool SearchObject query=ZMY* maxResults=20`                     |
 | `GetInterface`     | Retrieve ABAP interface source code.        | `interface_name` (string): Name of the ABAP interface.            | `@tool GetInterface interface_name=ZIF_MY_INTERFACE`              |
 | `GetTransaction`   | Retrieve ABAP transaction details.          | `transaction_name` (string): Name of the ABAP transaction.        | `@tool GetTransaction transaction_name=ZMY_TRANSACTION`           |
-| `GetEnhancements`  | Retrieve enhancement implementations for ABAP programs or includes. Automatically detects object type and parses enhancement source code. | `object_name` (string): Name of the program or include, `program` (string, optional): For includes, manually specify parent program if auto-detection fails | `@tool GetEnhancements object_name=SD_SALES_DOCUMENT_VIEW` or `@tool GetEnhancements object_name=mv45afzz program=SAPMV45A` |
-| `GetIncludesList` | Recursively retrieve all includes within a given ABAP program or include based on code analysis | `object_name` (string): Name of the ABAP program or include, `object_type` (string): Type of object (program or include) | `@tool GetIncludesList object_name=SAPMV45A object_type=program` |
+| `GetEnhancements`  | 🔍 **ENHANCEMENT ANALYSIS**: Retrieve and analyze enhancement implementations in ABAP programs or includes. Automatically detects object type and extracts enhancement source code. Use `include_nested=true` for **COMPREHENSIVE RECURSIVE SEARCH** across all nested includes - finds ALL enhancements in the entire program hierarchy. | `object_name` (string): Name of the program or include, `program` (string, optional): For includes, manually specify parent program if auto-detection fails, `include_nested` (boolean, optional): If true, performs recursive enhancement search in all nested includes | `@tool GetEnhancements object_name=SD_SALES_DOCUMENT_VIEW` or `@tool GetEnhancements object_name=mv45afzz program=SAPMV45A include_nested=true` |
+| `GetEnhancementByName` | 📝 **ENHANCEMENT BY NAME**: Retrieve source code of a specific enhancement implementation by its name and enhancement spot. Use this when you know the exact enhancement spot and implementation name. | `enhancement_spot` (string): Name of the enhancement spot, `enhancement_name` (string): Name of the specific enhancement implementation | `@tool GetEnhancementByName enhancement_spot=enhoxhh enhancement_name=zpartner_update_pai` |
+| `GetSqlQuery` | **FREESTYLE SQL QUERIES**: Execute SQL queries via SAP ADT Data Preview API. Supports SELECT, WITH statements and other read-only SQL operations. | `sql_query` (string): SQL query to execute, `row_number` (number, optional, default 100): Maximum number of rows to return | `@tool GetSqlQuery sql_query="SELECT * FROM mara WHERE matnr LIKE 'TEST%'" row_number=50` |
+| `GetIncludesList` | 📋 **INCLUDE INVENTORY**: Recursively discover and list ALL include files within an ABAP program or include. Performs code analysis to find include statements and builds a complete hierarchy. Use this when you need to understand the program structure. | `object_name` (string): Name of the ABAP program or include, `object_type` (string): Type of object (program or include) | `@tool GetIncludesList object_name=SAPMV45A object_type=program` |

@@ -1,103 +1,90 @@
 import { McpError, ErrorCode, AxiosResponse } from '../lib/utils';
-import { makeAdtRequestWithTimeout, return_error, return_response, getBaseUrl, encodeSapObjectName } from '../lib/utils';
+import { fetchNodeStructure, return_error, return_response } from '../lib/utils';
 
-async function fetchSource(name: string, type: 'program' | 'include'): Promise<string | null> {
-    const baseUrl = await getBaseUrl();
-    let url: string;
-    // ABAP object names are case-insensitive but typically stored and queried in uppercase.
-    const upperName = name.toUpperCase();
-
-    if (type === 'program') {
-        url = `${baseUrl}/sap/bc/adt/programs/programs/${encodeSapObjectName(upperName)}/source/main`;
-    } else { // 'include'
-        url = `${baseUrl}/sap/bc/adt/programs/includes/${encodeSapObjectName(upperName)}/source/main`;
-    }
-
+/**
+ * Parses XML response to extract includes information
+ * @param xmlData XML response data
+ * @returns Array of include objects with name and node_id
+ */
+function parseIncludesFromXml(xmlData: string): Array<{name: string, node_id: string, label: string}> {
+    const includes: Array<{name: string, node_id: string, label: string}> = [];
+    
     try {
-        // Request plain text source code. ADT /source/main endpoint usually provides this.
-        // Added 'Content-Type': 'application/octet-stream' as ADT sometimes expects it.
-        const response = await makeAdtRequestWithTimeout(url, 'GET', 'default', undefined, { 'Accept': 'text/plain', 'Content-Type': 'application/octet-stream' });
-
-        if (response && response.data && typeof response.data === 'string') {
-            return response.data;
-        }
-        // Fallback if data is not a string but can be converted (e.g. Buffer from Axios)
-        if (response && response.data) {
-            return String(response.data);
-        }
-        console.warn(`No data received for ${type} ${upperName} from ${url}`);
-        return null;
-    } catch (error: any) {
-        if (error.isAxiosError && error.response && error.response.status === 404) {
-            // This is an expected case if an include is mentioned but doesn't exist, or initial object not found.
-            // console.debug(`Source not found (404) for ${type} ${upperName} at ${url}`);
-        } else {
-            // Log other errors but allow the process to continue for other branches if possible.
-            console.warn(`Failed to fetch source for ${type} ${upperName} from ${url}: ${error.message}`);
-        }
-        return null;
-    }
-}
-
-function parseIncludes(sourceCode: string): string[] {
-    const includes: string[] = [];
-    
-    // Розділимо код на рядки і проаналізуємо кожен рядок окремо
-    const lines = sourceCode.split('\n');
-    
-    for (let i = 0; i < lines.length; i++) {
-        const line = lines[i];
+        // Simple regex-based parsing for XML
+        // Look for OBJECT_TYPE entries that contain "PROG/I" (includes)
+        const objectTypeRegex = /<SEU_ADT_OBJECT_TYPE_INFO>(.*?)<\/SEU_ADT_OBJECT_TYPE_INFO>/gs;
+        const matches = xmlData.match(objectTypeRegex);
         
-        // Видаляємо всі пробіли та табуляції для аналізу
-        const cleanLine = line.replace(/\s+/g, ' ').trim().toUpperCase();
-        
-        // Перевіряємо, чи рядок починається з INCLUDE
-        if (cleanLine.startsWith('INCLUDE ') && cleanLine.includes('.')) {
-            // Витягуємо назву між INCLUDE і крапкою
-            const match = cleanLine.match(/^INCLUDE\s+([A-Z0-9_<>']+)\s*\./);
-            if (match) {
-                let includeName = match[1];
-                // Нормалізація імені включення: видалення <, >, ' символів
-                includeName = includeName.replace(/[<>']/g, '');
-                if (!includes.includes(includeName)) {
-                    includes.push(includeName);
-                    console.log(`DEBUG: Found include: ${includeName} from line ${i+1}: ${line.trim()}`);
+        if (matches) {
+            for (const match of matches) {
+                // Check if this is an include type
+                if (match.includes('<OBJECT_TYPE>PROG/I</OBJECT_TYPE>')) {
+                    const nodeIdMatch = match.match(/<NODE_ID>(\d+)<\/NODE_ID>/);
+                    const labelMatch = match.match(/<OBJECT_TYPE_LABEL>(.*?)<\/OBJECT_TYPE_LABEL>/);
+                    
+                    if (nodeIdMatch && labelMatch) {
+                        includes.push({
+                            name: 'PROG/I',
+                            node_id: nodeIdMatch[1],
+                            label: labelMatch[1]
+                        });
+                    }
                 }
             }
         }
+    } catch (error) {
+        console.warn('Error parsing XML for includes:', error);
     }
     
     return includes;
 }
 
-async function findIncludesRecursive(
-    objectName: string,
-    objectType: 'program' | 'include',
-    allFoundIncludes: Set<string>, // Accumulates all unique include names found
-    visited: Set<string>          // Tracks "type:NAME" to prevent reprocessing and cycles
-): Promise<void> {
-    const upperObjectName = objectName.toUpperCase();
-    const visitedKey = `${objectType}:${upperObjectName}`;
-
-    if (visited.has(visitedKey)) {
-        return; // Already processed or in a processing cycle
+/**
+ * Parses XML response to extract actual include names from node structure
+ * @param xmlData XML response data
+ * @returns Array of include names
+ */
+function parseIncludeNamesFromXml(xmlData: string): string[] {
+    const includeNames: string[] = [];
+    
+    try {
+        // Look for SEU_ADT_REPOSITORY_OBJ_NODE entries with OBJECT_TYPE PROG/I
+        const nodeRegex = /<SEU_ADT_REPOSITORY_OBJ_NODE>(.*?)<\/SEU_ADT_REPOSITORY_OBJ_NODE>/gs;
+        const nodeMatches = xmlData.match(nodeRegex);
+        
+        if (nodeMatches) {
+            for (const nodeMatch of nodeMatches) {
+                // Check if this node is for includes (PROG/I)
+                if (nodeMatch.includes('<OBJECT_TYPE>PROG/I</OBJECT_TYPE>')) {
+                    // Extract the object name
+                    const nameMatch = nodeMatch.match(/<OBJECT_NAME>([^<]+)<\/OBJECT_NAME>/);
+                    if (nameMatch && nameMatch[1].trim()) {
+                        const includeName = nameMatch[1].trim();
+                        // Decode URL-encoded names if needed
+                        const decodedName = decodeURIComponent(includeName);
+                        includeNames.push(decodedName);
+                    }
+                }
+            }
+        }
+        
+        // If no nodes found, try alternative parsing for OBJECT_NAME tags
+        if (includeNames.length === 0) {
+            const objectNameRegex = /<OBJECT_NAME>([^<]+)<\/OBJECT_NAME>/g;
+            let match;
+            while ((match = objectNameRegex.exec(xmlData)) !== null) {
+                const name = match[1].trim();
+                if (name && name.length > 0) {
+                    const decodedName = decodeURIComponent(name);
+                    includeNames.push(decodedName);
+                }
+            }
+        }
+    } catch (error) {
+        console.warn('Error parsing XML for include names:', error);
     }
-    visited.add(visitedKey);
-
-    const sourceCode = await fetchSource(upperObjectName, objectType);
-    if (!sourceCode) {
-        // If source couldn't be fetched (e.g., 404 or other error), stop recursion for this path.
-        return;
-    }
-
-    const directIncludes = parseIncludes(sourceCode);
-    for (const includeName of directIncludes) {
-        // Add to the global list of found includes. Set handles uniqueness.
-        allFoundIncludes.add(includeName);
-        // Recursively find includes within this newly found include.
-        // All subsequent includes are of type 'include'.
-        await findIncludesRecursive(includeName, 'include', allFoundIncludes, visited);
-    }
+    
+    return [...new Set(includeNames)]; // Remove duplicates
 }
 
 export async function handleGetIncludesList(args: any) {
@@ -111,16 +98,58 @@ export async function handleGetIncludesList(args: any) {
             throw new McpError(ErrorCode.InvalidParams, 'Parameter "object_type" must be either "program" or "include".');
         }
 
-        const allFoundIncludes = new Set<string>();
-        const visited = new Set<string>(); // To handle cyclic dependencies and avoid redundant fetches
+        // For includes, we need to determine the parent program
+        let parentName = object_name;
+        let parentTechName = object_name;
+        let parentType = 'PROG/P';
 
-        // Запуск рекурсивного пошуку включень
-        await findIncludesRecursive(object_name, object_type, allFoundIncludes, visited);
+        if (object_type === 'include') {
+            // For includes, we assume they belong to a program with similar name
+            // This is a simplification - in real scenarios, you might need additional logic
+            // to determine the actual parent program
+            console.warn(`Include processing: assuming parent program for include ${object_name}`);
+        }
 
-        // Створюємо псевдо-response об'єкт для сумісності з return_response
-        const includesList = Array.from(allFoundIncludes);
-        const responseData = includesList.length > 0 
-            ? `Found ${includesList.length} includes in ${object_type} '${object_name}':\n${includesList.join('\n')}`
+        // Step 1: Get root node structure to find includes node
+        const rootResponse = await fetchNodeStructure(
+            parentName.toUpperCase(),
+            parentTechName.toUpperCase(),
+            parentType,
+            '000000', // Root node
+            true // with descriptions
+        );
+
+        // Step 2: Parse response to find includes node ID
+        const includesInfo = parseIncludesFromXml(rootResponse.data);
+        const includesNode = includesInfo.find(info => info.name === 'PROG/I');
+        
+        if (!includesNode) {
+            // Return empty result if no includes node found
+            const mockResponse = {
+                data: `No includes found in ${object_type} '${object_name}'.`,
+                status: 200,
+                statusText: 'OK',
+                headers: {},
+                config: {}
+            } as any;
+            return return_response(mockResponse);
+        }
+
+        // Step 3: Get includes list using the found node ID
+        const includesResponse = await fetchNodeStructure(
+            parentName.toUpperCase(),
+            parentTechName.toUpperCase(),
+            parentType,
+            includesNode.node_id,
+            true // with descriptions
+        );
+
+        // Step 4: Parse the includes response to extract include names
+        const includeNames = parseIncludeNamesFromXml(includesResponse.data);
+        
+        // Create formatted response similar to the original recursive method
+        const responseData = includeNames.length > 0 
+            ? `Found ${includeNames.length} includes in ${object_type} '${object_name}':\n${includeNames.join('\n')}`
             : `No includes found in ${object_type} '${object_name}'.`;
         
         const mockResponse = {
@@ -134,7 +163,6 @@ export async function handleGetIncludesList(args: any) {
         return return_response(mockResponse);
 
     } catch (error) {
-        // Catches McpError and other exceptions, then formats them using return_error.
         return return_error(error);
     }
 }

@@ -1,6 +1,5 @@
 import { McpError, ErrorCode } from '../lib/utils';
-import { makeAdtRequestWithTimeout, return_error, return_response, getBaseUrl, logger, encodeSapObjectName } from '../lib/utils';
-import { handleGetIncludesList } from './handleGetIncludesList';
+import { makeAdtRequestWithTimeout, return_error, return_response, getBaseUrl, logger, encodeSapObjectName, fetchNodeStructure } from '../lib/utils';
 
 /**
  * Interface for enhancement implementation data
@@ -213,6 +212,157 @@ async function determineObjectTypeAndPath(objectName: string, manualProgramConte
 }
 
 /**
+ * Parses XML response to extract includes information
+ * @param xmlData XML response data
+ * @returns Array of include objects with name and node_id
+ */
+function parseIncludesFromXml(xmlData: string): Array<{name: string, node_id: string, label: string}> {
+    const includes: Array<{name: string, node_id: string, label: string}> = [];
+    
+    try {
+        // Simple regex-based parsing for XML
+        // Look for OBJECT_TYPE entries that contain "PROG/I" (includes)
+        const objectTypeRegex = /<SEU_ADT_OBJECT_TYPE_INFO>(.*?)<\/SEU_ADT_OBJECT_TYPE_INFO>/gs;
+        const matches = xmlData.match(objectTypeRegex);
+        
+        if (matches) {
+            for (const match of matches) {
+                // Check if this is an include type
+                if (match.includes('<OBJECT_TYPE>PROG/I</OBJECT_TYPE>')) {
+                    const nodeIdMatch = match.match(/<NODE_ID>(\d+)<\/NODE_ID>/);
+                    const labelMatch = match.match(/<OBJECT_TYPE_LABEL>(.*?)<\/OBJECT_TYPE_LABEL>/);
+                    
+                    if (nodeIdMatch && labelMatch) {
+                        includes.push({
+                            name: 'PROG/I',
+                            node_id: nodeIdMatch[1],
+                            label: labelMatch[1]
+                        });
+                    }
+                }
+            }
+        }
+    } catch (error) {
+        logger.warn('Error parsing XML for includes:', error);
+    }
+    
+    return includes;
+}
+
+/**
+ * Parses XML response to extract actual include names from node structure
+ * @param xmlData XML response data
+ * @returns Array of include names
+ */
+function parseIncludeNamesFromXml(xmlData: string): string[] {
+    const includeNames: string[] = [];
+    
+    try {
+        // Look for SEU_ADT_REPOSITORY_OBJ_NODE entries with OBJECT_TYPE PROG/I
+        const nodeRegex = /<SEU_ADT_REPOSITORY_OBJ_NODE>(.*?)<\/SEU_ADT_REPOSITORY_OBJ_NODE>/gs;
+        const nodeMatches = xmlData.match(nodeRegex);
+        
+        if (nodeMatches) {
+            for (const nodeMatch of nodeMatches) {
+                // Check if this node is for includes (PROG/I)
+                if (nodeMatch.includes('<OBJECT_TYPE>PROG/I</OBJECT_TYPE>')) {
+                    // Extract the object name
+                    const nameMatch = nodeMatch.match(/<OBJECT_NAME>([^<]+)<\/OBJECT_NAME>/);
+                    if (nameMatch && nameMatch[1].trim()) {
+                        const includeName = nameMatch[1].trim();
+                        // Decode URL-encoded names if needed
+                        const decodedName = decodeURIComponent(includeName);
+                        includeNames.push(decodedName);
+                    }
+                }
+            }
+        }
+        
+        // If no nodes found, try alternative parsing for OBJECT_NAME tags
+        if (includeNames.length === 0) {
+            const objectNameRegex = /<OBJECT_NAME>([^<]+)<\/OBJECT_NAME>/g;
+            let match;
+            while ((match = objectNameRegex.exec(xmlData)) !== null) {
+                const name = match[1].trim();
+                if (name && name.length > 0) {
+                    const decodedName = decodeURIComponent(name);
+                    includeNames.push(decodedName);
+                }
+            }
+        }
+    } catch (error) {
+        logger.warn('Error parsing XML for include names:', error);
+    }
+    
+    return [...new Set(includeNames)]; // Remove duplicates
+}
+
+/**
+ * Internal function to get includes list using SAP ADT API
+ * @param objectName - Name of the object
+ * @param objectType - Type of the object ('program' | 'include' | 'class')
+ * @returns Array of include names
+ */
+async function getIncludesListInternal(objectName: string, objectType: 'program' | 'include' | 'class'): Promise<string[]> {
+    try {
+        // Classes don't have includes in the traditional sense
+        if (objectType === 'class') {
+            logger.info(`Classes don't have includes. Returning empty list for class '${objectName}'`);
+            return [];
+        }
+
+        // For includes, we need to determine the parent program
+        let parentName = objectName;
+        let parentTechName = objectName;
+        let parentType = 'PROG/P';
+
+        if (objectType === 'include') {
+            // For includes, we assume they belong to a program with similar name
+            // This is a simplification - in real scenarios, you might need additional logic
+            // to determine the actual parent program
+            logger.warn(`Include processing: assuming parent program for include ${objectName}`);
+        }
+
+        // Step 1: Get root node structure to find includes node
+        const rootResponse = await fetchNodeStructure(
+            parentName.toUpperCase(),
+            parentTechName.toUpperCase(),
+            parentType,
+            '000000', // Root node
+            true // with descriptions
+        );
+
+        // Step 2: Parse response to find includes node ID
+        const includesInfo = parseIncludesFromXml(rootResponse.data);
+        const includesNode = includesInfo.find(info => info.name === 'PROG/I');
+        
+        if (!includesNode) {
+            logger.info(`No includes node found for ${objectType} '${objectName}'`);
+            return [];
+        }
+
+        // Step 3: Get includes list using the found node ID
+        const includesResponse = await fetchNodeStructure(
+            parentName.toUpperCase(),
+            parentTechName.toUpperCase(),
+            parentType,
+            includesNode.node_id,
+            true // with descriptions
+        );
+
+        // Step 4: Parse the includes response to extract include names
+        const includeNames = parseIncludeNamesFromXml(includesResponse.data);
+        
+        logger.info(`Found ${includeNames.length} includes for ${objectType} '${objectName}' using SAP ADT API`);
+        return includeNames;
+
+    } catch (error) {
+        logger.error(`Failed to get includes list for ${objectType} '${objectName}':`, error);
+        return [];
+    }
+}
+
+/**
  * Gets enhancements for a single object (program or include)
  * @param objectName - Name of the object
  * @param manualProgramContext - Optional manual program context for includes
@@ -263,6 +413,8 @@ async function getEnhancementsForSingleObject(objectName: string, manualProgramC
  *   - object_name: Name of the ABAP object
  *   - program: Optional manual program context for includes  
  *   - include_nested: Optional boolean - if true, also searches enhancements in all nested includes
+ *   - timeout: Optional timeout in milliseconds for each ADT request (default: 30000ms = 30s)
+ *   - max_includes: Optional maximum number of includes to process (default: 50)
  * @returns Response with parsed enhancement data or error
  */
 export async function handleGetEnhancements(args: any) {
@@ -277,9 +429,15 @@ export async function handleGetEnhancements(args: any) {
         const manualProgram = args.program; // Optional manual program context for includes
         const includeNested = args.include_nested === true; // Optional boolean for recursive include search
         
+        // Simple timeout logic: one timeout for all ADT requests
+        const requestTimeout = args.timeout ? parseInt(args.timeout, 10) : 30000; // Timeout for each ADT request (default: 30s)
+        const maxIncludes = args.max_includes ? parseInt(args.max_includes, 10) : 50; // Maximum number of includes to process
+        
         logger.info(`Getting enhancements for object: ${objectName}`, {
             manualProgram: manualProgram || '(not provided)',
-            includeNested: includeNested
+            includeNested: includeNested,
+            requestTimeout: requestTimeout,
+            maxIncludes: maxIncludes
         });
         
         // Get enhancements for the main object
@@ -300,38 +458,121 @@ export async function handleGetEnhancements(args: any) {
         // If include_nested is true, also get enhancements from all nested includes
         logger.info('Searching for nested includes and their enhancements...');
         
-        // Get all includes recursively
-        const includesResult = await handleGetIncludesList({
-            object_name: objectName,
-            object_type: mainEnhancementResponse.object_type
-        });
-        
-        // Parse the includes list from the result
-        let includesList: string[] = [];
-        if (includesResult.content && includesResult.content[0] && includesResult.content[0].text) {
-            const includesText = includesResult.content[0].text;
-            // Extract include names from the text response
-            const includesMatch = includesText.match(/Found \d+ includes[^:]*:\n(.+)/s);
-            if (includesMatch && includesMatch[1]) {
-                includesList = includesMatch[1].split('\n').map(line => line.trim()).filter(line => line.length > 0);
+        // Wrap the entire nested processing in a timeout
+        const processNestedIncludes = async () => {
+            // Get all includes recursively using the internal SAP ADT API function
+            let includesList = await getIncludesListInternal(objectName, mainEnhancementResponse.object_type);
+            
+            logger.info(`Found ${includesList.length} nested includes:`, includesList);
+            
+            // Limit the number of includes to process to avoid timeout
+            if (includesList.length > maxIncludes) {
+                logger.warn(`Too many includes found (${includesList.length}). Limiting to first ${maxIncludes} includes to avoid timeout.`);
+                includesList = includesList.slice(0, maxIncludes);
             }
-        }
-        
-        logger.info(`Found ${includesList.length} nested includes:`, includesList);
-        
-        // Collect all enhancement responses
-        const allEnhancementResponses: EnhancementResponse[] = [mainEnhancementResponse];
-        
-        // Get enhancements for each include
-        for (const includeName of includesList) {
-            try {
-                logger.info(`Getting enhancements for nested include: ${includeName}`);
-                const includeEnhancements = await getEnhancementsForSingleObject(includeName, manualProgram);
-                allEnhancementResponses.push(includeEnhancements);
-            } catch (error) {
-                logger.warn(`Failed to get enhancements for include ${includeName}:`, error);
-                // Continue with other includes even if one fails
+            
+            // Collect all enhancement responses
+            const allEnhancementResponses: EnhancementResponse[] = [mainEnhancementResponse];
+            
+            // Add configuration for parallel processing
+            const maxConcurrentRequests = parseInt(process.env.MAX_CONCURRENT_ENHANCEMENT_REQUESTS || '3', 10);
+            const useParallelProcessing = process.env.USE_PARALLEL_ENHANCEMENT_PROCESSING === 'true';
+            
+            if (useParallelProcessing && includesList.length > 0) {
+                logger.info(`Processing ${includesList.length} includes in parallel with max concurrency: ${maxConcurrentRequests}`);
+                
+                // Process includes in batches to avoid overwhelming the server
+                for (let i = 0; i < includesList.length; i += maxConcurrentRequests) {
+                    const batch = includesList.slice(i, i + maxConcurrentRequests);
+                    logger.info(`Processing batch ${Math.floor(i / maxConcurrentRequests) + 1}: ${batch.join(', ')}`);
+                    
+                    const batchPromises = batch.map(async (includeName) => {
+                        try {
+                            // Create a promise with individual timeout for each include
+                            const includeEnhancementsPromise = getEnhancementsForSingleObject(includeName, manualProgram);
+                            
+                            const includeEnhancements = await createPromiseWithTimeout(
+                                includeEnhancementsPromise,
+                                requestTimeout,
+                                `Timeout: Failed to get enhancements for include ${includeName} within ${requestTimeout}ms`
+                            );
+                            
+                            return { success: true, includeName, data: includeEnhancements };
+                        } catch (error) {
+                            logger.warn(`Failed to get enhancements for include ${includeName}:`, error);
+                            return { success: false, includeName, error: error instanceof Error ? error.message : String(error) };
+                        }
+                    });
+                    
+                    // Wait for all promises in the current batch to complete
+                    const batchResults = await Promise.allSettled(batchPromises);
+                    
+                    // Process batch results
+                    for (const result of batchResults) {
+                        if (result.status === 'fulfilled' && result.value.success && result.value.data) {
+                            allEnhancementResponses.push(result.value.data);
+                        }
+                    }
+                    
+                    // Add a small delay between batches to be gentle on the server
+                    if (i + maxConcurrentRequests < includesList.length) {
+                        await new Promise(resolve => setTimeout(resolve, 1000));
+                    }
+                }
+            } else {
+                // Sequential processing (original behavior with individual timeouts)
+                
+                // Get enhancements for each include with individual timeout handling
+                for (const includeName of includesList) {
+                    try {
+                        logger.info(`Getting enhancements for nested include: ${includeName}`);
+                        
+                        // Create a promise with individual timeout for each include
+                        const includeEnhancementsPromise = getEnhancementsForSingleObject(includeName, manualProgram);
+                        
+                        const includeEnhancements = await createPromiseWithTimeout(
+                            includeEnhancementsPromise,
+                            requestTimeout,
+                            `Timeout: Failed to get enhancements for include ${includeName} within ${requestTimeout}ms`
+                        );
+                        
+                        allEnhancementResponses.push(includeEnhancements);
+                    } catch (error) {
+                        logger.warn(`Failed to get enhancements for include ${includeName}:`, error);
+                        // Continue with other includes even if one fails
+                    }
+                }
             }
+            
+            return allEnhancementResponses;
+        };
+        
+        // Execute nested processing without total timeout - each request has its own timeout
+        let allEnhancementResponses: EnhancementResponse[];
+        try {
+            allEnhancementResponses = await processNestedIncludes();
+        } catch (error) {
+            logger.error('Nested enhancement processing failed or timed out:', error);
+            // Return partial results with just the main object
+            return {
+                content: [
+                    {
+                        type: "text",
+                        text: JSON.stringify({
+                            main_object: {
+                                name: objectName,
+                                type: mainEnhancementResponse.object_type
+                            },
+                            include_nested: true,
+                            error: error instanceof Error ? error.message : String(error),
+                            partial_result: true,
+                            total_objects_analyzed: 1,
+                            total_enhancements_found: mainEnhancementResponse.enhancements.length,
+                            objects: [mainEnhancementResponse]
+                        }, null, 2)
+                    }
+                ]
+            };
         }
         
         // Create combined response
@@ -358,4 +599,38 @@ export async function handleGetEnhancements(args: any) {
     } catch (error) {
         return return_error(error);
     }
+}
+
+/**
+ * Creates a promise with timeout that properly cleans up the timeout when the promise resolves
+ * @param promise - The promise to wrap with timeout
+ * @param timeoutMs - Timeout in milliseconds
+ * @param errorMessage - Error message to use when timeout occurs
+ * @returns Promise that resolves with the original promise result or rejects with timeout error
+ */
+function createPromiseWithTimeout<T>(
+    promise: Promise<T>,
+    timeoutMs: number,
+    errorMessage: string
+): Promise<T> {
+    let timeoutId: NodeJS.Timeout;
+    
+    const timeoutPromise = new Promise<never>((_, reject) => {
+        timeoutId = setTimeout(() => {
+            reject(new Error(errorMessage));
+        }, timeoutMs);
+    });
+    
+    return Promise.race([
+        promise.then(result => {
+            // Clear timeout when main promise resolves successfully
+            clearTimeout(timeoutId);
+            return result;
+        }).catch(error => {
+            // Clear timeout when main promise rejects
+            clearTimeout(timeoutId);
+            throw error;
+        }),
+        timeoutPromise
+    ]);
 }
