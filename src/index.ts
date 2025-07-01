@@ -26,7 +26,9 @@ import { handleGetInterface } from "./handlers/handleGetInterface";
 import { handleGetTransaction } from "./handlers/handleGetTransaction";
 import { handleSearchObject } from "./handlers/handleSearchObject";
 import { handleGetEnhancements } from "./handlers/handleGetEnhancements";
-import { handleGetEnhancementByName } from "./handlers/handleGetEnhancementByName";
+import { handleGetEnhancementImpl } from "./handlers/handleGetEnhancementImpl";
+import { handleGetEnhancementSpot } from "./handlers/handleGetEnhancementSpot";
+import { handleGetBdef } from "./handlers/handleGetBdef";
 import { handleGetSqlQuery } from "./handlers/handleGetSqlQuery";
 import { handleGetRelatedObjectTypes } from "./handlers/handleGetRelatedObjectTypes";
 import { handleGetObjectsByType } from "./handlers/handleGetObjectsByType";
@@ -402,7 +404,7 @@ export class mcp_abap_adt_server {
           },
           {
             name: "SearchObject",
-            description: "Search for ABAP objects using quick search",
+            description: "Performs a quick search for ABAP objects in the SAP system. Accepts a 'query' string parameter (required) to specify the search term, and an optional 'maxResults' number parameter to limit the number of results (default: 100). Returns a list of matching ABAP objects with their names, types, and basic metadata. Useful for finding programs, classes, function modules, and other ABAP repository objects by partial or full name.",
             inputSchema: {
               type: "object",
               properties: {
@@ -530,8 +532,22 @@ export class mcp_abap_adt_server {
             },
           },
           {
-            name: "GetEnhancementByName",
-            description: "📝 ENHANCEMENT BY NAME: Retrieve source code of a specific enhancement implementation by its name and enhancement spot. Use this when you know the exact enhancement spot and implementation name.",
+            name: "GetEnhancementSpot",
+            description: "Retrieve metadata and list of implementations for a specific enhancement spot. Use this to get spot-level information and available implementations.",
+            inputSchema: {
+              type: "object",
+              properties: {
+                enhancement_spot: {
+                  type: "string",
+                  description: "Name of the enhancement spot (e.g., 'enhoxhh')",
+                }
+              },
+              required: ["enhancement_spot"],
+            },
+          },
+          {
+            name: "GetEnhancementImpl",
+            description: "Retrieve source code of a specific enhancement implementation by its name and enhancement spot. Use this when you know both the enhancement spot and implementation name.",
             inputSchema: {
               type: "object",
               properties: {
@@ -571,6 +587,20 @@ export class mcp_abap_adt_server {
               required: ["object_name", "object_type"],
             },
           },
+          {
+            name: "GetBdef",
+            description: "Retrieve the source code of a BDEF (Behavior Definition) for a CDS entity. Accepts a 'bdef_name' string parameter (required) specifying the name of the BDEF. Returns the BDEF source code and raw XML from the SAP ADT API.",
+            inputSchema: {
+              type: "object",
+              properties: {
+                bdef_name: {
+                  type: "string",
+                  description: "Name of the BDEF (Behavior Definition), e.g., 'Z_I_MYENTITY'",
+                },
+              },
+              required: ["bdef_name"],
+            },
+          },
         ],
       };
     });
@@ -606,14 +636,18 @@ export class mcp_abap_adt_server {
           return await handleGetTransaction(request.params.arguments);
         case "GetEnhancements":
           return await handleGetEnhancements(request.params.arguments);
-        case "GetEnhancementByName":
-          return await handleGetEnhancementByName(request.params.arguments);
+        case "GetEnhancementSpot":
+          return await handleGetEnhancementSpot(request.params.arguments);
+        case "GetEnhancementImpl":
+          return await handleGetEnhancementImpl(request.params.arguments);
         case "GetSqlQuery":
           return await handleGetSqlQuery(request.params.arguments);
         case "GetIncludesList":
           return await handleGetIncludesList(request.params.arguments);
         case "GetWhereUsed":
           return await handleGetWhereUsed(request.params.arguments);
+        case "GetBdef":
+          return await handleGetBdef(request.params.arguments);
         default:
           throw new McpError(
             ErrorCode.MethodNotFound,

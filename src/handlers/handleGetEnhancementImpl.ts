@@ -53,15 +53,21 @@ function parseEnhancementSourceFromXml(xmlData: string): string {
 }
 
 /**
- * Handler to retrieve a specific enhancement implementation by name
- * Uses the ADT API endpoint for reading enhancement source code directly
+ * Handler to retrieve a specific enhancement implementation by name in an ABAP system.
+ * This function is intended for retrieving the source code of a specific enhancement implementation (requires both spot and implementation name).
+ * This function uses the SAP ADT API endpoint to fetch the source code of a specific enhancement
+ * implementation within a given enhancement spot. If the implementation is not found, it falls back
+ * to retrieving metadata about the enhancement spot itself to provide context about the failure.
  * 
  * @param args - Tool arguments containing:
- *   - enhancement_spot: Name of the enhancement spot (e.g., 'enhoxhh')
- *   - enhancement_name: Name of the specific enhancement implementation (e.g., 'zpartner_update_pai')
- * @returns Response with enhancement source code or error
+ *   - enhancement_spot: Name of the enhancement spot (e.g., 'enhoxhh'). This is a required parameter.
+ *   - enhancement_name: Name of the specific enhancement implementation (e.g., 'zpartner_update_pai'). This is a required parameter.
+ * @returns Response object containing:
+ *   - If successful: enhancement_spot, enhancement_name, source_code, and raw_xml of the enhancement implementation.
+ *   - If implementation not found: enhancement_spot, enhancement_name, status as 'not_found', a message, spot_metadata, and raw_xml of the spot.
+ *   - In case of error: an error object with details about the failure.
  */
-export async function handleGetEnhancementByName(args: any) {
+export async function handleGetEnhancementImpl(args: any) {
     try {
         logger.info('handleGetEnhancementByName called with args:', args);
         
@@ -106,10 +112,44 @@ export async function handleGetEnhancementByName(args: any) {
                 ]
             };
         } else {
-            throw new McpError(
-                ErrorCode.InternalError, 
-                `Failed to retrieve enhancement ${enhancementName} from spot ${enhancementSpot}. Status: ${response.status}`
-            );
+            logger.warn(`Enhancement ${enhancementName} not found in spot ${enhancementSpot}. Status: ${response.status}. Attempting to retrieve spot metadata as fallback.`);
+            // Fallback to retrieve metadata about the enhancement spot
+            const spotUrl = `${await getBaseUrl()}/sap/bc/adt/enhancements/${encodeSapObjectName(enhancementSpot)}`;
+            logger.info(`Fallback enhancement spot URL: ${spotUrl}`);
+            
+            const spotResponse = await makeAdtRequestWithTimeout(spotUrl, 'GET', 'default', {
+                'Accept': 'application/vnd.sap.adt.enhancements.v1+xml'
+            });
+            
+            if (spotResponse.status === 200 && spotResponse.data) {
+                // Parse metadata if possible
+                const metadata: { description?: string } = {};
+                const descriptionMatch = spotResponse.data.match(/<adtcore:description>([^<]*)<\/adtcore:description>/);
+                if (descriptionMatch && descriptionMatch[1]) {
+                    metadata.description = descriptionMatch[1];
+                }
+                
+                return {
+                    content: [
+                        {
+                            type: "text",
+                            text: JSON.stringify({
+                                enhancement_spot: enhancementSpot,
+                                enhancement_name: enhancementName,
+                                status: "not_found",
+                                message: `Enhancement implementation ${enhancementName} not found in spot ${enhancementSpot}.`,
+                                spot_metadata: metadata,
+                                raw_xml: spotResponse.data
+                            }, null, 2)
+                        }
+                    ]
+                };
+            } else {
+                throw new McpError(
+                    ErrorCode.InternalError, 
+                    `Failed to retrieve enhancement ${enhancementName} from spot ${enhancementSpot}. Status: ${response.status}. Fallback to retrieve spot metadata also failed. Status: ${spotResponse.status}`
+                );
+            }
         }
         
     } catch (error) {
