@@ -254,6 +254,24 @@ export class mcp_abap_adt_server {
         tools: [
           // Define available tools
           {
+            name: "GetDescription",
+            description: "Strict match ABAP object search by name. Returns metadata and description for an object with the exact name and type. Supported types: program, class, include, interface, function, functiongroup, package, table, bdef, enhancementspot, enhancementimpl. Useful for retrieving description and type for a specific ABAP object.",
+            inputSchema: {
+              type: "object",
+              properties: {
+                object_name: {
+                  type: "string",
+                  description: "Exact name of the ABAP object to search for",
+                },
+                object_type: {
+                  type: "string",
+                  description: "ABAP object type (program, class, include, interface, function, functiongroup, package, table, bdef, enhancementspot, enhancementimpl)",
+                }
+              },
+              required: ["object_name", "object_type"],
+            },
+          },
+          {
             name: "GetProgram",
             description: "Retrieve ABAP program source code. Returns only the main program source code without includes or enhancements. Use GetIncludesList to get all includes, or GetEnhancements with include_nested=true for comprehensive enhancement analysis.",
             inputSchema: {
@@ -404,7 +422,7 @@ export class mcp_abap_adt_server {
           },
           {
             name: "SearchObject",
-            description: "Performs a quick search for ABAP objects in the SAP system. Accepts a 'query' string parameter (required) to specify the search term, and an optional 'maxResults' number parameter to limit the number of results (default: 100). Returns a list of matching ABAP objects with their names, types, and basic metadata. Useful for finding programs, classes, function modules, and other ABAP repository objects by partial or full name.",
+            description: "Quick search for ABAP repository objects (programs, classes, function modules, tables, CDS, BDEF, and more) by name or pattern. Accepts a 'query' string (required) and optional 'maxResults' (default: 1). Returns a list of matching objects with name, type, and metadata. Useful for finding any ABAP object by partial or full name. Example: query='ZMY*', maxResults=10.",
             inputSchema: {
               type: "object",
               properties: {
@@ -651,6 +669,8 @@ export class mcp_abap_adt_server {
           return await handleGetWhereUsed(request.params.arguments);
         case "GetBdef":
           return await handleGetBdef(request.params.arguments);
+        case "GetDescription":
+          return await (await import("./handlers/handleGetDescription.js")).handleGetDescription(request.params.arguments as any);
         default:
           throw new McpError(
             ErrorCode.MethodNotFound,
