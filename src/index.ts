@@ -415,7 +415,7 @@ export class mcp_abap_adt_server {
                 maxResults: {
                   type: "number",
                   description: "Maximum number of results to return",
-                  default: 100,
+                  default: 1,
                 },
               },
               required: ["query"],
@@ -575,8 +575,11 @@ export class mcp_abap_adt_server {
                 },
                 object_type: {
                   type: "string",
-                  enum: ["class", "program", "include", "function", "interface", "package"],
-                  description: "Type of the ABAP object",
+                  enum: [
+                    "class", "program", "include", "function", "interface", "package",
+                    "table", "TABL", "bdef", "BDEF"
+                  ],
+                  description: "Type of the ABAP object. Supported values: class, program, include, function, interface, package, table/TABL, bdef/BDEF.",
                 },
                 detailed: {
                   type: "boolean",

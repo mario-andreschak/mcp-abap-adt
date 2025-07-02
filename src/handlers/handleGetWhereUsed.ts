@@ -15,17 +15,31 @@ interface WhereUsedReference {
 
 interface WhereUsedArgs {
     object_name: string;
-    object_type: 'class' | 'program' | 'include' | 'function' | 'interface' | 'package';
+    object_type: string; // Now supports any ADT object type, e.g. 'class', 'program', 'table', 'bdef', etc.
     detailed?: boolean;
 }
 
 
 /**
- * Builds the URI for the object based on its type and name
+ * Builds the URI for the object based on its type and name.
+ * 
+ * Supported object_type values:
+ * - 'class'      → ABAP class
+ * - 'program'    → ABAP program
+ * - 'include'    → ABAP include
+ * - 'function'   → ABAP function group
+ * - 'interface'  → ABAP interface
+ * - 'package'    → ABAP package
+ * - 'table'/'TABL' → ABAP table (DDIC)
+ * - 'bdef'/'BDEF' → ABAP Behavior Definition
+ * 
+ * You can extend this list by adding new cases for other ADT object types (e.g. CDS, DT, etc.).
+ * 
+ * If an unsupported object_type is provided, an error will be thrown.
  */
 function buildObjectUri(objectName: string, objectType: string): string {
     const encodedName = encodeSapObjectName(objectName);
-    
+
     switch (objectType) {
         case 'class':
             return `/sap/bc/adt/oo/classes/${encodedName}`;
@@ -39,6 +53,14 @@ function buildObjectUri(objectName: string, objectType: string): string {
             return `/sap/bc/adt/oo/interfaces/${encodedName}`;
         case 'package':
             return `/sap/bc/adt/packages/${encodedName}`;
+        case 'table':
+        case 'tabl':
+        case 'TABL':
+            return `/sap/bc/adt/ddic/tables/${encodedName}`;
+        case 'bdef':
+        case 'BDEF':
+            return `/sap/bc/adt/bo/behaviordefinitions/${encodedName}`;
+        // Add more object types here as needed (e.g. CDS, DT, etc.)
         default:
             throw new McpError(ErrorCode.InvalidParams, `Unsupported object type: ${objectType}`);
     }
@@ -266,11 +288,7 @@ export async function handleGetWhereUsed(args: any) {
             throw new McpError(ErrorCode.InvalidParams, 'Object type is required');
         }
         
-        const validTypes = ['class', 'program', 'include', 'function', 'interface', 'package'];
-        if (!validTypes.includes(args.object_type)) {
-            throw new McpError(ErrorCode.InvalidParams, `Object type must be one of: ${validTypes.join(', ')}`);
-        }
-        
+        // Accept any object_type, validation is now handled in buildObjectUri
         const typedArgs = args as WhereUsedArgs;
         
         // 1. Build the object URI
