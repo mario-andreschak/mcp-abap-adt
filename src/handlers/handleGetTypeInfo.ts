@@ -24,7 +24,14 @@ export async function handleGetTypeInfo(args: any) {
             const response = await makeAdtRequestWithTimeout(url, 'GET', 'default');
             return return_response(response);
         } catch (error) {
-            return return_error(error);
+            // no data element found, try table type
+            try {
+                const url = `${await getBaseUrl()}/sap/bc/adt/ddic/tabletypes/${encodeSapObjectName(args.type_name)}`;
+                const response = await makeAdtRequestWithTimeout(url, 'GET', 'default');
+                return return_response(response);
+            } catch (error) {
+                return return_error(error);
+            }
         }
 
     }

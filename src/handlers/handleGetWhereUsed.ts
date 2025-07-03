@@ -49,18 +49,67 @@ function buildObjectUri(objectName: string, objectType: string): string {
             return `/sap/bc/adt/programs/includes/${encodedName}`;
         case 'function':
             return `/sap/bc/adt/functions/groups/${encodedName}`;
+        case 'functionmodule':
+        case 'function_module':
+        case 'function-module':
+        case 'fm':
+        case 'fugr/ff':
+            // objectName: GROUP|FM_NAME
+            if (objectName.includes('|')) {
+                const [group, fm] = objectName.split('|');
+                return `/sap/bc/adt/functions/groups/${encodeSapObjectName(group)}/fmodules/${encodeSapObjectName(fm)}`;
+            }
+            throw new McpError(ErrorCode.InvalidParams, 'Function module name must be in format GROUP|FM_NAME');
         case 'interface':
             return `/sap/bc/adt/oo/interfaces/${encodedName}`;
+        case 'badi':
+        case 'badi_class':
+        case 'badi-interface':
+        case 'badi-implementation':
+            return `/sap/bc/adt/oo/interfaces/${encodedName}`;
+        case 'badi_class_impl':
+        case 'badi-class-impl':
+            return `/sap/bc/adt/oo/classes/${encodedName}`;
         case 'package':
             return `/sap/bc/adt/packages/${encodedName}`;
         case 'table':
         case 'tabl':
         case 'TABL':
             return `/sap/bc/adt/ddic/tables/${encodedName}`;
+        case 'dataelement':
+        case 'data_element':
+        case 'data-element':
+            return `/sap/bc/adt/ddic/dataelements/${encodedName}`;
+        case 'domain':
+            return `/sap/bc/adt/ddic/domains/${encodedName}`;
+        case 'view':
+        case 'ddicview':
+        case 'cdsview':
+            return `/sap/bc/adt/ddic/views/${encodedName}`;
+        case 'searchhelp':
+        case 'search_help':
+        case 'search-help':
+            return `/sap/bc/adt/ddic/searchhelps/${encodedName}`;
+        case 'messageclass':
+        case 'message_class':
+        case 'message-class':
+            return `/sap/bc/adt/ddic/messageclasses/${encodedName}`;
+        case 'transaction':
+            return `/sap/bc/adt/transactions/${encodedName}`;
         case 'bdef':
         case 'BDEF':
             return `/sap/bc/adt/bo/behaviordefinitions/${encodedName}`;
-        // Add more object types here as needed (e.g. CDS, DT, etc.)
+        case 'enhancementspot':
+        case 'enhancement_spot':
+        case 'enhancement-spot':
+        case 'enhs':
+        case 'enho':
+            return `/sap/bc/adt/enhancements/enhsxsb/${encodedName}`;
+        case 'enhancementimpl':
+        case 'enhancement_impl':
+        case 'enhancement-impl':
+        case 'enhi':
+            return `/sap/bc/adt/enhancements/enhoxhh/${encodedName}`;
         default:
             throw new McpError(ErrorCode.InvalidParams, `Unsupported object type: ${objectType}`);
     }
@@ -277,6 +326,29 @@ function parseWhereUsedResponse(xmlData: string): WhereUsedReference[] {
     return references;
 }
 
+/**
+ * Returns where-used references for ABAP objects.
+ * 
+ * Supported object_type values:
+ * - class
+ * - program
+ * - include
+ * - function (function group)
+ * - functionmodule (function module, format: GROUP|FM_NAME)
+ * - interface
+ * - badi, badi_class, badi-implementation
+ * - package
+ * - table, tabl, TABL
+ * - dataelement
+ * - domain
+ * - view, ddicview, cdsview
+ * - searchhelp
+ * - messageclass
+ * - transaction
+ * - bdef, BDEF
+ * - enhancementspot, enhs, enho
+ * - enhancementimpl, enhi
+ */
 export async function handleGetWhereUsed(args: any) {
     try {
         // Validate required parameters
