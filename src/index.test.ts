@@ -13,6 +13,7 @@ import { handleGetTypeInfo } from './handlers/handleGetTypeInfo';
 import { handleGetInterface } from './handlers/handleGetInterface';
 import { handleGetTransaction } from './handlers/handleGetTransaction';
 import { handleSearchObject } from './handlers/handleSearchObject';
+import { handleGetDDL } from './handlers/handleGetDDL';
 import { cleanup } from './lib/utils';
 
 describe('mcp_abap_adt_server - Integration Tests', () => {
@@ -148,6 +149,17 @@ describe('mcp_abap_adt_server - Integration Tests', () => {
       expect(Array.isArray(result.content)).toBe(true);
       expect(result.content.length).toBeGreaterThan(0);
       expect(result.content[0].type).toBe('text');
+    });
+  });
+
+  describe('handleGetDDL', () => {
+    it('should successfully retrieve DDL/CDS view details', async () => {
+      const result = await handleGetDDL({ cds_name: 'I_Currency' });
+      expect(result.isError).toBe(false);
+      expect(Array.isArray(result.content)).toBe(true);
+      expect(result.content.length).toBeGreaterThan(0);
+      expect(result.content[0].type).toBe('text');
+      expect(result.content[0].text).toContain('CDS 뷰 정보');
     });
   });
 });

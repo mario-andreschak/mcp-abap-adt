@@ -65,8 +65,7 @@ export async function getBaseUrl() {
     const { url } = config;
     try {
         const urlObj = new URL(url);
-        const baseUrl = Buffer.from(`${urlObj.origin}`);
-        return baseUrl;
+        return urlObj.origin;
     } catch (error) {
         const errorMessage = `Invalid URL in configuration: ${error instanceof Error ? error.message : error}`;
         throw new Error(errorMessage);

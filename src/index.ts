@@ -13,6 +13,7 @@ import dotenv from 'dotenv';
 // Import handler functions
 import { handleGetProgram } from './handlers/handleGetProgram';
 import { handleGetClass } from './handlers/handleGetClass';
+import { handleGetWhereUsed } from './handlers/handleGetWhereUsed';
 import { handleGetFunctionGroup } from './handlers/handleGetFunctionGroup';
 import { handleGetFunction } from './handlers/handleGetFunction';
 import { handleGetTable } from './handlers/handleGetTable';
@@ -24,6 +25,7 @@ import { handleGetTypeInfo } from './handlers/handleGetTypeInfo';
 import { handleGetInterface } from './handlers/handleGetInterface';
 import { handleGetTransaction } from './handlers/handleGetTransaction';
 import { handleSearchObject } from './handlers/handleSearchObject';
+import { handleGetDDL } from './handlers/handleGetDDL';
 
 // Import shared utility functions and types
 import { getBaseUrl, getAuthHeaders, createAxiosInstance, makeAdtRequest, return_error, return_response } from './lib/utils';
@@ -127,6 +129,30 @@ export class mcp_abap_adt_server {
                 }
               },
               required: ['class_name']
+            }
+          },
+          {
+            name: 'GetWhereUsed',
+            description: 'Retrieve Where Used information for ABAP objects',
+            inputSchema: {
+              type: 'object',
+              properties: {
+                object_name: {
+                  type: 'string',
+                  description: 'Name of the ABAP object'
+                },
+                object_type: {
+                  type: 'string',
+                  description: 'Type of the ABAP object (CLASS, INTERFACE, PROGRAM, FUNCTION, TABLE, STRUCTURE)',
+                  enum: ['CLASS', 'INTERFACE', 'PROGRAM', 'FUNCTION', 'TABLE', 'STRUCTURE']
+                },
+                max_results: {
+                  type: 'number',
+                  description: 'Maximum number of results to return',
+                  default: 100
+                }
+              },
+              required: ['object_name']
             }
           },
           {
@@ -296,6 +322,20 @@ export class mcp_abap_adt_server {
               },
               required: ['interface_name']
             }
+          },
+          {
+            name: 'GetCds',
+            description: 'Retrieve CDS view source code',
+            inputSchema: {
+              type: 'object',
+              properties: {
+                cds_name: {
+                  type: 'string',
+                  description: 'Name of the CDS view'
+                }
+              },
+              required: ['cds_name']
+            }
           }
         ]
       };
@@ -307,7 +347,9 @@ export class mcp_abap_adt_server {
         case 'GetProgram':
           return await handleGetProgram(request.params.arguments);
         case 'GetClass':
-          return await handleGetClass(request.params.arguments);
+          return await handleGetClass(request.params.arguments as any);
+        case 'GetWhereUsed':
+          return await handleGetWhereUsed(request.params.arguments as any);
         case 'GetFunction':
           return await handleGetFunction(request.params.arguments);
         case 'GetFunctionGroup':
@@ -317,7 +359,7 @@ export class mcp_abap_adt_server {
         case 'GetTable':
           return await handleGetTable(request.params.arguments);
         case 'GetTableContents':
-          return await handleGetTableContents(request.params.arguments);
+          return await handleGetTableContents(request.params.arguments as any);
         case 'GetPackage':
           return await handleGetPackage(request.params.arguments);
         case 'GetTypeInfo':
@@ -330,6 +372,8 @@ export class mcp_abap_adt_server {
           return await handleGetInterface(request.params.arguments);
         case 'GetTransaction':
           return await handleGetTransaction(request.params.arguments);
+        case 'GetCds':
+          return await handleGetDDL(request.params.arguments as any);
         default:
           throw new McpError(
             ErrorCode.MethodNotFound,
