@@ -212,4 +212,4 @@ This server provides the following tools, which can be used through Cline (or an
 | `SearchObject`      | Search for ABAP objects using quick search.       | `query` (string): Search query string.<br>`maxResults` (number, optional, default 100): Maximum number of results to return. | `@tool SearchObject query=ZMY* maxResults=20`              |
 | `GetInterface`      | Retrieve ABAP interface source code.              | `interface_name` (string): Name of the ABAP interface.             | `@tool GetInterface interface_name=ZIF_MY_INTERFACE`       |
 | `GetTransaction`    | Retrieve ABAP transaction details.                | `transaction_name` (string): Name of the ABAP transaction.         | `@tool GetTransaction transaction_name=ZMY_TRANSACTION`    |
-| `GetCds`            | Retrieve CDS view source code.                     | `cds_name` (string): Name of the CDS view.                         | `@tool GetCds cds_name=ZI_MY_CDS_VIEW`                     |
+| `GetDDL`            | Retrieve CDS view source code.                     | `cds_name` (string): Name of the CDS view.                         | `@tool GetCds cds_name=ZI_MY_CDS_VIEW`                     |
