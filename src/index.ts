@@ -25,7 +25,7 @@ import { handleGetTypeInfo } from './handlers/handleGetTypeInfo';
 import { handleGetInterface } from './handlers/handleGetInterface';
 import { handleGetTransaction } from './handlers/handleGetTransaction';
 import { handleSearchObject } from './handlers/handleSearchObject';
-import { handleGetDDL } from './handlers/handleGetDDL';
+import { handleGetCDS } from './handlers/handleGetCDS';
 
 // Import shared utility functions and types
 import { getBaseUrl, getAuthHeaders, createAxiosInstance, makeAdtRequest, return_error, return_response } from './lib/utils';
@@ -373,7 +373,7 @@ export class mcp_abap_adt_server {
         case 'GetTransaction':
           return await handleGetTransaction(request.params.arguments);
         case 'GetCds':
-          return await handleGetDDL(request.params.arguments as any);
+          return await handleGetCDS(request.params.arguments as any);
         default:
           throw new McpError(
             ErrorCode.MethodNotFound,

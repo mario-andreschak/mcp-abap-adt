@@ -13,7 +13,8 @@ import { handleGetTypeInfo } from './handlers/handleGetTypeInfo';
 import { handleGetInterface } from './handlers/handleGetInterface';
 import { handleGetTransaction } from './handlers/handleGetTransaction';
 import { handleSearchObject } from './handlers/handleSearchObject';
-import { handleGetDDL } from './handlers/handleGetDDL';
+import { handleGetCDS } from './handlers/handleGetCDS';
+import { handleGetWhereUsed } from './handlers/handleGetWhereUsed';
 import { cleanup } from './lib/utils';
 
 describe('mcp_abap_adt_server - Integration Tests', () => {
@@ -152,14 +153,49 @@ describe('mcp_abap_adt_server - Integration Tests', () => {
     });
   });
 
-  describe('handleGetDDL', () => {
-    it('should successfully retrieve DDL/CDS view details', async () => {
-      const result = await handleGetDDL({ cds_name: 'I_Currency' });
+  describe('handleGetCDS', () => {
+    it('should successfully retrieve CDS view details', async () => {
+      const result = await handleGetCDS({ cds_name: 'I_Currency' });
       expect(result.isError).toBe(false);
       expect(Array.isArray(result.content)).toBe(true);
       expect(result.content.length).toBeGreaterThan(0);
       expect(result.content[0].type).toBe('text');
       expect(result.content[0].text).toContain('CDS 뷰 정보');
+    });
+  });
+
+  describe('handleGetWhereUsed', () => {
+    it('should successfully retrieve Where Used information for SBOOK table', async () => {
+      const result = await handleGetWhereUsed({ 
+        object_name: 'SBOOK', 
+        object_type: 'TABLE',
+        max_results: 50
+      });
+      expect(result.isError).toBe(false);
+      expect(Array.isArray(result.content)).toBe(true);
+      expect(result.content.length).toBeGreaterThan(0);
+      expect(result.content[0].type).toBe('text');
+      expect(result.content[0].text).toContain('SBOOK');
+    });
+
+    it('should handle different object types', async () => {
+      const result = await handleGetWhereUsed({ 
+        object_name: 'CL_ABAP_OBJECTDESCR', 
+        object_type: 'CLASS',
+        max_results: 25
+      });
+      expect(result.isError).toBe(false);
+      expect(Array.isArray(result.content)).toBe(true);
+      expect(result.content.length).toBeGreaterThan(0);
+      expect(result.content[0].type).toBe('text');
+    });
+
+    it('should handle missing object name', async () => {
+      const result = await handleGetWhereUsed({ 
+        object_name: '',
+        object_type: 'TABLE'
+      });
+      expect(result.isError).toBe(true);
     });
   });
 });
