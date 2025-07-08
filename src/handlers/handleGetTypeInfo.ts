@@ -36,3 +36,5 @@ export async function handleGetTypeInfo(args: any) {
 
     }
 }
+
+module.exports = { handleGetTypeInfo };
