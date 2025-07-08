@@ -45,17 +45,23 @@ export async function handleGetBdef(args: any) {
         });
 
         if (response.status === 200 && typeof response.data === "string") {
-            return {
+            const result = {
+                isError: false,
                 content: [
                     {
-                        type: "text",
-                        text: JSON.stringify({
+                        type: "json",
+                        json: {
                             bdef_name: bdefName,
                             source_code: response.data
-                        }, null, 2)
+                        }
                     }
                 ]
             };
+            if (args.filePath) {
+                const fs = require('fs');
+                fs.writeFileSync(args.filePath, JSON.stringify(result, null, 2), 'utf-8');
+            }
+            return result;
         } else if (response.status === 404) {
             throw new McpError(ErrorCode.InternalError, `Behavior definition '${bdefName}' not found`);
         } else {

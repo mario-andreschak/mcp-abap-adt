@@ -42,65 +42,70 @@ const child = spawn('node', [serverPath, `--env=${envPath}`], {
 
 child.stdout.on('data', (data) => {
   const dataStr = data.toString();
-  
-  try {
-    const jsonData = JSON.parse(dataStr);
-    
-    if (jsonData.id === 'test-get-program') {
-      console.log('\n▶ SERVER RESPONSE: PROGRAM SOURCE');
-      console.log('-'.repeat(40));
-      
-      if (jsonData.error) {
-        console.log(`❌ ERROR: ${jsonData.error.message} (code ${jsonData.error.code})`);
-      } else {
-        console.log(`✅ SUCCESS: Program source received\n`);
-        
-        // Extract and display source code
-        let sourceCode = '';
-        if (jsonData.result?.content?.[0]?.text) {
-          sourceCode = jsonData.result.content[0].text;
+
+  // Only parse lines that start with '{' (likely JSON)
+  const lines = dataStr.split('\n');
+  for (const line of lines) {
+    if (line.trim().startsWith('{')) {
+      try {
+        const jsonData = JSON.parse(line);
+        if (jsonData.id === 'test-get-program') {
+          console.log('\n▶ SERVER RESPONSE: PROGRAM SOURCE');
+          console.log('-'.repeat(40));
+
+          if (jsonData.error) {
+            console.log(`❌ ERROR: ${jsonData.error.message} (code ${jsonData.error.code})`);
+          } else {
+            console.log(`✅ SUCCESS: Program source received\n`);
+
+            // Extract and display source code
+            let sourceCode = '';
+            if (jsonData.result?.content?.[0]?.text) {
+              sourceCode = jsonData.result.content[0].text;
+            }
+
+            console.log('SOURCE CODE:');
+            console.log('='.repeat(80));
+            console.log(sourceCode);
+            console.log('='.repeat(80));
+
+            // Analyze INCLUDE statements
+            console.log('\n▶ INCLUDE ANALYSIS');
+            console.log('-'.repeat(40));
+
+            const includePattern = /^\s*INCLUDE\s+([A-Z0-9_<>']+)\s*\.\s*(?:\"|\*.*)?$/gim;
+            const includes = [];
+            let match;
+            while ((match = includePattern.exec(sourceCode)) !== null) {
+              let includeName = match[1];
+              includeName = includeName.replace(/[<>']/g, '').toUpperCase();
+              includes.push({
+                original: match[0].trim(),
+                name: includeName,
+                line: sourceCode.substring(0, match.index).split('\n').length
+              });
+            }
+
+            if (includes.length > 0) {
+              console.log(`Found ${includes.length} INCLUDE statements:`);
+              includes.forEach((inc, i) => {
+                console.log(`${i+1}. Line ${inc.line}: ${inc.name}`);
+                console.log(`   Raw: ${inc.original}`);
+              });
+            } else {
+              console.log('No INCLUDE statements found');
+            }
+          }
+
+          responseReceived = true;
+          console.log('\nTest completed successfully. Stopping server...');
+          child.kill();
+          process.exit(0);
         }
-        
-        console.log('SOURCE CODE:');
-        console.log('='.repeat(80));
-        console.log(sourceCode);
-        console.log('='.repeat(80));
-        
-        // Analyze INCLUDE statements
-        console.log('\n▶ INCLUDE ANALYSIS');
-        console.log('-'.repeat(40));
-        
-        const includePattern = /^\s*INCLUDE\s+([A-Z0-9_<>']+)\s*\.\s*(?:\"|\*.*)?$/gim;
-        const includes = [];
-        let match;
-        while ((match = includePattern.exec(sourceCode)) !== null) {
-          let includeName = match[1];
-          includeName = includeName.replace(/[<>']/g, '').toUpperCase();
-          includes.push({
-            original: match[0].trim(),
-            name: includeName,
-            line: sourceCode.substring(0, match.index).split('\n').length
-          });
-        }
-        
-        if (includes.length > 0) {
-          console.log(`Found ${includes.length} INCLUDE statements:`);
-          includes.forEach((inc, i) => {
-            console.log(`${i+1}. Line ${inc.line}: ${inc.name}`);
-            console.log(`   Raw: ${inc.original}`);
-          });
-        } else {
-          console.log('No INCLUDE statements found');
-        }
+      } catch (e) {
+        // Ignore parse errors for non-JSON lines
       }
-      
-      responseReceived = true;
-      console.log('\nTest completed successfully. Stopping server...');
-      child.kill();
-      process.exit(0);
     }
-  } catch (e) {
-    process.stdout.write(`[STDOUT] ${dataStr}`);
   }
 });
 

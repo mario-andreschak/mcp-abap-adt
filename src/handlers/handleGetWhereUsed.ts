@@ -415,15 +415,20 @@ export async function handleGetWhereUsed(args: any) {
             references: formattedReferences
         };
         
-        return {
+        const result = {
             isError: false,
             content: [
                 {
-                    type: "text",
-                    text: JSON.stringify(formattedResponse, null, 2),
+                    type: "json",
+                    json: formattedResponse,
                 },
             ],
         };
+        if (args.filePath) {
+            const fs = require('fs');
+            fs.writeFileSync(args.filePath, JSON.stringify(result, null, 2), 'utf-8');
+        }
+        return result;
         
     } catch (error) {
         return return_error(error);

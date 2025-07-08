@@ -79,15 +79,23 @@ export async function handleGetClass(args: any) {
                 ]
             };
             if (args.filePath) {
-                writeResultToFile(result, args.filePath);
+                writeResultToFile(JSON.stringify(result, null, 2), args.filePath);
             }
             return result;
         } else {
-            const plainResult = return_response(response);
+            // Plain text: повертаємо у старому JSON-форматі, у файл — багаторядковий текст
             if (args.filePath) {
-                writeResultToFile(plainResult, args.filePath);
+                writeResultToFile(response.data, args.filePath);
             }
-            return plainResult;
+            return {
+                isError: false,
+                content: [
+                    {
+                        type: "text",
+                        text: response.data
+                    }
+                ]
+            };
         }
     } catch (error) {
         return return_error(error);

@@ -61,7 +61,7 @@ export async function handleGetTypeInfo(args: any) {
     try {
         const url = `${await getBaseUrl()}/sap/bc/adt/ddic/domains/${encodeSapObjectName(args.type_name)}/source/main`;
         const response = await makeAdtRequestWithTimeout(url, 'GET', 'default');
-        return {
+        const result = {
             isError: false,
             content: [
                 {
@@ -70,12 +70,17 @@ export async function handleGetTypeInfo(args: any) {
                 }
             ]
         };
+        if (args.filePath) {
+            const fs = require('fs');
+            fs.writeFileSync(args.filePath, JSON.stringify(result, null, 2), 'utf-8');
+        }
+        return result;
     } catch (error) {
         // no domain found, try data element
         try {
             const url = `${await getBaseUrl()}/sap/bc/adt/ddic/dataelements/${encodeSapObjectName(args.type_name)}`;
             const response = await makeAdtRequestWithTimeout(url, 'GET', 'default');
-            return {
+            const result = {
                 isError: false,
                 content: [
                     {
@@ -84,12 +89,17 @@ export async function handleGetTypeInfo(args: any) {
                     }
                 ]
             };
+            if (args.filePath) {
+                const fs = require('fs');
+                fs.writeFileSync(args.filePath, JSON.stringify(result, null, 2), 'utf-8');
+            }
+            return result;
         } catch (error) {
             // no data element found, try table type
             try {
                 const url = `${await getBaseUrl()}/sap/bc/adt/ddic/tabletypes/${encodeSapObjectName(args.type_name)}`;
                 const response = await makeAdtRequestWithTimeout(url, 'GET', 'default');
-                return {
+                const result = {
                     isError: false,
                     content: [
                         {
@@ -98,6 +108,11 @@ export async function handleGetTypeInfo(args: any) {
                         }
                     ]
                 };
+                if (args.filePath) {
+                    const fs = require('fs');
+                    fs.writeFileSync(args.filePath, JSON.stringify(result, null, 2), 'utf-8');
+                }
+                return result;
             } catch (error) {
                 // fallback: try repository informationsystem for domain
                 try {
@@ -105,15 +120,20 @@ export async function handleGetTypeInfo(args: any) {
                     const uri = encodeURIComponent(`/sap/bc/adt/ddic/domains/${args.type_name.toLowerCase()}`);
                     const url = `${baseUrl}/sap/bc/adt/repository/informationsystem/objectproperties/values?uri=${uri}`;
                     const response = await makeAdtRequestWithTimeout(url, 'GET', 'default');
-                    return {
-                        isError: false,
-                        content: [
-                            {
-                                type: "json",
-                                json: parseTypeInfoXml(response.data)
-                            }
-                        ]
-                    };
+                        const result = {
+                            isError: false,
+                            content: [
+                                {
+                                    type: "json",
+                                    json: parseTypeInfoXml(response.data)
+                                }
+                            ]
+                        };
+                        if (args.filePath) {
+                            const fs = require('fs');
+                            fs.writeFileSync(args.filePath, JSON.stringify(result, null, 2), 'utf-8');
+                        }
+                        return result;
                 } catch (error) {
                     return return_error(error);
                 }

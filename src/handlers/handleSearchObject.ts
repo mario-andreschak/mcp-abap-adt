@@ -9,7 +9,12 @@ export async function handleSearchObject(args: any) {
         const maxResults = args.maxResults || 100;
         const url = `${await getBaseUrl()}/sap/bc/adt/repository/informationsystem/search?operation=quickSearch&query=${encodeSapObjectName(args.query)}*&maxResults=${maxResults}`;
         const response = await makeAdtRequestWithTimeout(url, 'GET', 'default');
-        return return_response(response);
+        const result = return_response(response);
+        if (args.filePath) {
+            const fs = require('fs');
+            fs.writeFileSync(args.filePath, JSON.stringify(result, null, 2), 'utf-8');
+        }
+        return result;
     } catch (error) {
         return return_error(error);
     }

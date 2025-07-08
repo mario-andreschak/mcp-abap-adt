@@ -122,15 +122,16 @@ export async function handleGetEnhancementSpot(args: any) {
             };
             
             const result = {
+                isError: false,
                 content: [
                     {
-                        type: "text",
-                        text: JSON.stringify(enhancementSpotResponse, null, 2)
+                        type: "json",
+                        json: enhancementSpotResponse
                     }
                 ]
             };
             if (args.filePath) {
-                writeResultToFile(result, args.filePath);
+                writeResultToFile(JSON.stringify(result, null, 2), args.filePath);
             }
             return result;
         } else {

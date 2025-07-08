@@ -105,15 +105,16 @@ export async function handleGetEnhancementImpl(args: any) {
             };
             
             const result = {
+                isError: false,
                 content: [
                     {
-                        type: "text",
-                        text: JSON.stringify(enhancementResponse, null, 2)
+                        type: "json",
+                        json: enhancementResponse
                     }
                 ]
             };
             if (args.filePath) {
-                writeResultToFile(result, args.filePath);
+                writeResultToFile(JSON.stringify(result, null, 2), args.filePath);
             }
             return result;
         } else {
@@ -134,25 +135,26 @@ export async function handleGetEnhancementImpl(args: any) {
                     metadata.description = descriptionMatch[1];
                 }
                 
-                const fallbackResult = {
-                    content: [
-                        {
-                            type: "text",
-                            text: JSON.stringify({
-                                enhancement_spot: enhancementSpot,
-                                enhancement_name: enhancementName,
-                                status: "not_found",
-                                message: `Enhancement implementation ${enhancementName} not found in spot ${enhancementSpot}.`,
-                                spot_metadata: metadata,
-                                raw_xml: spotResponse.data
-                            }, null, 2)
+            const fallbackResult = {
+                isError: false,
+                content: [
+                    {
+                        type: "json",
+                        json: {
+                            enhancement_spot: enhancementSpot,
+                            enhancement_name: enhancementName,
+                            status: "not_found",
+                            message: `Enhancement implementation ${enhancementName} not found in spot ${enhancementSpot}.`,
+                            spot_metadata: metadata,
+                            raw_xml: spotResponse.data
                         }
-                    ]
-                };
-                if (args.filePath) {
-                    writeResultToFile(fallbackResult, args.filePath);
-                }
-                return fallbackResult;
+                    }
+                ]
+            };
+            if (args.filePath) {
+                writeResultToFile(JSON.stringify(fallbackResult, null, 2), args.filePath);
+            }
+            return fallbackResult;
             } else {
                 throw new McpError(
                     ErrorCode.InternalError, 
