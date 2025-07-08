@@ -80,9 +80,9 @@ describe("mcp_abap_adt_server - Integration Tests", () => {
         function_name: "WB_PGEDITOR_INITIAL_SCREEN",
         function_group: "WBABAP",
       });
-      // Новий формат: handleGetFunction може повертати undefined або помилку, якщо функція не знайдена
+      // New format: handleGetFunction may return undefined or an error if the function is not found
       if (!result || !Array.isArray(result.content) || result.content.length === 0) {
-        // Якщо немає результату або content, тест вважається пропущеним (skip)
+        // If there is no result or content, the test is considered skipped
         return;
       }
       expect(result.content[0].type).toBe("text");
@@ -239,7 +239,7 @@ define table t000 {
   describe("handleGetTransaction", () => {
     it("should successfully retrieve transaction details", async () => {
       const result = await handleGetTransaction({ transaction_name: "SE93" });
-      // Використовуємо наш логер замість console.log
+      // Use our logger instead of console.log
       expect(result.isError).toBe(false);
       expect(Array.isArray(result.content)).toBe(true);
       expect(result.content.length).toBeGreaterThan(0);
