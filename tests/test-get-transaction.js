@@ -9,8 +9,10 @@ async function main() {
     };
     const result = await handleGetTransaction(args);
     console.log('handleGetTransaction result:', JSON.stringify(result, null, 2));
+    process.exit(0);
   } catch (e) {
     console.error('Error:', e);
+    process.exit(1);
   }
 }
 
