@@ -90,15 +90,23 @@ export async function handleGetFunction(args: any) {
                 ]
             };
             if (args.filePath) {
-                writeResultToFile(result, args.filePath);
+                writeResultToFile(JSON.stringify(result, null, 2), args.filePath);
             }
             return result;
         } else {
-            // Plain text: повертаємо як є (без JSON-обгортки)
+            // Plain text: повертаємо у старому JSON-форматі, у файл — багаторядковий текст
             if (args.filePath) {
                 writeResultToFile(response.data, args.filePath);
             }
-            return response.data;
+            return {
+                isError: false,
+                content: [
+                    {
+                        type: "text",
+                        text: response.data
+                    }
+                ]
+            };
         }
     } catch (error) {
         return return_error(error);

@@ -13,7 +13,15 @@ export async function handleGetInclude(args: any) {
         if (args.filePath) {
             writeResultToFile(plainText, args.filePath);
         }
-        return plainText;
+        return {
+            isError: false,
+            content: [
+                {
+                    type: "text",
+                    text: plainText
+                }
+            ]
+        };
     } catch (error) {
         return return_error(error);
     }

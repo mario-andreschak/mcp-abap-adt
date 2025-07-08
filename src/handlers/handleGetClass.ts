@@ -68,11 +68,27 @@ export async function handleGetClass(args: any) {
         const url = `${await getBaseUrl()}/sap/bc/adt/oo/classes/${encodeSapObjectName(args.class_name)}/source/main`;
         const response = await makeAdtRequestWithTimeout(url, 'GET', 'default');
         // Якщо XML — парсимо, якщо ні — повертаємо як є
-        const plainText = response.data;
-        if (args.filePath) {
-            writeResultToFile(plainText, args.filePath);
+        if (typeof response.data === 'string' && response.data.trim().startsWith('<?xml')) {
+            const result = {
+                isError: false,
+                content: [
+                    {
+                        type: "json",
+                        json: parseClassXml(response.data)
+                    }
+                ]
+            };
+            if (args.filePath) {
+                writeResultToFile(result, args.filePath);
+            }
+            return result;
+        } else {
+            const plainResult = return_response(response);
+            if (args.filePath) {
+                writeResultToFile(plainResult, args.filePath);
+            }
+            return plainResult;
         }
-        return plainText;
     } catch (error) {
         return return_error(error);
     }
