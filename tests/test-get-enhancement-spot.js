@@ -7,6 +7,11 @@ async function main() {
     const args = {
       enhancement_spot: process.argv[2] || 'ENHOXHH'
     };
+    // Support --filePath=... as optional CLI argument
+    const filePathArg = process.argv.find(arg => arg.startsWith('--filePath='));
+    if (filePathArg) {
+      args.filePath = filePathArg.split('=')[1];
+    }
     const result = await handleGetEnhancementSpot(args);
     console.log('handleGetEnhancementSpot result:', JSON.stringify(result, null, 2));
     process.exit(0);
