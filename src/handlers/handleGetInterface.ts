@@ -1,5 +1,45 @@
 import { McpError, ErrorCode, AxiosResponse } from '../lib/utils';
 import { makeAdtRequestWithTimeout, return_error, return_response, getBaseUrl, encodeSapObjectName } from '../lib/utils';
+import { XMLParser } from 'fast-xml-parser';
+
+function parseInterfaceXml(xml: string) {
+    const parser = new XMLParser({
+        ignoreAttributes: false,
+        attributeNamePrefix: '',
+        parseAttributeValue: true,
+        trimValues: true
+    });
+    const result = parser.parse(xml);
+
+    // ADT Interface XML (INTF/OI)
+    if (result['oo:interface']) {
+        const i = result['oo:interface'];
+        return {
+            name: i['adtcore:name'],
+            objectType: 'interface',
+            description: i['adtcore:description'],
+            package: i['adtcore:packageRef']?.['adtcore:name'] || null,
+            interfaces: Array.isArray(i['oo:interfaces']?.['oo:interface'])
+                ? i['oo:interfaces']['oo:interface'].map(ii => ii['adtcore:name'])
+                : i['oo:interfaces']?.['oo:interface']
+                ? [i['oo:interfaces']['oo:interface']['adtcore:name']]
+                : [],
+            methods: Array.isArray(i['oo:methods']?.['oo:method'])
+                ? i['oo:methods']['oo:method'].map(m => m['adtcore:name'])
+                : i['oo:methods']?.['oo:method']
+                ? [i['oo:methods']['oo:method']['adtcore:name']]
+                : [],
+            attributes: Array.isArray(i['oo:attributes']?.['oo:attribute'])
+                ? i['oo:attributes']['oo:attribute'].map(a => a['adtcore:name'])
+                : i['oo:attributes']?.['oo:attribute']
+                ? [i['oo:attributes']['oo:attribute']['adtcore:name']]
+                : []
+        };
+    }
+
+    // fallback: return raw
+    return { raw: result };
+}
 
 export async function handleGetInterface(args: any) {
     try {
@@ -8,7 +48,20 @@ export async function handleGetInterface(args: any) {
         }
         const url = `${await getBaseUrl()}/sap/bc/adt/oo/interfaces/${encodeSapObjectName(args.interface_name)}/source/main`;
         const response = await makeAdtRequestWithTimeout(url, 'GET', 'default');
-        return return_response(response);
+        // Якщо XML — парсимо, якщо ні — повертаємо як є
+        if (typeof response.data === 'string' && response.data.trim().startsWith('<?xml')) {
+            return {
+                isError: false,
+                content: [
+                    {
+                        type: "json",
+                        json: parseInterfaceXml(response.data)
+                    }
+                ]
+            };
+        } else {
+            return return_response(response);
+        }
     } catch (error) {
         return return_error(error);
     }

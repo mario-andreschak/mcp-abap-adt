@@ -1,6 +1,6 @@
 // Test for handleGetFunction
 
-const { handleGetFunction } = require('../src/handlers/handleGetFunction');
+const { handleGetFunction } = require('../dist/handlers/handleGetFunction');
 
 async function main() {
   try {
