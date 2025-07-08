@@ -5,7 +5,8 @@ const { handleGetFunctionGroup } = require('../src/handlers/handleGetFunctionGro
 async function main() {
   try {
     const args = {
-      function_group: process.argv[2] || 'ZFG'
+      function_group: process.argv[2] || 'ZFG',
+      filePath: process.argv[3] || undefined
     };
     const result = await handleGetFunctionGroup(args);
     console.log('handleGetFunctionGroup result:', JSON.stringify(result, null, 2));

@@ -5,7 +5,8 @@ const { handleGetTable } = require('../dist/handlers/handleGetTable');
 async function main() {
   try {
     const args = {
-      table_name: process.argv[2] || 'T000'
+      table_name: process.argv[2] || 'T000',
+      filePath: process.argv[3] || undefined
     };
     const result = await handleGetTable(args);
     console.log('handleGetTable result:', JSON.stringify(result, null, 2));

@@ -1,11 +1,12 @@
 // Test for handleGetInclude
 
-const { handleGetInclude } = require('../src/handlers/handleGetInclude');
+const { handleGetInclude } = require('../dist/handlers/handleGetInclude');
 
 async function main() {
   try {
     const args = {
-      include_name: process.argv[2] || 'RM07DOCS_F01'
+      include_name: process.argv[2] || 'RM07DOCS_F01',
+      filePath: process.argv[3] || undefined
     };
     const result = await handleGetInclude(args);
     console.log('handleGetInclude result:', JSON.stringify(result, null, 2));

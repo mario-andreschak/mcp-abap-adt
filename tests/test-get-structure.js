@@ -5,7 +5,8 @@ const { handleGetStructure } = require('../dist/handlers/handleGetStructure');
 async function main() {
   try {
     const args = {
-      structure_name: process.argv[2] || 'ZMY_STRUCT'
+      structure_name: process.argv[2] || 'ZMY_STRUCT',
+      filePath: process.argv[3] || undefined
     };
     const result = await handleGetStructure(args);
     console.log('handleGetStructure result:', JSON.stringify(result, null, 2));

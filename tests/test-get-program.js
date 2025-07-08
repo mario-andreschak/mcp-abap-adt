@@ -13,7 +13,8 @@ if (args.length < 1) {
 }
 
 const programName = args[0];
-const envFile = args[1] || '.env';
+const filePath = args[1];
+const envFile = args[2] || '.env';
 
 // Absolute path to dist/index.js
 const serverPath = path.resolve(__dirname, '../dist/index.js');
@@ -120,7 +121,8 @@ function sendGetProgramRequest() {
     params: {
       name: "GetProgram",
       arguments: {
-        program_name: programName
+        program_name: programName,
+        ...(filePath ? { filePath } : {})
       }
     }
   };

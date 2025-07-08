@@ -9,11 +9,11 @@ export async function handleGetInclude(args: any) {
         }
         const url = `${await getBaseUrl()}/sap/bc/adt/programs/includes/${encodeSapObjectName(args.include_name)}/source/main`;
         const response = await makeAdtRequestWithTimeout(url, 'GET', 'default');
-        const result = return_response(response);
+        const plainText = response.data;
         if (args.filePath) {
-            writeResultToFile(result, args.filePath);
+            writeResultToFile(plainText, args.filePath);
         }
-        return result;
+        return plainText;
     } catch (error) {
         return return_error(error);
     }

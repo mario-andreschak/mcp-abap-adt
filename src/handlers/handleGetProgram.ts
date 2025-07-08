@@ -10,11 +10,11 @@ export async function handleGetProgram(args: any) {
         const url = `${await getBaseUrl()}/sap/bc/adt/programs/programs/${encodeSapObjectName(args.program_name)}/source/main`;
 
         const response = await makeAdtRequestWithTimeout(url, 'GET', 'default');
-        const result = return_response(response);
+        const plainText = response.data;
         if (args.filePath) {
-            writeResultToFile(result, args.filePath);
+            writeResultToFile(plainText, args.filePath);
         }
-        return result;
+        return plainText;
     }
     catch (error) {
         return return_error(error);
