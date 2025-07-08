@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.3.0] - 2025-07-08
+
+### Added
+- Added integration test `tests/integration/handleGetFunction.int.test.js` for handleGetFunction.
+- Significantly expanded integration test coverage in `src/index.test.ts` for all main tools (GetProgram, GetClass, GetFunctionGroup, GetFunction, GetTable, GetStructure, GetTableContents, GetPackage, GetInclude, GetTypeInfo, GetInterface, GetTransaction, GetEnhancements, GetSqlQuery, SearchObject).
+- Added new checks for advanced scenarios (e.g., SQL generation, error handling, enhancement XML parsing).
+
+### Changed
+- Updated documentation regarding testing and integration scenarios.
+
 ## [1.2.0] - 2025-07-02
 
 ### Changed
