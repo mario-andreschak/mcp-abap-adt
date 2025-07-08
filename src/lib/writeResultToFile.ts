@@ -21,7 +21,14 @@ export function writeResultToFile(result: string | object, filePath: string): vo
     fs.mkdirSync(path.dirname(resolvedPath), { recursive: true });
 
     // Serialize object to JSON if needed
-    const data = typeof result === 'string' ? result : JSON.stringify(result, null, 2);
+    let data: string;
+    if (typeof result === 'string') {
+      // Normalize line endings for file output
+      const os = require('os');
+      data = result.replace(/\r\n|\n/g, os.EOL);
+    } else {
+      data = JSON.stringify(result, null, 2);
+    }
 
     // DEBUG: log what will be written (first 200 chars)
     // eslint-disable-next-line no-console
