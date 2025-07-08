@@ -10,8 +10,10 @@ async function main() {
     };
     const result = await handleGetDescription(args);
     console.log('handleGetDescription result:', JSON.stringify(result, null, 2));
+    process.exit(0);
   } catch (e) {
     console.error('Error:', e);
+    process.exit(1);
   }
 }
 

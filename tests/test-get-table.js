@@ -1,6 +1,6 @@
 // Test for handleGetTable
 
-const { handleGetTable } = require('../src/handlers/handleGetTable');
+const { handleGetTable } = require('../dist/handlers/handleGetTable');
 
 async function main() {
   try {
@@ -9,8 +9,10 @@ async function main() {
     };
     const result = await handleGetTable(args);
     console.log('handleGetTable result:', JSON.stringify(result, null, 2));
+    process.exit(0);
   } catch (e) {
     console.error('Error:', e);
+    process.exit(1);
   }
 }
 
