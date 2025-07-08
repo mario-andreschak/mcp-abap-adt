@@ -1,5 +1,5 @@
 import { McpError, ErrorCode, AxiosResponse } from '../lib/utils';
-import { makeAdtRequestWithTimeout, return_error, return_response, getBaseUrl, encodeSapObjectName } from '../lib/utils';
+import { makeAdtRequestWithTimeout, return_error, getBaseUrl, encodeSapObjectName } from '../lib/utils';
 import { XMLParser } from 'fast-xml-parser';
 
 function parseFunctionXml(xml: string) {
@@ -77,7 +77,7 @@ export async function handleGetFunction(args: any) {
         }
         const url = `${await getBaseUrl()}/sap/bc/adt/functions/groups/${encodeSapObjectName(args.function_group)}/fmodules/${encodeSapObjectName(args.function_name)}/source/main`;
         const response = await makeAdtRequestWithTimeout(url, 'GET', 'default');
-        // Якщо XML — парсимо, якщо ні — повертаємо як є
+        // Якщо XML — парсимо і повертаємо JSON, якщо ні — повертаємо plain text напряму
         if (typeof response.data === 'string' && response.data.trim().startsWith('<?xml')) {
             return {
                 isError: false,
@@ -89,7 +89,8 @@ export async function handleGetFunction(args: any) {
                 ]
             };
         } else {
-            return return_response(response);
+            // Plain text: повертаємо як є (без JSON-обгортки)
+            return response.data;
         }
     } catch (error) {
         return return_error(error);
