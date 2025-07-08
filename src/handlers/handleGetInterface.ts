@@ -1,6 +1,7 @@
 import { McpError, ErrorCode, AxiosResponse } from '../lib/utils';
 import { makeAdtRequestWithTimeout, return_error, return_response, getBaseUrl, encodeSapObjectName } from '../lib/utils';
 import { XMLParser } from 'fast-xml-parser';
+import { writeResultToFile } from '../lib/writeResultToFile';
 
 function parseInterfaceXml(xml: string) {
     const parser = new XMLParser({
@@ -50,7 +51,7 @@ export async function handleGetInterface(args: any) {
         const response = await makeAdtRequestWithTimeout(url, 'GET', 'default');
         // Якщо XML — парсимо, якщо ні — повертаємо як є
         if (typeof response.data === 'string' && response.data.trim().startsWith('<?xml')) {
-            return {
+            const result = {
                 isError: false,
                 content: [
                     {
@@ -59,8 +60,16 @@ export async function handleGetInterface(args: any) {
                     }
                 ]
             };
+            if (args.filePath) {
+                writeResultToFile(result, args.filePath);
+            }
+            return result;
         } else {
-            return return_response(response);
+            const plainResult = return_response(response);
+            if (args.filePath) {
+                writeResultToFile(plainResult, args.filePath);
+            }
+            return plainResult;
         }
     } catch (error) {
         return return_error(error);

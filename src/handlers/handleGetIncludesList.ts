@@ -1,5 +1,6 @@
 import { McpError, ErrorCode, AxiosResponse } from '../lib/utils';
 import { fetchNodeStructure, return_error, return_response } from '../lib/utils';
+import { writeResultToFile } from '../lib/writeResultToFile';
 
 /**
  * Parses XML response to extract includes information
@@ -173,7 +174,7 @@ export async function handleGetIncludesList(args: any) {
                 raw_xml: includesResponse.data
             };
             
-            return {
+            const result = {
                 content: [
                     {
                         type: "text",
@@ -181,6 +182,10 @@ export async function handleGetIncludesList(args: any) {
                     }
                 ]
             };
+            if (args.filePath) {
+                writeResultToFile(result, args.filePath);
+            }
+            return result;
         } else {
             // Return minimal text response (original format)
             const responseData = includeNames.length > 0 
@@ -195,7 +200,11 @@ export async function handleGetIncludesList(args: any) {
                 config: {}
             } as any;
 
-            return return_response(mockResponse);
+            const plainResult = return_response(mockResponse);
+            if (args.filePath) {
+                writeResultToFile(plainResult, args.filePath);
+            }
+            return plainResult;
         }
 
     } catch (error) {

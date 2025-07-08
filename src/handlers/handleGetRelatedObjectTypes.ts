@@ -1,5 +1,6 @@
 import { McpError, ErrorCode } from '../lib/utils';
 import { fetchNodeStructure, return_error, return_response } from '../lib/utils';
+import { writeResultToFile } from '../lib/writeResultToFile';
 
 /**
  * Parses XML response to extract object type information
@@ -146,7 +147,11 @@ export async function handleGetRelatedObjectTypes(args: any) {
                 headers: {},
                 config: {}
             } as any;
-            return return_response(mockResponse);
+            const plainResult = return_response(mockResponse);
+            if (args.filePath) {
+                writeResultToFile(plainResult, args.filePath);
+            }
+            return plainResult;
         }
 
         // Create formatted response
@@ -185,7 +190,11 @@ export async function handleGetRelatedObjectTypes(args: any) {
             config: {}
         } as any;
 
-        return return_response(mockResponse);
+        const finalResult = return_response(mockResponse);
+        if (args.filePath) {
+            writeResultToFile(finalResult, args.filePath);
+        }
+        return finalResult;
 
     } catch (error) {
         return return_error(error);

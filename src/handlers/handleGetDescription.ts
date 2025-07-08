@@ -6,6 +6,7 @@
 import { McpError, ErrorCode, makeAdtRequestWithTimeout, return_error, return_response, getBaseUrl, encodeSapObjectName } from '../lib/utils';
 import { handleSearchObject } from './handleSearchObject';
 import { XMLParser } from 'fast-xml-parser';
+import { writeResultToFile } from '../lib/writeResultToFile';
 
 interface FunctionModuleMeta {
   group: string;
@@ -228,10 +229,14 @@ export async function handleGetDescription(args: any) {
         result = parsed;
       }
     }
-    return {
+    const finalResult = {
       isError: false,
       content: [{ type: 'text', text: JSON.stringify(result, null, 2) }],
     };
+    if (args.filePath) {
+      writeResultToFile(finalResult, args.filePath);
+    }
+    return finalResult;
   } catch (error) {
     return return_error(error);
   }

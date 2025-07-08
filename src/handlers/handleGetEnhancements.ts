@@ -1,5 +1,6 @@
 import { McpError, ErrorCode } from '../lib/utils';
 import { makeAdtRequestWithTimeout, return_error, return_response, getBaseUrl, logger, encodeSapObjectName, fetchNodeStructure } from '../lib/utils';
+import { writeResultToFile } from '../lib/writeResultToFile';
 
 /**
  * Interface for enhancement implementation data
@@ -519,7 +520,7 @@ export async function handleGetEnhancements(args: any) {
                 response = { ...response, detailed: true };
             }
             
-            return {
+            const result = {
                 content: [
                     {
                         type: "text",
@@ -527,6 +528,10 @@ export async function handleGetEnhancements(args: any) {
                     }
                 ]
             };
+            if (args.filePath) {
+                writeResultToFile(result, args.filePath);
+            }
+            return result;
         }
         
         // If include_nested is true, also get enhancements from all nested includes
@@ -579,7 +584,7 @@ export async function handleGetEnhancements(args: any) {
         } catch (error) {
             logger.error('Nested enhancement processing failed or timed out:', error);
             // Return partial results with just the main object
-            return {
+            const fallbackResult = {
                 content: [
                     {
                         type: "text",
@@ -598,6 +603,10 @@ export async function handleGetEnhancements(args: any) {
                     }
                 ]
             };
+            if (args.filePath) {
+                writeResultToFile(fallbackResult, args.filePath);
+            }
+            return fallbackResult;
         }
         
         // Create combined response

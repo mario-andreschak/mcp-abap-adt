@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.4.0] - 2025-07-08
+
+### Added
+- Added optional `filePath` parameter to MCP methods (example: GetFunction). If specified, the result is also saved to the given file inside the `output/` directory (with path validation).
+- Implemented utility `writeResultToFile` for safe file writing with directory restriction and logging.
+
 ## [1.3.0] - 2025-07-08
 
 ### Added

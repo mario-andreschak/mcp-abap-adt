@@ -1,5 +1,6 @@
 import { McpError, ErrorCode } from '../lib/utils';
 import { makeAdtRequestWithTimeout, return_error, return_response, getBaseUrl, logger } from '../lib/utils';
+import { writeResultToFile } from '../lib/writeResultToFile';
 
 /**
  * Interface for SQL query execution response
@@ -161,7 +162,7 @@ export async function handleGetSqlQuery(args: any) {
                 executionTime: parsedData.execution_time
             });
             
-            return {
+            const result = {
                 isError: false,
                 content: [
                     {
@@ -170,6 +171,10 @@ export async function handleGetSqlQuery(args: any) {
                     }
                 ]
             };
+            if (args.filePath) {
+                writeResultToFile(result, args.filePath);
+            }
+            return result;
         } else {
             throw new McpError(ErrorCode.InternalError, `Failed to execute SQL query. Status: ${response.status}`);
         }

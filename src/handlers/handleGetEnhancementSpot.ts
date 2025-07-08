@@ -1,5 +1,6 @@
 import { McpError, ErrorCode } from '../lib/utils';
 import { makeAdtRequestWithTimeout, return_error, getBaseUrl, logger, encodeSapObjectName } from '../lib/utils';
+import { writeResultToFile } from '../lib/writeResultToFile';
 
 /**
  * Interface for enhancement spot response
@@ -120,7 +121,7 @@ export async function handleGetEnhancementSpot(args: any) {
                 raw_xml: response.data // Include raw XML for debugging if needed
             };
             
-            return {
+            const result = {
                 content: [
                     {
                         type: "text",
@@ -128,6 +129,10 @@ export async function handleGetEnhancementSpot(args: any) {
                     }
                 ]
             };
+            if (args.filePath) {
+                writeResultToFile(result, args.filePath);
+            }
+            return result;
         } else {
             throw new McpError(
                 ErrorCode.InternalError, 

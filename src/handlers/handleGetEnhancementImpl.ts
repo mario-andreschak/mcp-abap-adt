@@ -1,5 +1,6 @@
 import { McpError, ErrorCode } from '../lib/utils';
 import { makeAdtRequestWithTimeout, return_error, getBaseUrl, logger, encodeSapObjectName } from '../lib/utils';
+import { writeResultToFile } from '../lib/writeResultToFile';
 
 /**
  * Interface for enhancement by name response
@@ -103,7 +104,7 @@ export async function handleGetEnhancementImpl(args: any) {
                 raw_xml: response.data // Include raw XML for debugging if needed
             };
             
-            return {
+            const result = {
                 content: [
                     {
                         type: "text",
@@ -111,6 +112,10 @@ export async function handleGetEnhancementImpl(args: any) {
                     }
                 ]
             };
+            if (args.filePath) {
+                writeResultToFile(result, args.filePath);
+            }
+            return result;
         } else {
             logger.warn(`Enhancement ${enhancementName} not found in spot ${enhancementSpot}. Status: ${response.status}. Attempting to retrieve spot metadata as fallback.`);
             // Fallback to retrieve metadata about the enhancement spot
@@ -129,7 +134,7 @@ export async function handleGetEnhancementImpl(args: any) {
                     metadata.description = descriptionMatch[1];
                 }
                 
-                return {
+                const fallbackResult = {
                     content: [
                         {
                             type: "text",
@@ -144,6 +149,10 @@ export async function handleGetEnhancementImpl(args: any) {
                         }
                     ]
                 };
+                if (args.filePath) {
+                    writeResultToFile(fallbackResult, args.filePath);
+                }
+                return fallbackResult;
             } else {
                 throw new McpError(
                     ErrorCode.InternalError, 

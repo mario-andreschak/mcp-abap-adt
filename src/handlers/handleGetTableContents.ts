@@ -30,6 +30,7 @@
 
 import { McpError, ErrorCode, AxiosResponse, logger } from '../lib/utils';
 import { makeAdtRequestWithTimeout, return_error, return_response, getBaseUrl, encodeSapObjectName } from '../lib/utils';
+import { writeResultToFile } from '../lib/writeResultToFile';
 
 /**
  * Parse SAP ADT XML response and convert to JSON format with rows
@@ -274,7 +275,7 @@ export async function handleGetTableContents(args: any) {
             rowsCount: parsedData.rows.length 
         });
         
-        return {
+        const result = {
             isError: false,
             content: [
                 {
@@ -283,6 +284,10 @@ export async function handleGetTableContents(args: any) {
                 }
             ]
         };
+        if (args.filePath) {
+            writeResultToFile(result, args.filePath);
+        }
+        return result;
     } catch (error) {
         logger.error('Error in handleGetTableContents', { 
             error: error instanceof Error ? error.message : String(error),

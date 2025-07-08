@@ -1,6 +1,7 @@
 import { McpError, ErrorCode, AxiosResponse } from '../lib/utils';
 import { makeAdtRequestWithTimeout, return_error, getBaseUrl, encodeSapObjectName } from '../lib/utils';
 import { XMLParser } from 'fast-xml-parser';
+import { writeResultToFile } from '../lib/writeResultToFile';
 
 function parseFunctionXml(xml: string) {
     const parser = new XMLParser({
@@ -79,7 +80,7 @@ export async function handleGetFunction(args: any) {
         const response = await makeAdtRequestWithTimeout(url, 'GET', 'default');
         // Якщо XML — парсимо і повертаємо JSON, якщо ні — повертаємо plain text напряму
         if (typeof response.data === 'string' && response.data.trim().startsWith('<?xml')) {
-            return {
+            const result = {
                 isError: false,
                 content: [
                     {
@@ -88,8 +89,15 @@ export async function handleGetFunction(args: any) {
                     }
                 ]
             };
+            if (args.filePath) {
+                writeResultToFile(result, args.filePath);
+            }
+            return result;
         } else {
             // Plain text: повертаємо як є (без JSON-обгортки)
+            if (args.filePath) {
+                writeResultToFile(response.data, args.filePath);
+            }
             return response.data;
         }
     } catch (error) {

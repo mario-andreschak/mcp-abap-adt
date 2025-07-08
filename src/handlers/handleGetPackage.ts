@@ -1,6 +1,7 @@
 import { McpError, ErrorCode, AxiosResponse } from '../lib/utils';
 import { makeAdtRequestWithTimeout, return_error, return_response, getBaseUrl } from '../lib/utils';
 import convert from 'xml-js';
+import { writeResultToFile } from '../lib/writeResultToFile';
 
 export async function handleGetPackage(args: any) {
     try {
@@ -28,13 +29,17 @@ export async function handleGetPackage(args: any) {
             OBJECT_URI: node.OBJECT_URI._text
         }));
 
-        return {
+        const finalResult = {
             isError: false,
             content: [{
                 type: 'text',
                 text: JSON.stringify(extractedData)
             }]
         };
+        if (args.filePath) {
+            writeResultToFile(finalResult, args.filePath);
+        }
+        return finalResult;
 
     } catch (error) {
         return return_error(error);
