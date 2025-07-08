@@ -1,6 +1,6 @@
 // Test for handleGetClass
 
-const { handleGetClass } = require('../src/handlers/handleGetClass');
+const { handleGetClass } = require('../dist/handlers/handleGetClass');
 
 async function main() {
   try {
