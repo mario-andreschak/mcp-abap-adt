@@ -8,7 +8,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [1.4.0] - 2025-07-08
 
 ### Added
-- Added optional `filePath` parameter to MCP methods (example: GetFunction). If specified, the result is also saved to the given file inside the `output/` directory (with path validation).
+- All MCP handler functions now support an optional `filePath` parameter. If provided, the handler will save the result to the specified file path (any absolute or relative path, with any extension).
+- All CLI test scripts now accept the `--filePath=...` argument to save the result to a file.
+- The result written to file is exactly what is returned to the user (no extra formatting or caching).
+- Improved error logging and debug output for file writing operations.
+- Updated documentation and usage examples in README.md to reflect new file output support.
 - Implemented utility `writeResultToFile` for safe file writing with directory restriction and logging.
 
 ## [1.3.0] - 2025-07-08
