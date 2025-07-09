@@ -17,7 +17,6 @@ export interface SqlQueryResponse {
         length?: number;
     }>;
     rows: Array<Record<string, any>>;
-    raw_xml?: string;
 }
 
 /**
@@ -103,8 +102,7 @@ function parseSqlQueryXml(xmlData: string, sqlQuery: string, rowNumber: number):
             execution_time: queryExecutionTime,
             total_rows: totalRows,
             columns,
-            rows,
-            raw_xml: xmlData
+            rows
         };
         
     } catch (parseError) {
@@ -116,7 +114,6 @@ function parseSqlQueryXml(xmlData: string, sqlQuery: string, rowNumber: number):
             row_number: rowNumber,
             columns: [],
             rows: [],
-            raw_xml: xmlData,
             error: 'Failed to parse XML response'
         } as any;
     }

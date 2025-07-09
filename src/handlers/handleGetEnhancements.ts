@@ -20,7 +20,6 @@ export interface EnhancementResponse {
     object_type: 'program' | 'include' | 'class';
     context?: string;
     enhancements: EnhancementImplementation[];
-    raw_xml?: string;
     detailed?: boolean;
     total_enhancements?: number;
 }
@@ -408,8 +407,7 @@ async function getEnhancementsForSingleObject(objectName: string, manualProgramC
             object_name: objectName,
             object_type: objectInfo.type,
             context: objectInfo.context,
-            enhancements: enhancements,
-            raw_xml: response.data // Include raw XML for debugging if needed
+            enhancements: enhancements
         };
         
         return enhancementResponse;

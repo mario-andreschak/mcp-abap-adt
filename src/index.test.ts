@@ -259,7 +259,15 @@ define table t000 {
       expect(result.content[0].type).toBe("text");
       
       // Parse the JSON response to verify enhancement data structure
-      const responseData = JSON.parse(result.content[0].text);
+      const content0 = result.content[0];
+let responseData;
+if (content0.type === "text" && "text" in content0) {
+  responseData = JSON.parse(content0.text);
+} else if (content0.type === "json" && "json" in content0) {
+  responseData = content0.json;
+} else {
+  throw new Error("Unexpected content type");
+}
       expect(responseData).toHaveProperty('object_name');
       expect(responseData).toHaveProperty('object_type');
       expect(responseData).toHaveProperty('enhancements');
@@ -278,7 +286,15 @@ define table t000 {
       expect(result.content[0].type).toBe("text");
       
       // Parse the JSON response to verify enhancement data structure
-      const responseData = JSON.parse(result.content[0].text);
+      const content0 = result.content[0];
+let responseData;
+if (content0.type === "text" && "text" in content0) {
+  responseData = JSON.parse(content0.text);
+} else if (content0.type === "json" && "json" in content0) {
+  responseData = content0.json;
+} else {
+  throw new Error("Unexpected content type");
+}
       expect(responseData).toHaveProperty('object_name');
       expect(responseData.object_name).toBe('mv45afzz');
       expect(responseData).toHaveProperty('object_type');

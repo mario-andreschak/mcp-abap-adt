@@ -12,7 +12,6 @@ export interface EnhancementSpotResponse {
         type?: string;
         status?: string;
     };
-    raw_xml?: string;
 }
 
 /**
@@ -117,8 +116,7 @@ export async function handleGetEnhancementSpot(args: any) {
             
             const enhancementSpotResponse: EnhancementSpotResponse = {
                 enhancement_spot: enhancementSpot,
-                metadata: metadata,
-                raw_xml: response.data // Include raw XML for debugging if needed
+                metadata: metadata
             };
             
             const result = {

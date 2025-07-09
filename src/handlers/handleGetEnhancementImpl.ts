@@ -9,7 +9,6 @@ export interface EnhancementByNameResponse {
     enhancement_spot: string;
     enhancement_name: string;
     source_code: string;
-    raw_xml?: string;
 }
 
 /**
@@ -100,8 +99,7 @@ export async function handleGetEnhancementImpl(args: any) {
             const enhancementResponse: EnhancementByNameResponse = {
                 enhancement_spot: enhancementSpot,
                 enhancement_name: enhancementName,
-                source_code: sourceCode,
-                raw_xml: response.data // Include raw XML for debugging if needed
+                source_code: sourceCode
             };
             
             const result = {
@@ -145,8 +143,7 @@ export async function handleGetEnhancementImpl(args: any) {
                             enhancement_name: enhancementName,
                             status: "not_found",
                             message: `Enhancement implementation ${enhancementName} not found in spot ${enhancementSpot}.`,
-                            spot_metadata: metadata,
-                            raw_xml: spotResponse.data
+                            spot_metadata: metadata
                         }
                     }
                 ]

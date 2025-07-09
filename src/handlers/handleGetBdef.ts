@@ -8,7 +8,6 @@ export interface BdefResponse {
     bdef_name: string;
     source_code?: string;
     functions?: Array<{ name: string; description?: string }>;
-    raw_xml?: string;
 }
 
 /**

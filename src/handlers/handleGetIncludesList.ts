@@ -162,31 +162,31 @@ export async function handleGetIncludesList(args: any) {
         // Step 4: Parse the includes response to extract include names
         const includeNames = parseIncludeNamesFromXml(includesResponse.data);
         
-        if (isDetailed) {
-            // Return detailed JSON response
-            const detailedResponse = {
-                object_name: object_name,
-                object_type: object_type,
-                detailed: true,
-                total_includes: includeNames.length,
-                includes: includeNames,
-                includes_node_info: includesNode,
-                raw_xml: includesResponse.data
-            };
-            
-            const result = {
-                content: [
-                    {
-                        type: "text",
-                        text: JSON.stringify(detailedResponse, null, 2)
-                    }
-                ]
-            };
-            if (args.filePath) {
-                writeResultToFile(result, args.filePath);
+if (isDetailed) {
+    // Return detailed JSON response
+    const detailedResponse = {
+        object_name: object_name,
+        object_type: object_type,
+        detailed: true,
+        total_includes: includeNames.length,
+        includes: includeNames,
+        includes_node_info: includesNode
+    };
+    
+    const result = {
+        content: [
+            {
+                type: "json",
+                json: detailedResponse
             }
-            return result;
-        } else {
+        ]
+    };
+    if (args.filePath) {
+        const fs = require('fs');
+        fs.writeFileSync(args.filePath, JSON.stringify(result, null, 2), 'utf-8');
+    }
+    return result;
+} else {
             // Return minimal text response (original format)
 const responseData = includeNames.length > 0 
     ? includeNames.join('\n')
@@ -202,7 +202,8 @@ const mockResponse = {
 
 const plainResult = return_response(mockResponse);
 if (args.filePath) {
-    writeResultToFile({ content: [{ type: "text", text: responseData }] }, args.filePath);
+    const fs = require('fs');
+    fs.writeFileSync(args.filePath, responseData, 'utf-8');
 }
 return plainResult;
         }
