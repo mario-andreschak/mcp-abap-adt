@@ -21,6 +21,7 @@
 | handleGetSqlQuery           | JSON: { isError, content[{type:"text", text}]}  | JSON (старий формат)      | JSON                      | JSON                  |
 | handleGetIncludesList       | JSON: { isError, content[{type:"text", text}]} або {type:"json", json} | JSON (старий формат)      | JSON                      | JSON                  |
 | handleGetObjectsByType      | JSON: { isError, content[{type:"text", text}]} або {type:"json", json} | JSON (старий формат)      | JSON                      | JSON                  |
+| handleGetObjectsList        | JSON: { content: [{type:"json", json: {parent_name, parent_tech_name, parent_type, total_objects, objects: [ { ...fields..., object_uri_response? } ]}}] } | JSON (новий формат) | JSON | JSON (масив об'єктів, для кожного з OBJECT_URI додається object_uri_response з результатом запиту) |
 | handleGetWhereUsed          | JSON: { isError, content[{type:"text", text}]}  | JSON (старий формат)      | JSON                      | JSON                  |
 | handleGetBdef               | JSON: { isError, content[{type:"text", text}]} або {type:"json", json} | JSON (старий формат)      | JSON                      | JSON                  |
 

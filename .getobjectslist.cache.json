@@ -1,0 +1,3027 @@
+{
+  "parent_name": "/CBY/PURBOOK_EN",
+  "parent_tech_name": "/CBY/PURBOOK_EN",
+  "parent_type": "PROG/P",
+  "total_objects": 503,
+  "objects": [
+    {
+      "OBJECT_TYPE": "PROG/I",
+      "OBJECT_NAME": "/CBY/BBK_DECL_EVE",
+      "TECH_NAME": "/CBY/BBK_DECL_EVE",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fbbk_decl_eve/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en",
+      "object_uri_response": "*&---------------------------------------------------------------------*\r\n*&  Include           /CBY/BBK_DECL_EVE\r\n*&---------------------------------------------------------------------*\r\nAT SELECTION-SCREEN ON VALUE-REQUEST FOR p_ex1c.\r\n\r\n  CALL FUNCTION 'REUSE_ALV_EXTRACT_AT_F4_P_EX2'\r\n*   EXPORTING\r\n*     I_PARNAME_P_EXT2 = 'P_EXT2'\r\n    CHANGING\r\n      c_p_ex2          = p_ex1c\r\n      c_p_ext2         = p_ext1c\r\n      cs_extract2      = gs_extract1c.\r\n\r\nAT SELECTION-SCREEN ON VALUE-REQUEST FOR vr_cnum.\r\n  PERFORM f4_for_vr_cnum.\r\n\r\nAT SELECTION-SCREEN ON VALUE-REQUEST FOR p_ex_src-low.\r\n  CALL FUNCTION 'REUSE_ALV_EXTRACT_AT_F4_P_EX2'\r\n    EXPORTING\r\n      i_parname_p_ext2 = space\r\n    CHANGING\r\n      c_p_ex2          = p_ex_src-low\r\n      c_p_ext2         = gs_extract_src-text\r\n      cs_extract2      = gs_extract_src.\r\n\r\nAT SELECTION-SCREEN ON VALUE-REQUEST FOR p_ex_src-high.\r\n  CALL FUNCTION 'REUSE_ALV_EXTRACT_AT_F4_P_EX2'\r\n    EXPORTING\r\n      i_parname_p_ext2 = space\r\n    CHANGING\r\n      c_p_ex2          = p_ex_src-high\r\n      c_p_ext2         = gs_extract_src-text\r\n      cs_extract2      = gs_extract_src.\r\n\r\nAT SELECTION-SCREEN ON VALUE-REQUEST FOR p_ex_dst.\r\n  CALL FUNCTION 'REUSE_ALV_EXTRACT_AT_F4_P_EX2'\r\n    EXPORTING\r\n      i_parname_p_ext2 = space\r\n    CHANGING\r\n      c_p_ex2          = p_ex_dst\r\n      c_p_ext2         = gs_extract_dst-text\r\n      cs_extract2      = gs_extract_dst."
+    },
+    {
+      "OBJECT_TYPE": "PROG/I",
+      "OBJECT_NAME": "/CBY/BBK_DECL_F01",
+      "TECH_NAME": "/CBY/BBK_DECL_F01",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fbbk_decl_f01/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en"
+    },
+    {
+      "OBJECT_TYPE": "PROG/I",
+      "OBJECT_NAME": "/CBY/BBK_DECL_F03",
+      "TECH_NAME": "/CBY/BBK_DECL_F03",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fbbk_decl_f03/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en"
+    },
+    {
+      "OBJECT_TYPE": "PROG/I",
+      "OBJECT_NAME": "/CBY/BBK_DECL_SELX",
+      "TECH_NAME": "/CBY/BBK_DECL_SELX",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fbbk_decl_selx/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en"
+    },
+    {
+      "OBJECT_TYPE": "PROG/I",
+      "OBJECT_NAME": "/CBY/BBK_INC_CL",
+      "TECH_NAME": "/CBY/BBK_INC_CL",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fbbk_inc_cl/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en"
+    },
+    {
+      "OBJECT_TYPE": "PROG/I",
+      "OBJECT_NAME": "/CBY/BBK_XML_EVE",
+      "TECH_NAME": "/CBY/BBK_XML_EVE",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fbbk_xml_eve/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en"
+    },
+    {
+      "OBJECT_TYPE": "PROG/I",
+      "OBJECT_NAME": "/CBY/BBK_XML_F01",
+      "TECH_NAME": "/CBY/BBK_XML_F01",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fbbk_xml_f01/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en"
+    },
+    {
+      "OBJECT_TYPE": "PROG/I",
+      "OBJECT_NAME": "/CBY/BBK_XML_F02",
+      "TECH_NAME": "/CBY/BBK_XML_F02",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fbbk_xml_f02/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en"
+    },
+    {
+      "OBJECT_TYPE": "PROG/I",
+      "OBJECT_NAME": "/CBY/BBK_XML_SEL",
+      "TECH_NAME": "/CBY/BBK_XML_SEL",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fbbk_xml_sel/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en"
+    },
+    {
+      "OBJECT_TYPE": "PROG/I",
+      "OBJECT_NAME": "/CBY/BBK_XML_TOP",
+      "TECH_NAME": "/CBY/BBK_XML_TOP",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fbbk_xml_top/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en"
+    },
+    {
+      "OBJECT_TYPE": "PROG/I",
+      "OBJECT_NAME": "/CBY/PURBOOK_DATA",
+      "TECH_NAME": "/CBY/PURBOOK_DATA",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_data/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en"
+    },
+    {
+      "OBJECT_TYPE": "PROG/I",
+      "OBJECT_NAME": "/CBY/PURBOOK_DECL_DATA",
+      "TECH_NAME": "/CBY/PURBOOK_DECL_DATA",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_decl_data/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en"
+    },
+    {
+      "OBJECT_TYPE": "PROG/I",
+      "OBJECT_NAME": "/CBY/PURBOOK_EXTRACT",
+      "TECH_NAME": "/CBY/PURBOOK_EXTRACT",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_extract/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en"
+    },
+    {
+      "OBJECT_TYPE": "PROG/I",
+      "OBJECT_NAME": "/CBY/PURBOOK_EXTRACT_DATA",
+      "TECH_NAME": "/CBY/PURBOOK_EXTRACT_DATA",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_extract_data/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en"
+    },
+    {
+      "OBJECT_TYPE": "PROG/I",
+      "OBJECT_NAME": "/CBY/PURBOOK_FC1",
+      "TECH_NAME": "/CBY/PURBOOK_FC1",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_fc1/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en"
+    },
+    {
+      "OBJECT_TYPE": "PROG/I",
+      "OBJECT_NAME": "/CBY/PURBOOK_FORMS",
+      "TECH_NAME": "/CBY/PURBOOK_FORMS",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_forms/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en"
+    },
+    {
+      "OBJECT_TYPE": "PROG/I",
+      "OBJECT_NAME": "/CBY/PURBOOK_SELSCR",
+      "TECH_NAME": "/CBY/PURBOOK_SELSCR",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_selscr/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en"
+    },
+    {
+      "OBJECT_TYPE": "PROG/I",
+      "OBJECT_NAME": "/CBY/PURBOOK_TYPE_POOL",
+      "TECH_NAME": "/CBY/PURBOOK_TYPE_POOL",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_type_pool/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en"
+    },
+    {
+      "OBJECT_TYPE": "PROG/I",
+      "OBJECT_NAME": "RFEPOSC9",
+      "TECH_NAME": "RFEPOSC9",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/rfeposc9/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PC",
+      "OBJECT_NAME": "STANDARD",
+      "TECH_NAME": "/CBY/PURBOOK_EN",
+      "OBJECT_URI": "/sap/bc/adt/vit/wb/object_type/progpc/object_name/%2fCBY%2fPURBOOK_EN%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20STANDARD"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PD",
+      "OBJECT_NAME": "0",
+      "TECH_NAME": "/CBY/PURBOOK_SELSCR",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_selscr/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPD;name=0"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PD",
+      "OBJECT_NAME": "&lt;FS_BOOK&gt;",
+      "TECH_NAME": "/CBY/PURBOOK_DATA",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_data/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPD;name=%3cFS_BOOK%3e"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PD",
+      "OBJECT_NAME": "ADD",
+      "TECH_NAME": "/CBY/PURBOOK_SELSCR",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_selscr/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPD;name=ADD"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PD",
+      "OBJECT_NAME": "AD_BELNR",
+      "TECH_NAME": "/CBY/PURBOOK_SELSCR",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_selscr/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPD;name=AD_BELNR"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PD",
+      "OBJECT_NAME": "AD_BLART",
+      "TECH_NAME": "/CBY/PURBOOK_SELSCR",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_selscr/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPD;name=AD_BLART"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PD",
+      "OBJECT_NAME": "AD_BUDAT",
+      "TECH_NAME": "/CBY/PURBOOK_SELSCR",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_selscr/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPD;name=AD_BUDAT"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PD",
+      "OBJECT_NAME": "AD_DATE",
+      "TECH_NAME": "/CBY/PURBOOK_SELSCR",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_selscr/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPD;name=AD_DATE"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PD",
+      "OBJECT_NAME": "AD_DOC_N",
+      "TECH_NAME": "/CBY/PURBOOK_SELSCR",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_selscr/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPD;name=AD_DOC_N"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PD",
+      "OBJECT_NAME": "AD_GJAHR",
+      "TECH_NAME": "/CBY/PURBOOK_SELSCR",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_selscr/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPD;name=AD_GJAHR"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PD",
+      "OBJECT_NAME": "AD_MONAT",
+      "TECH_NAME": "/CBY/PURBOOK_SELSCR",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_selscr/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPD;name=AD_MONAT"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PD",
+      "OBJECT_NAME": "AD_SHEET",
+      "TECH_NAME": "/CBY/PURBOOK_SELSCR",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_selscr/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPD;name=AD_SHEET"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PD",
+      "OBJECT_NAME": "AD_VTDAT",
+      "TECH_NAME": "/CBY/PURBOOK_SELSCR",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_selscr/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPD;name=AD_VTDAT"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PD",
+      "OBJECT_NAME": "ALL_INCL",
+      "TECH_NAME": "/CBY/PURBOOK_SELSCR",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_selscr/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPD;name=ALL_INCL"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PD",
+      "OBJECT_NAME": "B1",
+      "TECH_NAME": "/CBY/PURBOOK_SELSCR",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_selscr/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPD;name=B1"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PD",
+      "OBJECT_NAME": "B1_1",
+      "TECH_NAME": "/CBY/PURBOOK_SELSCR",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_selscr/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPD;name=B1_1"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PD",
+      "OBJECT_NAME": "B3",
+      "TECH_NAME": "/CBY/PURBOOK_SELSCR",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_selscr/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPD;name=B3"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PD",
+      "OBJECT_NAME": "BK_VERS",
+      "TECH_NAME": "/CBY/PURBOOK_SELSCR",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_selscr/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPD;name=BK_VERS"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PD",
+      "OBJECT_NAME": "BR_BELNR",
+      "TECH_NAME": "/CBY/PURBOOK_SELSCR",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_selscr/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPD;name=BR_BELNR"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PD",
+      "OBJECT_NAME": "BR_BUDAT",
+      "TECH_NAME": "/CBY/PURBOOK_SELSCR",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_selscr/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPD;name=BR_BUDAT"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PD",
+      "OBJECT_NAME": "BR_BUKRS",
+      "TECH_NAME": "/CBY/PURBOOK_SELSCR",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_selscr/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPD;name=BR_BUKRS"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PD",
+      "OBJECT_NAME": "BR_GJAHR",
+      "TECH_NAME": "/CBY/PURBOOK_SELSCR",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_selscr/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPD;name=BR_GJAHR"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PD",
+      "OBJECT_NAME": "BR_XBLNR",
+      "TECH_NAME": "/CBY/PURBOOK_SELSCR",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_selscr/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPD;name=BR_XBLNR"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PD",
+      "OBJECT_NAME": "BUFF_HEADER",
+      "TECH_NAME": "/CBY/PURBOOK_DATA",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_data/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPD;name=BUFF_HEADER"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PD",
+      "OBJECT_NAME": "BUFF_HEADER_ADD",
+      "TECH_NAME": "/CBY/PURBOOK_DATA",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_data/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPD;name=BUFF_HEADER_ADD"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PD",
+      "OBJECT_NAME": "BUFF_TAB",
+      "TECH_NAME": "/CBY/PURBOOK_DATA",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_data/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPD;name=BUFF_TAB"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PD",
+      "OBJECT_NAME": "BUFF_TAB_ADD",
+      "TECH_NAME": "/CBY/PURBOOK_DATA",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_data/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPD;name=BUFF_TAB_ADD"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PD",
+      "OBJECT_NAME": "CHK_GTD2",
+      "TECH_NAME": "/CBY/PURBOOK_SELSCR",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_selscr/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPD;name=CHK_GTD2"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PD",
+      "OBJECT_NAME": "CHK_REF",
+      "TECH_NAME": "/CBY/PURBOOK_SELSCR",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_selscr/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPD;name=CHK_REF"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PD",
+      "OBJECT_NAME": "DYNP_VALUE_TAB",
+      "TECH_NAME": "/CBY/PURBOOK_DATA",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_data/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPD;name=DYNP_VALUE_TAB"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PD",
+      "OBJECT_NAME": "EPOS",
+      "TECH_NAME": "/CBY/PURBOOK_DATA",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_data/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPD;name=EPOS"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PD",
+      "OBJECT_NAME": "EXTRACT",
+      "TECH_NAME": "/CBY/PURBOOK_SELSCR",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_selscr/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPD;name=EXTRACT"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PD",
+      "OBJECT_NAME": "FM_NAME",
+      "TECH_NAME": "/CBY/PURBOOK_DATA",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_data/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPD;name=FM_NAME"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PD",
+      "OBJECT_NAME": "FPNAME",
+      "TECH_NAME": "/CBY/PURBOOK_DATA",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_data/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPD;name=FPNAME"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PD",
+      "OBJECT_NAME": "FP_DOCPARAMS",
+      "TECH_NAME": "/CBY/PURBOOK_DATA",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_data/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPD;name=FP_DOCPARAMS"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PD",
+      "OBJECT_NAME": "FP_OUTPUTPARAMS",
+      "TECH_NAME": "/CBY/PURBOOK_DATA",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_data/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPD;name=FP_OUTPUTPARAMS"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PD",
+      "OBJECT_NAME": "GC_COLOR_HIGHLIGHT",
+      "TECH_NAME": "/CBY/PURBOOK_DECL_DATA",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_decl_data/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPD;name=GC_COLOR_HIGHLIGHT"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PD",
+      "OBJECT_NAME": "GC_COUNT",
+      "TECH_NAME": "/CBY/PURBOOK_EXTRACT_DATA",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_extract_data/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPD;name=GC_COUNT"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PD",
+      "OBJECT_NAME": "GC_CUSTOMIZING",
+      "TECH_NAME": "/CBY/PURBOOK_DATA",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_data/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPD;name=GC_CUSTOMIZING"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PD",
+      "OBJECT_NAME": "GC_FORMNAME_TOP_OF_PAGE",
+      "TECH_NAME": "/CBY/PURBOOK_DATA",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_data/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPD;name=GC_FORMNAME_TOP_OF_PAGE"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PD",
+      "OBJECT_NAME": "GC_FPWBFORMNAME",
+      "TECH_NAME": "/CBY/PURBOOK_DECL_DATA",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_decl_data/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPD;name=GC_FPWBFORMNAME"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PD",
+      "OBJECT_NAME": "GC_J_3RBUY_ALV",
+      "TECH_NAME": "/CBY/PURBOOK_DATA",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_data/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPD;name=GC_J_3RBUY_ALV"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PD",
+      "OBJECT_NAME": "GC_LINES_MIDDLE_PAGE",
+      "TECH_NAME": "/CBY/PURBOOK_DATA",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_data/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPD;name=GC_LINES_MIDDLE_PAGE"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PD",
+      "OBJECT_NAME": "GC_MAX_GTD_LEN",
+      "TECH_NAME": "/CBY/PURBOOK_DATA",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_data/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPD;name=GC_MAX_GTD_LEN"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PD",
+      "OBJECT_NAME": "GC_OPERA_AGENT",
+      "TECH_NAME": "/CBY/PURBOOK_DATA",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_data/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPD;name=GC_OPERA_AGENT"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PD",
+      "OBJECT_NAME": "GC_OPERA_BSET",
+      "TECH_NAME": "/CBY/PURBOOK_DATA",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_data/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPD;name=GC_OPERA_BSET"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PD",
+      "OBJECT_NAME": "GC_OPERA_GROSS",
+      "TECH_NAME": "/CBY/PURBOOK_DATA",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_data/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPD;name=GC_OPERA_GROSS"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PD",
+      "OBJECT_NAME": "GC_OPERA_MINUS",
+      "TECH_NAME": "/CBY/PURBOOK_DATA",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_data/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPD;name=GC_OPERA_MINUS"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PD",
+      "OBJECT_NAME": "GC_OPERA_NEG",
+      "TECH_NAME": "/CBY/PURBOOK_DATA",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_data/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPD;name=GC_OPERA_NEG"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PD",
+      "OBJECT_NAME": "GC_OPERA_PAY",
+      "TECH_NAME": "/CBY/PURBOOK_DATA",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_data/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPD;name=GC_OPERA_PAY"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PD",
+      "OBJECT_NAME": "GC_OPERA_PAYINV",
+      "TECH_NAME": "/CBY/PURBOOK_DATA",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_data/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPD;name=GC_OPERA_PAYINV"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PD",
+      "OBJECT_NAME": "GC_OPERA_PLUS",
+      "TECH_NAME": "/CBY/PURBOOK_DATA",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_data/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPD;name=GC_OPERA_PLUS"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PD",
+      "OBJECT_NAME": "GC_OPERA_TAX",
+      "TECH_NAME": "/CBY/PURBOOK_DATA",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_data/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPD;name=GC_OPERA_TAX"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PD",
+      "OBJECT_NAME": "GC_PARAMS",
+      "TECH_NAME": "/CBY/PURBOOK_DATA",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_data/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPD;name=GC_PARAMS"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PD",
+      "OBJECT_NAME": "GC_RCU_XBLNR",
+      "TECH_NAME": "/CBY/PURBOOK_DATA",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_data/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPD;name=GC_RCU_XBLNR"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PD",
+      "OBJECT_NAME": "GC_RESP_TYPE_ACCOUNT",
+      "TECH_NAME": "/CBY/BBK_XML_TOP",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fbbk_xml_top/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPD;name=GC_RESP_TYPE_ACCOUNT"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PD",
+      "OBJECT_NAME": "GC_RESP_TYPE_AUTH",
+      "TECH_NAME": "/CBY/BBK_XML_TOP",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fbbk_xml_top/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPD;name=GC_RESP_TYPE_AUTH"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PD",
+      "OBJECT_NAME": "GC_RESP_TYPE_LEGAL",
+      "TECH_NAME": "/CBY/BBK_XML_TOP",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fbbk_xml_top/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPD;name=GC_RESP_TYPE_LEGAL"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PD",
+      "OBJECT_NAME": "GC_RESP_TYPE_PERSON",
+      "TECH_NAME": "/CBY/BBK_XML_TOP",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fbbk_xml_top/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPD;name=GC_RESP_TYPE_PERSON"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PD",
+      "OBJECT_NAME": "GC_SHLPNAME",
+      "TECH_NAME": "/CBY/PURBOOK_DATA",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_data/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPD;name=GC_SHLPNAME"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PD",
+      "OBJECT_NAME": "GC_TDID",
+      "TECH_NAME": "/CBY/PURBOOK_DATA",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_data/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPD;name=GC_TDID"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PD",
+      "OBJECT_NAME": "GC_TDOBJECT",
+      "TECH_NAME": "/CBY/PURBOOK_DATA",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_data/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPD;name=GC_TDOBJECT"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PD",
+      "OBJECT_NAME": "GC_TDOBJECT_BELEG",
+      "TECH_NAME": "/CBY/PURBOOK_DATA",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_data/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPD;name=GC_TDOBJECT_BELEG"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PD",
+      "OBJECT_NAME": "GC_VAT_DECL_SEL_CORR",
+      "TECH_NAME": "/CBY/PURBOOK_DECL_DATA",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_decl_data/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPD;name=GC_VAT_DECL_SEL_CORR"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PD",
+      "OBJECT_NAME": "GC_VAT_DECL_SEL_MAIN",
+      "TECH_NAME": "/CBY/PURBOOK_DECL_DATA",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_decl_data/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPD;name=GC_VAT_DECL_SEL_MAIN"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PD",
+      "OBJECT_NAME": "GC_XML_BK_TYPE_PB",
+      "TECH_NAME": "/CBY/BBK_XML_TOP",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fbbk_xml_top/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPD;name=GC_XML_BK_TYPE_PB"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PD",
+      "OBJECT_NAME": "GC_XML_BK_TYPE_SB",
+      "TECH_NAME": "/CBY/BBK_XML_TOP",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fbbk_xml_top/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPD;name=GC_XML_BK_TYPE_SB"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PD",
+      "OBJECT_NAME": "GC_XML_CLASS",
+      "TECH_NAME": "/CBY/BBK_XML_TOP",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fbbk_xml_top/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPD;name=GC_XML_CLASS"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PD",
+      "OBJECT_NAME": "GC_XML_ENGINE",
+      "TECH_NAME": "/CBY/BBK_XML_TOP",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fbbk_xml_top/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPD;name=GC_XML_ENGINE"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PD",
+      "OBJECT_NAME": "GC_XML_HIER_KEY_PB",
+      "TECH_NAME": "/CBY/BBK_XML_TOP",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fbbk_xml_top/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPD;name=GC_XML_HIER_KEY_PB"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PD",
+      "OBJECT_NAME": "GC_XML_HIER_KEY_PBA",
+      "TECH_NAME": "/CBY/BBK_XML_TOP",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fbbk_xml_top/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPD;name=GC_XML_HIER_KEY_PBA"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PD",
+      "OBJECT_NAME": "GC_XML_HIER_KEY_PBA_KEYS",
+      "TECH_NAME": "/CBY/BBK_XML_TOP",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fbbk_xml_top/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPD;name=GC_XML_HIER_KEY_PBA_KEYS"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PD",
+      "OBJECT_NAME": "GC_XML_HIER_KEY_PB_KEYS",
+      "TECH_NAME": "/CBY/BBK_XML_TOP",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fbbk_xml_top/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPD;name=GC_XML_HIER_KEY_PB_KEYS"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PD",
+      "OBJECT_NAME": "GC_XML_HIER_KEY_SB",
+      "TECH_NAME": "/CBY/BBK_XML_TOP",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fbbk_xml_top/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPD;name=GC_XML_HIER_KEY_SB"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PD",
+      "OBJECT_NAME": "GC_XML_HIER_KEY_SBA",
+      "TECH_NAME": "/CBY/BBK_XML_TOP",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fbbk_xml_top/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPD;name=GC_XML_HIER_KEY_SBA"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PD",
+      "OBJECT_NAME": "GC_XML_HIER_KEY_SBA_KEYS",
+      "TECH_NAME": "/CBY/BBK_XML_TOP",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fbbk_xml_top/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPD;name=GC_XML_HIER_KEY_SBA_KEYS"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PD",
+      "OBJECT_NAME": "GC_XML_HIER_KEY_SB_KEYS",
+      "TECH_NAME": "/CBY/BBK_XML_TOP",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fbbk_xml_top/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPD;name=GC_XML_HIER_KEY_SB_KEYS"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PD",
+      "OBJECT_NAME": "GF_ADD_MODE",
+      "TECH_NAME": "/CBY/PURBOOK_DATA",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_data/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPD;name=GF_ADD_MODE"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PD",
+      "OBJECT_NAME": "GF_ADD_QUART",
+      "TECH_NAME": "/CBY/PURBOOK_DATA",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_data/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPD;name=GF_ADD_QUART"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PD",
+      "OBJECT_NAME": "GF_BLINES",
+      "TECH_NAME": "/CBY/PURBOOK_DATA",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_data/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPD;name=GF_BLINES"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PD",
+      "OBJECT_NAME": "GF_CODE_PAGE",
+      "TECH_NAME": "/CBY/PURBOOK_DATA",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_data/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPD;name=GF_CODE_PAGE"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PD",
+      "OBJECT_NAME": "GF_DATE_",
+      "TECH_NAME": "/CBY/PURBOOK_DATA",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_data/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPD;name=GF_DATE_"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PD",
+      "OBJECT_NAME": "GF_EXIT",
+      "TECH_NAME": "/CBY/PURBOOK_DATA",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_data/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPD;name=GF_EXIT"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PD",
+      "OBJECT_NAME": "GF_FLG_OK_RECORDS",
+      "TECH_NAME": "/CBY/PURBOOK_DATA",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_data/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPD;name=GF_FLG_OK_RECORDS"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PD",
+      "OBJECT_NAME": "GF_FOOTER_HEIGHT",
+      "TECH_NAME": "/CBY/PURBOOK_DATA",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_data/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPD;name=GF_FOOTER_HEIGHT"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PD",
+      "OBJECT_NAME": "GF_HEADER_HEIGHT",
+      "TECH_NAME": "/CBY/PURBOOK_DATA",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_data/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPD;name=GF_HEADER_HEIGHT"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PD",
+      "OBJECT_NAME": "GF_LONG_GTD",
+      "TECH_NAME": "/CBY/PURBOOK_DATA",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_data/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPD;name=GF_LONG_GTD"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PD",
+      "OBJECT_NAME": "GF_MAIN_QUART",
+      "TECH_NAME": "/CBY/PURBOOK_DATA",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_data/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPD;name=GF_MAIN_QUART"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PD",
+      "OBJECT_NAME": "GF_MAIN_QUART_HI",
+      "TECH_NAME": "/CBY/PURBOOK_DATA",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_data/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPD;name=GF_MAIN_QUART_HI"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PD",
+      "OBJECT_NAME": "GF_NUM_LINE_ADD",
+      "TECH_NAME": "/CBY/PURBOOK_DATA",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_data/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPD;name=GF_NUM_LINE_ADD"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PD",
+      "OBJECT_NAME": "GF_PAGES_PER_PACKAGE",
+      "TECH_NAME": "/CBY/PURBOOK_DATA",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_data/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPD;name=GF_PAGES_PER_PACKAGE"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PD",
+      "OBJECT_NAME": "GF_REPID",
+      "TECH_NAME": "/CBY/PURBOOK_DATA",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_data/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPD;name=GF_REPID"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PD",
+      "OBJECT_NAME": "GF_REQUEST_",
+      "TECH_NAME": "/CBY/PURBOOK_DATA",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_data/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPD;name=GF_REQUEST_"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PD",
+      "OBJECT_NAME": "GF_SAVE",
+      "TECH_NAME": "/CBY/PURBOOK_DATA",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_data/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPD;name=GF_SAVE"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PD",
+      "OBJECT_NAME": "GF_STATUS",
+      "TECH_NAME": "/CBY/PURBOOK_DATA",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_data/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPD;name=GF_STATUS"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PD",
+      "OBJECT_NAME": "GF_USER_COMMAND",
+      "TECH_NAME": "/CBY/PURBOOK_DATA",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_data/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPD;name=GF_USER_COMMAND"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PD",
+      "OBJECT_NAME": "GF_VER1",
+      "TECH_NAME": "/CBY/PURBOOK_DATA",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_data/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPD;name=GF_VER1"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PD",
+      "OBJECT_NAME": "GF_VERSION_",
+      "TECH_NAME": "/CBY/PURBOOK_DATA",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_data/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPD;name=GF_VERSION_"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PD",
+      "OBJECT_NAME": "GS_EXTRACT1",
+      "TECH_NAME": "/CBY/PURBOOK_DATA",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_data/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPD;name=GS_EXTRACT1"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PD",
+      "OBJECT_NAME": "GS_EXTRACT1C",
+      "TECH_NAME": "/CBY/PURBOOK_DATA",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_data/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPD;name=GS_EXTRACT1C"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PD",
+      "OBJECT_NAME": "GS_EXTRACT2",
+      "TECH_NAME": "/CBY/PURBOOK_DATA",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_data/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPD;name=GS_EXTRACT2"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PD",
+      "OBJECT_NAME": "GS_EXTRACT3",
+      "TECH_NAME": "/CBY/PURBOOK_DATA",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_data/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPD;name=GS_EXTRACT3"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PD",
+      "OBJECT_NAME": "GS_EXTRACT_DST",
+      "TECH_NAME": "/CBY/PURBOOK_DATA",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_data/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPD;name=GS_EXTRACT_DST"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PD",
+      "OBJECT_NAME": "GS_EXTRACT_SRC",
+      "TECH_NAME": "/CBY/PURBOOK_DATA",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_data/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPD;name=GS_EXTRACT_SRC"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PD",
+      "OBJECT_NAME": "GS_FOOTER_FORM",
+      "TECH_NAME": "/CBY/PURBOOK_DATA",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_data/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPD;name=GS_FOOTER_FORM"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PD",
+      "OBJECT_NAME": "GS_HEADER_FORM",
+      "TECH_NAME": "/CBY/PURBOOK_DATA",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_data/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPD;name=GS_HEADER_FORM"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PD",
+      "OBJECT_NAME": "GS_HEADER_PB",
+      "TECH_NAME": "/CBY/PURBOOK_DATA",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_data/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPD;name=GS_HEADER_PB"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PD",
+      "OBJECT_NAME": "GS_LAYOUT",
+      "TECH_NAME": "/CBY/PURBOOK_DATA",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_data/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPD;name=GS_LAYOUT"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PD",
+      "OBJECT_NAME": "GS_OPER_TYP_ALL",
+      "TECH_NAME": "/CBY/PURBOOK_DATA",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_data/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPD;name=GS_OPER_TYP_ALL"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PD",
+      "OBJECT_NAME": "GS_PRINT",
+      "TECH_NAME": "/CBY/PURBOOK_DATA",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_data/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPD;name=GS_PRINT"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PD",
+      "OBJECT_NAME": "GS_TEMP_T001",
+      "TECH_NAME": "/CBY/PURBOOK_DATA",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_data/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPD;name=GS_TEMP_T001"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PD",
+      "OBJECT_NAME": "GS_TOTALS",
+      "TECH_NAME": "/CBY/PURBOOK_DATA",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_data/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPD;name=GS_TOTALS"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PD",
+      "OBJECT_NAME": "GS_VARIANT",
+      "TECH_NAME": "/CBY/PURBOOK_DATA",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_data/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPD;name=GS_VARIANT"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PD",
+      "OBJECT_NAME": "GS_X_VARIANT",
+      "TECH_NAME": "/CBY/PURBOOK_DATA",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_data/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPD;name=GS_X_VARIANT"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PD",
+      "OBJECT_NAME": "GT_ADD_QUART_R",
+      "TECH_NAME": "/CBY/PURBOOK_DATA",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_data/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPD;name=GT_ADD_QUART_R"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PD",
+      "OBJECT_NAME": "GT_BKPF",
+      "TECH_NAME": "/CBY/PURBOOK_DATA",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_data/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPD;name=GT_BKPF"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PD",
+      "OBJECT_NAME": "GT_BKPF_EXT",
+      "TECH_NAME": "/CBY/PURBOOK_DATA",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_data/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPD;name=GT_BKPF_EXT"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PD",
+      "OBJECT_NAME": "GT_BSEG",
+      "TECH_NAME": "/CBY/PURBOOK_DATA",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_data/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPD;name=GT_BSEG"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PD",
+      "OBJECT_NAME": "GT_BSEG_EXT",
+      "TECH_NAME": "/CBY/PURBOOK_DATA",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_data/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPD;name=GT_BSEG_EXT"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PD",
+      "OBJECT_NAME": "GT_BUFF_TAB_2016",
+      "TECH_NAME": "/CBY/PURBOOK_DATA",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_data/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPD;name=GT_BUFF_TAB_2016"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PD",
+      "OBJECT_NAME": "GT_DOCLIST",
+      "TECH_NAME": "/CBY/PURBOOK_DATA",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_data/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPD;name=GT_DOCLIST"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PD",
+      "OBJECT_NAME": "GT_EVENTS",
+      "TECH_NAME": "/CBY/PURBOOK_DATA",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_data/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPD;name=GT_EVENTS"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PD",
+      "OBJECT_NAME": "GT_FIELDCAT",
+      "TECH_NAME": "/CBY/PURBOOK_DATA",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_data/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPD;name=GT_FIELDCAT"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PD",
+      "OBJECT_NAME": "GT_FOOTER",
+      "TECH_NAME": "/CBY/PURBOOK_DATA",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_data/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPD;name=GT_FOOTER"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PD",
+      "OBJECT_NAME": "GT_HEADER",
+      "TECH_NAME": "/CBY/PURBOOK_DATA",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_data/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPD;name=GT_HEADER"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PD",
+      "OBJECT_NAME": "GT_MERGE_EXTRACT",
+      "TECH_NAME": "/CBY/PURBOOK_DATA",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_data/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPD;name=GT_MERGE_EXTRACT"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PD",
+      "OBJECT_NAME": "GT_OPER_TYP_ITOG",
+      "TECH_NAME": "/CBY/PURBOOK_DATA",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_data/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPD;name=GT_OPER_TYP_ITOG"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PD",
+      "OBJECT_NAME": "GT_P_BOOK_ALV",
+      "TECH_NAME": "/CBY/PURBOOK_DATA",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_data/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPD;name=GT_P_BOOK_ALV"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PD",
+      "OBJECT_NAME": "GT_SAVE_BR_BELNR",
+      "TECH_NAME": "/CBY/PURBOOK_DATA",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_data/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPD;name=GT_SAVE_BR_BELNR"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PD",
+      "OBJECT_NAME": "GT_SORT",
+      "TECH_NAME": "/CBY/PURBOOK_DATA",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_data/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPD;name=GT_SORT"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PD",
+      "OBJECT_NAME": "GT_TEMP_T001",
+      "TECH_NAME": "/CBY/PURBOOK_DATA",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_data/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPD;name=GT_TEMP_T001"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PD",
+      "OBJECT_NAME": "GT_TOTALS",
+      "TECH_NAME": "/CBY/PURBOOK_DATA",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_data/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPD;name=GT_TOTALS"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PD",
+      "OBJECT_NAME": "GV_XML_ENABLED",
+      "TECH_NAME": "/CBY/BBK_XML_TOP",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fbbk_xml_top/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPD;name=GV_XML_ENABLED"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PD",
+      "OBJECT_NAME": "GV_XML_ENABLED_P14",
+      "TECH_NAME": "/CBY/BBK_XML_TOP",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fbbk_xml_top/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPD;name=GV_XML_ENABLED_P14"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PD",
+      "OBJECT_NAME": "GV_XML_ENABLED_X14",
+      "TECH_NAME": "/CBY/BBK_XML_TOP",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fbbk_xml_top/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPD;name=GV_XML_ENABLED_X14"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PD",
+      "OBJECT_NAME": "GV_XML_FILE_ATTR",
+      "TECH_NAME": "/CBY/BBK_XML_TOP",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fbbk_xml_top/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPD;name=GV_XML_FILE_ATTR"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PD",
+      "OBJECT_NAME": "GV_XML_VISIBLE",
+      "TECH_NAME": "/CBY/BBK_XML_TOP",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fbbk_xml_top/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPD;name=GV_XML_VISIBLE"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PD",
+      "OBJECT_NAME": "G_COMPARE_EXTRACT",
+      "TECH_NAME": "/CBY/PURBOOK_DECL_DATA",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_decl_data/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPD;name=G_COMPARE_EXTRACT"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PD",
+      "OBJECT_NAME": "G_VAT_DECL_CUST",
+      "TECH_NAME": "/CBY/PURBOOK_DECL_DATA",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_decl_data/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPD;name=G_VAT_DECL_CUST"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PD",
+      "OBJECT_NAME": "G_VAT_DECL_FLAG",
+      "TECH_NAME": "/CBY/PURBOOK_DECL_DATA",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_decl_data/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPD;name=G_VAT_DECL_FLAG"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PD",
+      "OBJECT_NAME": "G_VAT_DECL_MAIN_EXTRACT",
+      "TECH_NAME": "/CBY/PURBOOK_DECL_DATA",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_decl_data/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPD;name=G_VAT_DECL_MAIN_EXTRACT"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PD",
+      "OBJECT_NAME": "G_VAT_DECL_SECTION",
+      "TECH_NAME": "/CBY/PURBOOK_DECL_DATA",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_decl_data/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPD;name=G_VAT_DECL_SECTION"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PD",
+      "OBJECT_NAME": "G_VAT_DECL_SECTION_A",
+      "TECH_NAME": "/CBY/PURBOOK_DECL_DATA",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_decl_data/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPD;name=G_VAT_DECL_SECTION_A"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PD",
+      "OBJECT_NAME": "G_VAT_DECL_SEL",
+      "TECH_NAME": "/CBY/PURBOOK_DECL_DATA",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_decl_data/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPD;name=G_VAT_DECL_SEL"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PD",
+      "OBJECT_NAME": "IN_TOTALS",
+      "TECH_NAME": "/CBY/PURBOOK_DATA",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_data/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPD;name=IN_TOTALS"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PD",
+      "OBJECT_NAME": "ITEM_TEXT",
+      "TECH_NAME": "/CBY/PURBOOK_SELSCR",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_selscr/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPD;name=ITEM_TEXT"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PD",
+      "OBJECT_NAME": "J3RDL_COMM_TRADE_AGENT",
+      "TECH_NAME": "/CBY/PURBOOK_TYPE_POOL",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_type_pool/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPD;name=J3RDL_COMM_TRADE_AGENT"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PD",
+      "OBJECT_NAME": "J3RDL_COMM_TRADE_DIRECT",
+      "TECH_NAME": "/CBY/PURBOOK_TYPE_POOL",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_type_pool/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPD;name=J3RDL_COMM_TRADE_DIRECT"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PD",
+      "OBJECT_NAME": "J3RDL_COMM_TRADE_PRINCIPAL",
+      "TECH_NAME": "/CBY/PURBOOK_TYPE_POOL",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_type_pool/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPD;name=J3RDL_COMM_TRADE_PRINCIPAL"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PD",
+      "OBJECT_NAME": "J3RDL_CORR_FLAG_CORR",
+      "TECH_NAME": "/CBY/PURBOOK_TYPE_POOL",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_type_pool/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPD;name=J3RDL_CORR_FLAG_CORR"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PD",
+      "OBJECT_NAME": "J3RDL_CORR_FLAG_CORR_REV",
+      "TECH_NAME": "/CBY/PURBOOK_TYPE_POOL",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_type_pool/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPD;name=J3RDL_CORR_FLAG_CORR_REV"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PD",
+      "OBJECT_NAME": "J3RDL_CORR_FLAG_NONE",
+      "TECH_NAME": "/CBY/PURBOOK_TYPE_POOL",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_type_pool/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPD;name=J3RDL_CORR_FLAG_NONE"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PD",
+      "OBJECT_NAME": "J3RDL_CORR_FLAG_REV",
+      "TECH_NAME": "/CBY/PURBOOK_TYPE_POOL",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_type_pool/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPD;name=J3RDL_CORR_FLAG_REV"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PD",
+      "OBJECT_NAME": "J3RDL_DECL_SECTION_PL",
+      "TECH_NAME": "/CBY/PURBOOK_TYPE_POOL",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_type_pool/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPD;name=J3RDL_DECL_SECTION_PL"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PD",
+      "OBJECT_NAME": "J3RDL_DECL_SECTION_PLA",
+      "TECH_NAME": "/CBY/PURBOOK_TYPE_POOL",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_type_pool/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPD;name=J3RDL_DECL_SECTION_PLA"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PD",
+      "OBJECT_NAME": "J3RDL_DECL_SECTION_SL",
+      "TECH_NAME": "/CBY/PURBOOK_TYPE_POOL",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_type_pool/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPD;name=J3RDL_DECL_SECTION_SL"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PD",
+      "OBJECT_NAME": "J3RDL_DECL_SECTION_SLA",
+      "TECH_NAME": "/CBY/PURBOOK_TYPE_POOL",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_type_pool/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPD;name=J3RDL_DECL_SECTION_SLA"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PD",
+      "OBJECT_NAME": "J3RDL_DECL_TYPE_CORR",
+      "TECH_NAME": "/CBY/PURBOOK_TYPE_POOL",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_type_pool/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPD;name=J3RDL_DECL_TYPE_CORR"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PD",
+      "OBJECT_NAME": "J3RDL_DECL_TYPE_MAIN",
+      "TECH_NAME": "/CBY/PURBOOK_TYPE_POOL",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_type_pool/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPD;name=J3RDL_DECL_TYPE_MAIN"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PD",
+      "OBJECT_NAME": "J3RDL_FORGOTTEN_LEN",
+      "TECH_NAME": "/CBY/PURBOOK_TYPE_POOL",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_type_pool/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPD;name=J3RDL_FORGOTTEN_LEN"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PD",
+      "OBJECT_NAME": "J3RDL_FORGOTTEN_PREFIX",
+      "TECH_NAME": "/CBY/PURBOOK_TYPE_POOL",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_type_pool/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPD;name=J3RDL_FORGOTTEN_PREFIX"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PD",
+      "OBJECT_NAME": "J3RDL_JOURNAL_DATA",
+      "TECH_NAME": "/CBY/PURBOOK_TYPE_POOL",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_type_pool/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPD;name=J3RDL_JOURNAL_DATA"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PD",
+      "OBJECT_NAME": "J3RDL_JOURNAL_REV1",
+      "TECH_NAME": "/CBY/PURBOOK_TYPE_POOL",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_type_pool/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPD;name=J3RDL_JOURNAL_REV1"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PD",
+      "OBJECT_NAME": "J3RDL_JOURNAL_REV2",
+      "TECH_NAME": "/CBY/PURBOOK_TYPE_POOL",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_type_pool/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPD;name=J3RDL_JOURNAL_REV2"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PD",
+      "OBJECT_NAME": "J3RDL_JOURNAL_REV3",
+      "TECH_NAME": "/CBY/PURBOOK_TYPE_POOL",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_type_pool/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPD;name=J3RDL_JOURNAL_REV3"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PD",
+      "OBJECT_NAME": "J3RDL_JOURNAL_REV_ALL",
+      "TECH_NAME": "/CBY/PURBOOK_TYPE_POOL",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_type_pool/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPD;name=J3RDL_JOURNAL_REV_ALL"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PD",
+      "OBJECT_NAME": "J3RDL_VER_0283",
+      "TECH_NAME": "/CBY/PURBOOK_TYPE_POOL",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_type_pool/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPD;name=J3RDL_VER_0283"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PD",
+      "OBJECT_NAME": "J3RDL_VER_0735",
+      "TECH_NAME": "/CBY/PURBOOK_TYPE_POOL",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_type_pool/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPD;name=J3RDL_VER_0735"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PD",
+      "OBJECT_NAME": "J3RDL_VER_1137",
+      "TECH_NAME": "/CBY/PURBOOK_TYPE_POOL",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_type_pool/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPD;name=J3RDL_VER_1137"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PD",
+      "OBJECT_NAME": "J3RDL_VER_DECL_15",
+      "TECH_NAME": "/CBY/PURBOOK_TYPE_POOL",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_type_pool/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPD;name=J3RDL_VER_DECL_15"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PD",
+      "OBJECT_NAME": "J3RDL_VER_DEFAULT",
+      "TECH_NAME": "/CBY/PURBOOK_TYPE_POOL",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_type_pool/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPD;name=J3RDL_VER_DEFAULT"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PD",
+      "OBJECT_NAME": "KONTAB",
+      "TECH_NAME": "/CBY/PURBOOK_DATA",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_data/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPD;name=KONTAB"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PD",
+      "OBJECT_NAME": "LAUFD",
+      "TECH_NAME": "/CBY/PURBOOK_SELSCR",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_selscr/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPD;name=LAUFD"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PD",
+      "OBJECT_NAME": "LAUFI",
+      "TECH_NAME": "/CBY/PURBOOK_SELSCR",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_selscr/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPD;name=LAUFI"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PD",
+      "OBJECT_NAME": "MAINBUK",
+      "TECH_NAME": "/CBY/PURBOOK_SELSCR",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_selscr/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPD;name=MAINBUK"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PD",
+      "OBJECT_NAME": "MM_TRANSACTION",
+      "TECH_NAME": "/CBY/PURBOOK_EXTRACT_DATA",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_extract_data/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPD;name=MM_TRANSACTION"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PD",
+      "OBJECT_NAME": "NUM_AUTO",
+      "TECH_NAME": "/CBY/PURBOOK_SELSCR",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_selscr/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPD;name=NUM_AUTO"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PD",
+      "OBJECT_NAME": "NUM_CRET",
+      "TECH_NAME": "/CBY/PURBOOK_SELSCR",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_selscr/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPD;name=NUM_CRET"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PD",
+      "OBJECT_NAME": "NUM_DEL",
+      "TECH_NAME": "/CBY/PURBOOK_SELSCR",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_selscr/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPD;name=NUM_DEL"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PD",
+      "OBJECT_NAME": "NUM_STRT",
+      "TECH_NAME": "/CBY/PURBOOK_SELSCR",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_selscr/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPD;name=NUM_STRT"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PD",
+      "OBJECT_NAME": "OUTPUTOPT",
+      "TECH_NAME": "/CBY/PURBOOK_SELSCR",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_selscr/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPD;name=OUTPUTOPT"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PD",
+      "OBJECT_NAME": "PAR_COL",
+      "TECH_NAME": "/CBY/PURBOOK_SELSCR",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_selscr/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPD;name=PAR_COL"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PD",
+      "OBJECT_NAME": "PAR_CPAG",
+      "TECH_NAME": "/CBY/PURBOOK_SELSCR",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_selscr/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPD;name=PAR_CPAG"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PD",
+      "OBJECT_NAME": "PAR_EXT",
+      "TECH_NAME": "/CBY/PURBOOK_SELSCR",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_selscr/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPD;name=PAR_EXT"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PD",
+      "OBJECT_NAME": "PAR_EXTD",
+      "TECH_NAME": "/CBY/PURBOOK_SELSCR",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_selscr/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPD;name=PAR_EXTD"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PD",
+      "OBJECT_NAME": "PAR_EXTN",
+      "TECH_NAME": "/CBY/PURBOOK_SELSCR",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_selscr/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPD;name=PAR_EXTN"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PD",
+      "OBJECT_NAME": "PAR_EXTP",
+      "TECH_NAME": "/CBY/PURBOOK_SELSCR",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_selscr/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPD;name=PAR_EXTP"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PD",
+      "OBJECT_NAME": "PAR_FI",
+      "TECH_NAME": "/CBY/PURBOOK_SELSCR",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_selscr/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPD;name=PAR_FI"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PD",
+      "OBJECT_NAME": "PAR_PAYD",
+      "TECH_NAME": "/CBY/PURBOOK_SELSCR",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_selscr/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPD;name=PAR_PAYD"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PD",
+      "OBJECT_NAME": "PAR_PAYN",
+      "TECH_NAME": "/CBY/PURBOOK_SELSCR",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_selscr/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPD;name=PAR_PAYN"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PD",
+      "OBJECT_NAME": "PAR_SELA",
+      "TECH_NAME": "/CBY/PURBOOK_SELSCR",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_selscr/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPD;name=PAR_SELA"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PD",
+      "OBJECT_NAME": "PA_ADOBE",
+      "TECH_NAME": "/CBY/PURBOOK_SELSCR",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_selscr/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPD;name=PA_ADOBE"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PD",
+      "OBJECT_NAME": "PA_XML",
+      "TECH_NAME": "/CBY/BBK_XML_SEL",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fbbk_xml_sel/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPD;name=PA_XML"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PD",
+      "OBJECT_NAME": "PA_XMLA",
+      "TECH_NAME": "/CBY/BBK_XML_SEL",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fbbk_xml_sel/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPD;name=PA_XMLA"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PD",
+      "OBJECT_NAME": "POSTAB",
+      "TECH_NAME": "/CBY/PURBOOK_DATA",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_data/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPD;name=POSTAB"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PD",
+      "OBJECT_NAME": "P_A1_NAM",
+      "TECH_NAME": "/CBY/BBK_XML_SEL",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fbbk_xml_sel/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPD;name=P_A1_NAM"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PD",
+      "OBJECT_NAME": "P_ACTPAY",
+      "TECH_NAME": "/CBY/PURBOOK_SELSCR",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_selscr/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPD;name=P_ACTPAY"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PD",
+      "OBJECT_NAME": "P_ADD",
+      "TECH_NAME": "/CBY/PURBOOK_SELSCR",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_selscr/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPD;name=P_ADD"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PD",
+      "OBJECT_NAME": "P_ADOBE",
+      "TECH_NAME": "/CBY/PURBOOK_SELSCR",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_selscr/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPD;name=P_ADOBE"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PD",
+      "OBJECT_NAME": "P_ALV",
+      "TECH_NAME": "/CBY/PURBOOK_SELSCR",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_selscr/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPD;name=P_ALV"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PD",
+      "OBJECT_NAME": "P_BOOK",
+      "TECH_NAME": "/CBY/PURBOOK_DATA",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_data/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPD;name=P_BOOK"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PD",
+      "OBJECT_NAME": "P_BOOK_ALV1",
+      "TECH_NAME": "/CBY/PURBOOK_DATA",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_data/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPD;name=P_BOOK_ALV1"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PD",
+      "OBJECT_NAME": "P_DEL",
+      "TECH_NAME": "/CBY/PURBOOK_SELSCR",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_selscr/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPD;name=P_DEL"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PD",
+      "OBJECT_NAME": "P_DP_ADD",
+      "TECH_NAME": "/CBY/PURBOOK_SELSCR",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_selscr/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPD;name=P_DP_ADD"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PD",
+      "OBJECT_NAME": "P_DP_BAS",
+      "TECH_NAME": "/CBY/PURBOOK_SELSCR",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_selscr/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPD;name=P_DP_BAS"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PD",
+      "OBJECT_NAME": "P_EINVID",
+      "TECH_NAME": "/CBY/PURBOOK_SELSCR",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_selscr/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPD;name=P_EINVID"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PD",
+      "OBJECT_NAME": "P_ETTN21",
+      "TECH_NAME": "/CBY/PURBOOK_SELSCR",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_selscr/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPD;name=P_ETTN21"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PD",
+      "OBJECT_NAME": "P_ETTN22",
+      "TECH_NAME": "/CBY/PURBOOK_SELSCR",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_selscr/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPD;name=P_ETTN22"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PD",
+      "OBJECT_NAME": "P_ETTN23",
+      "TECH_NAME": "/CBY/PURBOOK_SELSCR",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_selscr/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPD;name=P_ETTN23"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PD",
+      "OBJECT_NAME": "P_EX1",
+      "TECH_NAME": "/CBY/PURBOOK_SELSCR",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_selscr/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPD;name=P_EX1"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PD",
+      "OBJECT_NAME": "P_EX1C",
+      "TECH_NAME": "/CBY/PURBOOK_SELSCR",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_selscr/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPD;name=P_EX1C"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PD",
+      "OBJECT_NAME": "P_EX2",
+      "TECH_NAME": "/CBY/PURBOOK_SELSCR",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_selscr/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPD;name=P_EX2"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PD",
+      "OBJECT_NAME": "P_EX3",
+      "TECH_NAME": "/CBY/PURBOOK_SELSCR",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_selscr/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPD;name=P_EX3"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PD",
+      "OBJECT_NAME": "P_EXT1",
+      "TECH_NAME": "/CBY/PURBOOK_SELSCR",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_selscr/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPD;name=P_EXT1"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PD",
+      "OBJECT_NAME": "P_EXTNUM",
+      "TECH_NAME": "/CBY/PURBOOK_SELSCR",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_selscr/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPD;name=P_EXTNUM"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PD",
+      "OBJECT_NAME": "P_EX_DST",
+      "TECH_NAME": "/CBY/PURBOOK_SELSCR",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_selscr/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPD;name=P_EX_DST"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PD",
+      "OBJECT_NAME": "P_EX_SRC",
+      "TECH_NAME": "/CBY/PURBOOK_SELSCR",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_selscr/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPD;name=P_EX_SRC"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PD",
+      "OBJECT_NAME": "P_LNGGTD",
+      "TECH_NAME": "/CBY/PURBOOK_SELSCR",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_selscr/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPD;name=P_LNGGTD"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PD",
+      "OBJECT_NAME": "P_LOAD",
+      "TECH_NAME": "/CBY/PURBOOK_SELSCR",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_selscr/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPD;name=P_LOAD"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PD",
+      "OBJECT_NAME": "P_MERGE",
+      "TECH_NAME": "/CBY/PURBOOK_SELSCR",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_selscr/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPD;name=P_MERGE"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PD",
+      "OBJECT_NAME": "P_MODE",
+      "TECH_NAME": "/CBY/PURBOOK_SELSCR",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_selscr/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPD;name=P_MODE"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PD",
+      "OBJECT_NAME": "P_NOEX",
+      "TECH_NAME": "/CBY/PURBOOK_SELSCR",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_selscr/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPD;name=P_NOEX"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PD",
+      "OBJECT_NAME": "P_QUART",
+      "TECH_NAME": "/CBY/PURBOOK_SELSCR",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_selscr/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPD;name=P_QUART"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PD",
+      "OBJECT_NAME": "P_S1_NAM",
+      "TECH_NAME": "/CBY/BBK_XML_SEL",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fbbk_xml_sel/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPD;name=P_S1_NAM"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PD",
+      "OBJECT_NAME": "P_S1_TYP",
+      "TECH_NAME": "/CBY/BBK_XML_SEL",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fbbk_xml_sel/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPD;name=P_S1_TYP"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PD",
+      "OBJECT_NAME": "P_SAVE",
+      "TECH_NAME": "/CBY/PURBOOK_SELSCR",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_selscr/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPD;name=P_SAVE"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PD",
+      "OBJECT_NAME": "P_SUM",
+      "TECH_NAME": "/CBY/PURBOOK_SELSCR",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_selscr/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPD;name=P_SUM"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PD",
+      "OBJECT_NAME": "P_TAGGED",
+      "TECH_NAME": "/CBY/PURBOOK_SELSCR",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_selscr/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPD;name=P_TAGGED"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PD",
+      "OBJECT_NAME": "P_UPDATE",
+      "TECH_NAME": "/CBY/PURBOOK_SELSCR",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_selscr/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPD;name=P_UPDATE"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PD",
+      "OBJECT_NAME": "P_VARI",
+      "TECH_NAME": "/CBY/PURBOOK_SELSCR",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_selscr/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPD;name=P_VARI"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PD",
+      "OBJECT_NAME": "P_XBLNR",
+      "TECH_NAME": "/CBY/PURBOOK_SELSCR",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_selscr/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPD;name=P_XBLNR"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PD",
+      "OBJECT_NAME": "P_XBLNR1",
+      "TECH_NAME": "/CBY/PURBOOK_SELSCR",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_selscr/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPD;name=P_XBLNR1"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PD",
+      "OBJECT_NAME": "P_XBLNR2",
+      "TECH_NAME": "/CBY/PURBOOK_SELSCR",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_selscr/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPD;name=P_XBLNR2"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PD",
+      "OBJECT_NAME": "P_XML",
+      "TECH_NAME": "/CBY/BBK_XML_SEL",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fbbk_xml_sel/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPD;name=P_XML"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PD",
+      "OBJECT_NAME": "P_XMLDIR",
+      "TECH_NAME": "/CBY/BBK_XML_SEL",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fbbk_xml_sel/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPD;name=P_XMLDIR"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PD",
+      "OBJECT_NAME": "P_XMLTAX",
+      "TECH_NAME": "/CBY/BBK_XML_SEL",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fbbk_xml_sel/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPD;name=P_XMLTAX"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PD",
+      "OBJECT_NAME": "REF",
+      "TECH_NAME": "/CBY/PURBOOK_DATA",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_data/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPD;name=REF"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PD",
+      "OBJECT_NAME": "SEL_BLDT",
+      "TECH_NAME": "/CBY/PURBOOK_SELSCR",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_selscr/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPD;name=SEL_BLDT"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PD",
+      "OBJECT_NAME": "SEL_BLRT",
+      "TECH_NAME": "/CBY/PURBOOK_SELSCR",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_selscr/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPD;name=SEL_BLRT"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PD",
+      "OBJECT_NAME": "SEL_MONA",
+      "TECH_NAME": "/CBY/PURBOOK_SELSCR",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_selscr/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPD;name=SEL_MONA"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PD",
+      "OBJECT_NAME": "SEL_MWKZ",
+      "TECH_NAME": "/CBY/PURBOOK_SELSCR",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_selscr/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPD;name=SEL_MWKZ"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PD",
+      "OBJECT_NAME": "SEL_OPAY",
+      "TECH_NAME": "/CBY/PURBOOK_SELSCR",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_selscr/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPD;name=SEL_OPAY"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PD",
+      "OBJECT_NAME": "SEL_UKRS",
+      "TECH_NAME": "/CBY/PURBOOK_SELSCR",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_selscr/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPD;name=SEL_UKRS"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PD",
+      "OBJECT_NAME": "SEL_VTDT",
+      "TECH_NAME": "/CBY/PURBOOK_SELSCR",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_selscr/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPD;name=SEL_VTDT"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PD",
+      "OBJECT_NAME": "SIGNATORY1",
+      "TECH_NAME": "/CBY/BBK_XML_SEL",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fbbk_xml_sel/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPD;name=SIGNATORY1"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PD",
+      "OBJECT_NAME": "S_ADR",
+      "TECH_NAME": "/CBY/PURBOOK_SELSCR",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_selscr/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPD;name=S_ADR"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PD",
+      "OBJECT_NAME": "S_LIFNR",
+      "TECH_NAME": "/CBY/PURBOOK_SELSCR",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_selscr/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPD;name=S_LIFNR"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PD",
+      "OBJECT_NAME": "VAT_DECL",
+      "TECH_NAME": "/CBY/PURBOOK_SELSCR",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_selscr/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPD;name=VAT_DECL"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PD",
+      "OBJECT_NAME": "VER2012",
+      "TECH_NAME": "/CBY/PURBOOK_DECL_DATA",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_decl_data/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPD;name=VER2012"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PD",
+      "OBJECT_NAME": "VER2014",
+      "TECH_NAME": "/CBY/PURBOOK_DECL_DATA",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_decl_data/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPD;name=VER2014"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PD",
+      "OBJECT_NAME": "VR_CNUM",
+      "TECH_NAME": "/CBY/PURBOOK_SELSCR",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_selscr/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPD;name=VR_CNUM"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PD",
+      "OBJECT_NAME": "VR_CODE",
+      "TECH_NAME": "/CBY/PURBOOK_SELSCR",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_selscr/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPD;name=VR_CODE"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PD",
+      "OBJECT_NAME": "VR_EMPTY",
+      "TECH_NAME": "/CBY/BBK_DECL_SELX",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fbbk_decl_selx/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPD;name=VR_EMPTY"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PD",
+      "OBJECT_NAME": "VR_GJAHR",
+      "TECH_NAME": "/CBY/PURBOOK_SELSCR",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_selscr/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPD;name=VR_GJAHR"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PD",
+      "OBJECT_NAME": "VR_PERIO",
+      "TECH_NAME": "/CBY/PURBOOK_SELSCR",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_selscr/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPD;name=VR_PERIO"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PD",
+      "OBJECT_NAME": "VR_PROD",
+      "TECH_NAME": "/CBY/BBK_DECL_SELX",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fbbk_decl_selx/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPD;name=VR_PROD"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PD",
+      "OBJECT_NAME": "VR_TITL",
+      "TECH_NAME": "/CBY/PURBOOK_SELSCR",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_selscr/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPD;name=VR_TITL"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PD",
+      "OBJECT_NAME": "VR_TYPE",
+      "TECH_NAME": "/CBY/PURBOOK_SELSCR",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_selscr/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPD;name=VR_TYPE"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PD",
+      "OBJECT_NAME": "_OUTOPT",
+      "TECH_NAME": "/CBY/PURBOOK_SELSCR",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_selscr/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPD;name=_OUTOPT"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PE",
+      "OBJECT_NAME": "AT ... VALUE ... MAINBUK",
+      "TECH_NAME": "/CBY/PURBOOK_EN",
+      "OBJECT_URI": "/sap/bc/adt/programs/programs/%2fcby%2fpurbook_en/source/main#type=PROG%2FPE;name=AT%20...%20VALUE%20...%20MAINBUK"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PE",
+      "OBJECT_NAME": "AT ... VALUE ... PAR_EXTD",
+      "TECH_NAME": "/CBY/PURBOOK_FORMS",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_forms/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPE;name=AT%20...%20VALUE%20...%20PAR_EXTD"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PE",
+      "OBJECT_NAME": "AT ... VALUE ... PAR_EXTN",
+      "TECH_NAME": "/CBY/PURBOOK_FORMS",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_forms/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPE;name=AT%20...%20VALUE%20...%20PAR_EXTN"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PE",
+      "OBJECT_NAME": "AT ... VALUE ... PAR_PAYD",
+      "TECH_NAME": "/CBY/PURBOOK_EN",
+      "OBJECT_URI": "/sap/bc/adt/programs/programs/%2fcby%2fpurbook_en/source/main#type=PROG%2FPE;name=AT%20...%20VALUE%20...%20PAR_PAYD"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PE",
+      "OBJECT_NAME": "AT ... VALUE ... PAR_PAYN",
+      "TECH_NAME": "/CBY/PURBOOK_EN",
+      "OBJECT_URI": "/sap/bc/adt/programs/programs/%2fcby%2fpurbook_en/source/main#type=PROG%2FPE;name=AT%20...%20VALUE%20...%20PAR_PAYN"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PE",
+      "OBJECT_NAME": "AT ... VALUE ... P_EINVID",
+      "TECH_NAME": "/CBY/PURBOOK_EN",
+      "OBJECT_URI": "/sap/bc/adt/programs/programs/%2fcby%2fpurbook_en/source/main#type=PROG%2FPE;name=AT%20...%20VALUE%20...%20P_EINVID"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PE",
+      "OBJECT_NAME": "AT ... VALUE ... P_ETTN21",
+      "TECH_NAME": "/CBY/PURBOOK_EN",
+      "OBJECT_URI": "/sap/bc/adt/programs/programs/%2fcby%2fpurbook_en/source/main#type=PROG%2FPE;name=AT%20...%20VALUE%20...%20P_ETTN21"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PE",
+      "OBJECT_NAME": "AT ... VALUE ... P_ETTN22",
+      "TECH_NAME": "/CBY/PURBOOK_EN",
+      "OBJECT_URI": "/sap/bc/adt/programs/programs/%2fcby%2fpurbook_en/source/main#type=PROG%2FPE;name=AT%20...%20VALUE%20...%20P_ETTN22"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PE",
+      "OBJECT_NAME": "AT ... VALUE ... P_ETTN23",
+      "TECH_NAME": "/CBY/PURBOOK_EN",
+      "OBJECT_URI": "/sap/bc/adt/programs/programs/%2fcby%2fpurbook_en/source/main#type=PROG%2FPE;name=AT%20...%20VALUE%20...%20P_ETTN23"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PE",
+      "OBJECT_NAME": "AT ... VALUE ... P_EX1",
+      "TECH_NAME": "/CBY/PURBOOK_EN",
+      "OBJECT_URI": "/sap/bc/adt/programs/programs/%2fcby%2fpurbook_en/source/main#type=PROG%2FPE;name=AT%20...%20VALUE%20...%20P_EX1"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PE",
+      "OBJECT_NAME": "AT ... VALUE ... P_EX1C",
+      "TECH_NAME": "/CBY/BBK_DECL_EVE",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fbbk_decl_eve/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPE;name=AT%20...%20VALUE%20...%20P_EX1C"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PE",
+      "OBJECT_NAME": "AT ... VALUE ... P_EX2",
+      "TECH_NAME": "/CBY/PURBOOK_EN",
+      "OBJECT_URI": "/sap/bc/adt/programs/programs/%2fcby%2fpurbook_en/source/main#type=PROG%2FPE;name=AT%20...%20VALUE%20...%20P_EX2"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PE",
+      "OBJECT_NAME": "AT ... VALUE ... P_EX3",
+      "TECH_NAME": "/CBY/PURBOOK_EN",
+      "OBJECT_URI": "/sap/bc/adt/programs/programs/%2fcby%2fpurbook_en/source/main#type=PROG%2FPE;name=AT%20...%20VALUE%20...%20P_EX3"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PE",
+      "OBJECT_NAME": "AT ... VALUE ... P_EX_DST",
+      "TECH_NAME": "/CBY/BBK_DECL_EVE",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fbbk_decl_eve/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPE;name=AT%20...%20VALUE%20...%20P_EX_DST"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PE",
+      "OBJECT_NAME": "AT ... VALUE ... P_EX_SRC-HIGH",
+      "TECH_NAME": "/CBY/BBK_DECL_EVE",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fbbk_decl_eve/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPE;name=AT%20...%20VALUE%20...%20P_EX_SRC-HIGH"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PE",
+      "OBJECT_NAME": "AT ... VALUE ... P_EX_SRC-LOW",
+      "TECH_NAME": "/CBY/BBK_DECL_EVE",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fbbk_decl_eve/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPE;name=AT%20...%20VALUE%20...%20P_EX_SRC-LOW"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PE",
+      "OBJECT_NAME": "AT ... VALUE ... P_VARI",
+      "TECH_NAME": "/CBY/PURBOOK_EN",
+      "OBJECT_URI": "/sap/bc/adt/programs/programs/%2fcby%2fpurbook_en/source/main#type=PROG%2FPE;name=AT%20...%20VALUE%20...%20P_VARI"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PE",
+      "OBJECT_NAME": "AT ... VALUE ... P_XMLDIR",
+      "TECH_NAME": "/CBY/BBK_XML_EVE",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fbbk_xml_eve/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPE;name=AT%20...%20VALUE%20...%20P_XMLDIR"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PE",
+      "OBJECT_NAME": "AT ... VALUE ... P_XMLTAX",
+      "TECH_NAME": "/CBY/BBK_XML_EVE",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fbbk_xml_eve/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPE;name=AT%20...%20VALUE%20...%20P_XMLTAX"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PE",
+      "OBJECT_NAME": "AT ... VALUE ... VR_CNUM",
+      "TECH_NAME": "/CBY/BBK_DECL_EVE",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fbbk_decl_eve/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPE;name=AT%20...%20VALUE%20...%20VR_CNUM"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PE",
+      "OBJECT_NAME": "AT SELECTION-SCREEN",
+      "TECH_NAME": "/CBY/PURBOOK_EN",
+      "OBJECT_URI": "/sap/bc/adt/programs/programs/%2fcby%2fpurbook_en/source/main#type=PROG%2FPE;name=AT%20SELECTION-SCREEN"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PE",
+      "OBJECT_NAME": "AT SELECTION-SCREEN OUTPUT",
+      "TECH_NAME": "/CBY/PURBOOK_EN",
+      "OBJECT_URI": "/sap/bc/adt/programs/programs/%2fcby%2fpurbook_en/source/main#type=PROG%2FPE;name=AT%20SELECTION-SCREEN%20OUTPUT"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PE",
+      "OBJECT_NAME": "END-OF-SELECTION",
+      "TECH_NAME": "/CBY/PURBOOK_EN",
+      "OBJECT_URI": "/sap/bc/adt/programs/programs/%2fcby%2fpurbook_en/source/main#type=PROG%2FPE;name=END-OF-SELECTION"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PE",
+      "OBJECT_NAME": "INITIALIZATION",
+      "TECH_NAME": "/CBY/PURBOOK_EN",
+      "OBJECT_URI": "/sap/bc/adt/programs/programs/%2fcby%2fpurbook_en/source/main#type=PROG%2FPE;name=INITIALIZATION"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PE",
+      "OBJECT_NAME": "START-OF-SELECTION",
+      "TECH_NAME": "/CBY/PURBOOK_EN",
+      "OBJECT_URI": "/sap/bc/adt/programs/programs/%2fcby%2fpurbook_en/source/main#type=PROG%2FPE;name=START-OF-SELECTION"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PG",
+      "OBJECT_NAME": "ABAP",
+      "TECH_NAME": "ABAP",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_data/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPG;name=ABAP"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PG",
+      "OBJECT_NAME": "SDYDO",
+      "TECH_NAME": "SDYDO",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_data/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPG;name=SDYDO"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PG",
+      "OBJECT_NAME": "SLIS",
+      "TECH_NAME": "SLIS",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_data/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPG;name=SLIS"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PL",
+      "OBJECT_NAME": "LCL_BUY_BOOK",
+      "TECH_NAME": "/CBY/BBK_INC_CL",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fbbk_inc_cl/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPL;name=LCL_BUY_BOOK"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PS",
+      "OBJECT_NAME": "1000",
+      "TECH_NAME": "/CBY/PURBOOK_EN                         1000",
+      "OBJECT_URI": "/sap/bc/adt/vit/wb/object_type/progps/object_name/%2fCBY%2fPURBOOK_EN%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%201000"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PT",
+      "OBJECT_NAME": "BKPF",
+      "TECH_NAME": "/CBY/PURBOOK_DATA",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_data/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPT;name=BKPF"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PT",
+      "OBJECT_NAME": "BSEG",
+      "TECH_NAME": "/CBY/PURBOOK_DATA",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_data/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPT;name=BSEG"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PT",
+      "OBJECT_NAME": "BSET",
+      "TECH_NAME": "/CBY/PURBOOK_DATA",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_data/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPT;name=BSET"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PT",
+      "OBJECT_NAME": "J_3RBUE_BOOK_IND",
+      "TECH_NAME": "/CBY/PURBOOK_DATA",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_data/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPT;name=J_3RBUE_BOOK_IND"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PT",
+      "OBJECT_NAME": "J_3RBUE_BOOK_NUM",
+      "TECH_NAME": "/CBY/PURBOOK_DATA",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_data/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPT;name=J_3RBUE_BOOK_NUM"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PT",
+      "OBJECT_NAME": "SSCRFIELDS",
+      "TECH_NAME": "/CBY/PURBOOK_DATA",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_data/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPT;name=SSCRFIELDS"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PT",
+      "OBJECT_NAME": "T001",
+      "TECH_NAME": "/CBY/PURBOOK_DATA",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_data/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPT;name=T001"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PT",
+      "OBJECT_NAME": "T007F",
+      "TECH_NAME": "/CBY/PURBOOK_DATA",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_data/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPT;name=T007F"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PT",
+      "OBJECT_NAME": "T007K",
+      "TECH_NAME": "/CBY/PURBOOK_DATA",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_data/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPT;name=T007K"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PT",
+      "OBJECT_NAME": "T021V",
+      "TECH_NAME": "/CBY/PURBOOK_DATA",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_data/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPT;name=T021V"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PU",
+      "OBJECT_NAME": "ADD_FI_GTD",
+      "TECH_NAME": "/CBY/PURBOOK_FORMS",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_forms/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPU;name=ADD_FI_GTD"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PU",
+      "OBJECT_NAME": "ADD_FI_XBLNR",
+      "TECH_NAME": "/CBY/PURBOOK_FORMS",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_forms/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPU;name=ADD_FI_XBLNR"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PU",
+      "OBJECT_NAME": "ADD_TRANSPARENT_NUMBER",
+      "TECH_NAME": "/CBY/PURBOOK_FORMS",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_forms/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPU;name=ADD_TRANSPARENT_NUMBER"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PU",
+      "OBJECT_NAME": "ADOBE_CURRENCY_COLUMN",
+      "TECH_NAME": "/CBY/BBK_XML_F02",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fbbk_xml_f02/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPU;name=ADOBE_CURRENCY_COLUMN"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PU",
+      "OBJECT_NAME": "ADOBE_FILL_INV",
+      "TECH_NAME": "/CBY/PURBOOK_FORMS",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_forms/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPU;name=ADOBE_FILL_INV"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PU",
+      "OBJECT_NAME": "ADOBE_PERIOD",
+      "TECH_NAME": "/CBY/PURBOOK_FORMS",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_forms/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPU;name=ADOBE_PERIOD"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PU",
+      "OBJECT_NAME": "CALL_ADOBE",
+      "TECH_NAME": "/CBY/PURBOOK_FORMS",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_forms/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPU;name=CALL_ADOBE"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PU",
+      "OBJECT_NAME": "CALL_ALV_NO_CYCLE",
+      "TECH_NAME": "/CBY/PURBOOK_FORMS",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_forms/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPU;name=CALL_ALV_NO_CYCLE"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PU",
+      "OBJECT_NAME": "CALL_CLEARED_ITEMS",
+      "TECH_NAME": "/CBY/PURBOOK_FORMS",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_forms/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPU;name=CALL_CLEARED_ITEMS"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PU",
+      "OBJECT_NAME": "CALL_XML",
+      "TECH_NAME": "/CBY/BBK_XML_F01",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fbbk_xml_f01/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPU;name=CALL_XML"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PU",
+      "OBJECT_NAME": "CHANGE_FISCAL_PERIOD",
+      "TECH_NAME": "/CBY/PURBOOK_FORMS",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_forms/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPU;name=CHANGE_FISCAL_PERIOD"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PU",
+      "OBJECT_NAME": "CHANGE_VALUES",
+      "TECH_NAME": "/CBY/PURBOOK_FORMS",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_forms/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPU;name=CHANGE_VALUES"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PU",
+      "OBJECT_NAME": "CHECK_ADOBE_INTERFACE",
+      "TECH_NAME": "/CBY/BBK_XML_F01",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fbbk_xml_f01/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPU;name=CHECK_ADOBE_INTERFACE"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PU",
+      "OBJECT_NAME": "CHECK_BEFORE_OUTPUT",
+      "TECH_NAME": "/CBY/BBK_XML_F02",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fbbk_xml_f02/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPU;name=CHECK_BEFORE_OUTPUT"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PU",
+      "OBJECT_NAME": "CHECK_CBY_AUTH",
+      "TECH_NAME": "/CBY/PURBOOK_FORMS",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_forms/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPU;name=CHECK_CBY_AUTH"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PU",
+      "OBJECT_NAME": "CHECK_DECL_BEFORE_OUTPUT",
+      "TECH_NAME": "/CBY/BBK_DECL_F01",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fbbk_decl_f01/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPU;name=CHECK_DECL_BEFORE_OUTPUT"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PU",
+      "OBJECT_NAME": "CHECK_DECL_FLAGS",
+      "TECH_NAME": "/CBY/BBK_DECL_F01",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fbbk_decl_f01/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPU;name=CHECK_DECL_FLAGS"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PU",
+      "OBJECT_NAME": "CHECK_DECL_SCREEN",
+      "TECH_NAME": "/CBY/BBK_DECL_F01",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fbbk_decl_f01/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPU;name=CHECK_DECL_SCREEN"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PU",
+      "OBJECT_NAME": "CHECK_DECL_START",
+      "TECH_NAME": "/CBY/BBK_DECL_F01",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fbbk_decl_f01/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPU;name=CHECK_DECL_START"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PU",
+      "OBJECT_NAME": "CHECK_EXTRACT_NAME",
+      "TECH_NAME": "/CBY/PURBOOK_EXTRACT",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_extract/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPU;name=CHECK_EXTRACT_NAME"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PU",
+      "OBJECT_NAME": "CHECK_FORGOTTEN_INVOICES",
+      "TECH_NAME": "/CBY/PURBOOK_FORMS",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_forms/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPU;name=CHECK_FORGOTTEN_INVOICES"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PU",
+      "OBJECT_NAME": "CHECK_MERGE_EXTRACTS",
+      "TECH_NAME": "/CBY/BBK_DECL_F01",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fbbk_decl_f01/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPU;name=CHECK_MERGE_EXTRACTS"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PU",
+      "OBJECT_NAME": "CHECK_SELECTION_SCREEN",
+      "TECH_NAME": "/CBY/PURBOOK_FORMS",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_forms/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPU;name=CHECK_SELECTION_SCREEN"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PU",
+      "OBJECT_NAME": "CHECK_STANDARD_XML_HIER",
+      "TECH_NAME": "/CBY/BBK_DECL_F01",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fbbk_decl_f01/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPU;name=CHECK_STANDARD_XML_HIER"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PU",
+      "OBJECT_NAME": "CHECK_XML_ENABLED",
+      "TECH_NAME": "/CBY/BBK_XML_F02",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fbbk_xml_f02/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPU;name=CHECK_XML_ENABLED"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PU",
+      "OBJECT_NAME": "CHECK_XML_HIER",
+      "TECH_NAME": "/CBY/BBK_XML_F02",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fbbk_xml_f02/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPU;name=CHECK_XML_HIER"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PU",
+      "OBJECT_NAME": "CHECK_XML_SCREEN",
+      "TECH_NAME": "/CBY/BBK_XML_F02",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fbbk_xml_f02/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPU;name=CHECK_XML_SCREEN"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PU",
+      "OBJECT_NAME": "COMPRESS_DATA",
+      "TECH_NAME": "/CBY/PURBOOK_FORMS",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_forms/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPU;name=COMPRESS_DATA"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PU",
+      "OBJECT_NAME": "COMPRESS_GTD",
+      "TECH_NAME": "/CBY/PURBOOK_FORMS",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_forms/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPU;name=COMPRESS_GTD"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PU",
+      "OBJECT_NAME": "CONVERT_TEXT_TO_DATE",
+      "TECH_NAME": "/CBY/PURBOOK_FORMS",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_forms/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPU;name=CONVERT_TEXT_TO_DATE"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PU",
+      "OBJECT_NAME": "CREATE_EXTRACT",
+      "TECH_NAME": "/CBY/PURBOOK_FORMS",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_forms/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPU;name=CREATE_EXTRACT"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PU",
+      "OBJECT_NAME": "CREATE_NUM_DATA",
+      "TECH_NAME": "/CBY/PURBOOK_FORMS",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_forms/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPU;name=CREATE_NUM_DATA"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PU",
+      "OBJECT_NAME": "DELETE_EXTRACT",
+      "TECH_NAME": "/CBY/PURBOOK_FORMS",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_forms/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPU;name=DELETE_EXTRACT"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PU",
+      "OBJECT_NAME": "DELETE_EXTRACT_EX",
+      "TECH_NAME": "/CBY/PURBOOK_EXTRACT",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_extract/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPU;name=DELETE_EXTRACT_EX"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PU",
+      "OBJECT_NAME": "DELETE_NUM_DATA",
+      "TECH_NAME": "/CBY/PURBOOK_FORMS",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_forms/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPU;name=DELETE_NUM_DATA"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PU",
+      "OBJECT_NAME": "E01_FIELDCAT_INIT",
+      "TECH_NAME": "/CBY/PURBOOK_FC1",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_fc1/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPU;name=E01_FIELDCAT_INIT"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PU",
+      "OBJECT_NAME": "E05_LAYOUT_BUILD",
+      "TECH_NAME": "/CBY/PURBOOK_FORMS",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_forms/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPU;name=E05_LAYOUT_BUILD"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PU",
+      "OBJECT_NAME": "E06_SORT_BUILD",
+      "TECH_NAME": "/CBY/PURBOOK_FORMS",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_forms/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPU;name=E06_SORT_BUILD"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PU",
+      "OBJECT_NAME": "END_OF_LIST",
+      "TECH_NAME": "/CBY/PURBOOK_FORMS",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_forms/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPU;name=END_OF_LIST"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PU",
+      "OBJECT_NAME": "END_OF_PAGE",
+      "TECH_NAME": "/CBY/PURBOOK_FORMS",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_forms/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPU;name=END_OF_PAGE"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PU",
+      "OBJECT_NAME": "EVENTS_INIT",
+      "TECH_NAME": "/CBY/PURBOOK_FORMS",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_forms/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPU;name=EVENTS_INIT"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PU",
+      "OBJECT_NAME": "F4_FOR_VARIANT",
+      "TECH_NAME": "/CBY/PURBOOK_FORMS",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_forms/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPU;name=F4_FOR_VARIANT"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PU",
+      "OBJECT_NAME": "F4_FOR_VR_CNUM",
+      "TECH_NAME": "/CBY/BBK_DECL_F01",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fbbk_decl_f01/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPU;name=F4_FOR_VR_CNUM"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PU",
+      "OBJECT_NAME": "F4_FOR_XMLDIR",
+      "TECH_NAME": "/CBY/BBK_XML_F02",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fbbk_xml_f02/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPU;name=F4_FOR_XMLDIR"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PU",
+      "OBJECT_NAME": "F4_FOR_XMLTAX",
+      "TECH_NAME": "/CBY/BBK_XML_F02",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fbbk_xml_f02/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPU;name=F4_FOR_XMLTAX"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PU",
+      "OBJECT_NAME": "F4_MAINBUK",
+      "TECH_NAME": "/CBY/PURBOOK_FORMS",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_forms/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPU;name=F4_MAINBUK"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PU",
+      "OBJECT_NAME": "FILL_ADD_FIELDS",
+      "TECH_NAME": "/CBY/PURBOOK_FORMS",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_forms/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPU;name=FILL_ADD_FIELDS"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PU",
+      "OBJECT_NAME": "FILL_DECL_HEADER",
+      "TECH_NAME": "/CBY/BBK_DECL_F01",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fbbk_decl_f01/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPU;name=FILL_DECL_HEADER"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PU",
+      "OBJECT_NAME": "FILL_OPER_TYP",
+      "TECH_NAME": "/CBY/PURBOOK_FORMS",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_forms/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPU;name=FILL_OPER_TYP"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PU",
+      "OBJECT_NAME": "FORMAT_PAY_EXT_NUMBER",
+      "TECH_NAME": "/CBY/BBK_XML_F02",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fbbk_xml_f02/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPU;name=FORMAT_PAY_EXT_NUMBER"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PU",
+      "OBJECT_NAME": "GET_ADD_DOCUMENTS",
+      "TECH_NAME": "/CBY/PURBOOK_FORMS",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_forms/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPU;name=GET_ADD_DOCUMENTS"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PU",
+      "OBJECT_NAME": "GET_CALENDAR_PERIOD",
+      "TECH_NAME": "/CBY/PURBOOK_FORMS",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_forms/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPU;name=GET_CALENDAR_PERIOD"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PU",
+      "OBJECT_NAME": "GET_CORRECTIVE_DOCUMENTS",
+      "TECH_NAME": "/CBY/PURBOOK_FORMS",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_forms/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPU;name=GET_CORRECTIVE_DOCUMENTS"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PU",
+      "OBJECT_NAME": "GET_COUNTRY_FROM_ISO",
+      "TECH_NAME": "/CBY/PURBOOK_FORMS",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_forms/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPU;name=GET_COUNTRY_FROM_ISO"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PU",
+      "OBJECT_NAME": "GET_CURR_CODE",
+      "TECH_NAME": "/CBY/BBK_XML_F02",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fbbk_xml_f02/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPU;name=GET_CURR_CODE"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PU",
+      "OBJECT_NAME": "GET_CURR_CONV",
+      "TECH_NAME": "/CBY/BBK_XML_F02",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fbbk_xml_f02/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPU;name=GET_CURR_CONV"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PU",
+      "OBJECT_NAME": "GET_DATA_FOR_BP2016RB",
+      "TECH_NAME": "/CBY/PURBOOK_FORMS",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_forms/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPU;name=GET_DATA_FOR_BP2016RB"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PU",
+      "OBJECT_NAME": "GET_DOCUMENTS",
+      "TECH_NAME": "/CBY/PURBOOK_FORMS",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_forms/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPU;name=GET_DOCUMENTS"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PU",
+      "OBJECT_NAME": "GET_EINV_DATA",
+      "TECH_NAME": "/CBY/PURBOOK_FORMS",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_forms/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPU;name=GET_EINV_DATA"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PU",
+      "OBJECT_NAME": "GET_ETTN_DATA",
+      "TECH_NAME": "/CBY/PURBOOK_FORMS",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_forms/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPU;name=GET_ETTN_DATA"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PU",
+      "OBJECT_NAME": "GET_ETTN_TEXT",
+      "TECH_NAME": "/CBY/PURBOOK_FORMS",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_forms/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPU;name=GET_ETTN_TEXT"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PU",
+      "OBJECT_NAME": "GET_EXTRACT_NAME",
+      "TECH_NAME": "/CBY/PURBOOK_EXTRACT",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_extract/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPU;name=GET_EXTRACT_NAME"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PU",
+      "OBJECT_NAME": "GET_GTD_FROM_MM",
+      "TECH_NAME": "/CBY/PURBOOK_FORMS",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_forms/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPU;name=GET_GTD_FROM_MM"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PU",
+      "OBJECT_NAME": "GET_HEADER_PB2016",
+      "TECH_NAME": "/CBY/PURBOOK_FORMS",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_forms/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPU;name=GET_HEADER_PB2016"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PU",
+      "OBJECT_NAME": "GET_INCOMING_TOTALS",
+      "TECH_NAME": "/CBY/PURBOOK_FORMS",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_forms/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPU;name=GET_INCOMING_TOTALS"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PU",
+      "OBJECT_NAME": "GET_INCOMMING_PERIOD",
+      "TECH_NAME": "/CBY/PURBOOK_FORMS",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_forms/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPU;name=GET_INCOMMING_PERIOD"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PU",
+      "OBJECT_NAME": "GET_INTERMEDIATE_PERIOD",
+      "TECH_NAME": "/CBY/PURBOOK_FORMS",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_forms/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPU;name=GET_INTERMEDIATE_PERIOD"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PU",
+      "OBJECT_NAME": "GET_INVOICE_JOURNAL",
+      "TECH_NAME": "/CBY/PURBOOK_FORMS",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_forms/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPU;name=GET_INVOICE_JOURNAL"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PU",
+      "OBJECT_NAME": "GET_ITOG_OPER_TYPE_PB2016",
+      "TECH_NAME": "/CBY/PURBOOK_FORMS",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_forms/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPU;name=GET_ITOG_OPER_TYPE_PB2016"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PU",
+      "OBJECT_NAME": "GET_LONG_GTD",
+      "TECH_NAME": "/CBY/PURBOOK_FORMS",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_forms/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPU;name=GET_LONG_GTD"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PU",
+      "OBJECT_NAME": "GET_SCREEN_FIELD",
+      "TECH_NAME": "/CBY/BBK_XML_F02",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fbbk_xml_f02/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPU;name=GET_SCREEN_FIELD"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PU",
+      "OBJECT_NAME": "GET_SEC_ITEM_TRN",
+      "TECH_NAME": "/CBY/PURBOOK_FORMS",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_forms/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPU;name=GET_SEC_ITEM_TRN"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PU",
+      "OBJECT_NAME": "GET_TEXTIDS_DESC",
+      "TECH_NAME": "/CBY/BBK_XML_F02",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fbbk_xml_f02/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPU;name=GET_TEXTIDS_DESC"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PU",
+      "OBJECT_NAME": "GET_TOTALS",
+      "TECH_NAME": "/CBY/PURBOOK_FORMS",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_forms/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPU;name=GET_TOTALS"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PU",
+      "OBJECT_NAME": "GET_XML_FILE_NAME",
+      "TECH_NAME": "/CBY/BBK_XML_F02",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fbbk_xml_f02/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPU;name=GET_XML_FILE_NAME"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PU",
+      "OBJECT_NAME": "HTML_END_OF_LIST",
+      "TECH_NAME": "/CBY/PURBOOK_FORMS",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_forms/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPU;name=HTML_END_OF_LIST"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PU",
+      "OBJECT_NAME": "HTML_TOP_OF_PAGE",
+      "TECH_NAME": "/CBY/PURBOOK_FORMS",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_forms/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPU;name=HTML_TOP_OF_PAGE"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PU",
+      "OBJECT_NAME": "IF_REVERSED",
+      "TECH_NAME": "/CBY/PURBOOK_FORMS",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_forms/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPU;name=IF_REVERSED"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PU",
+      "OBJECT_NAME": "INIT_ALV_NO_CYCLE",
+      "TECH_NAME": "/CBY/PURBOOK_FORMS",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_forms/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPU;name=INIT_ALV_NO_CYCLE"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PU",
+      "OBJECT_NAME": "LOAD_EXTRACT",
+      "TECH_NAME": "/CBY/PURBOOK_FORMS",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_forms/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPU;name=LOAD_EXTRACT"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PU",
+      "OBJECT_NAME": "LOAD_EXTRACT_DYN",
+      "TECH_NAME": "/CBY/PURBOOK_EXTRACT",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_extract/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPU;name=LOAD_EXTRACT_DYN"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PU",
+      "OBJECT_NAME": "MAIN_PROCESSING",
+      "TECH_NAME": "/CBY/PURBOOK_FORMS",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_forms/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPU;name=MAIN_PROCESSING"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PU",
+      "OBJECT_NAME": "MM_BELNR_OLD",
+      "TECH_NAME": "/CBY/PURBOOK_FORMS",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_forms/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPU;name=MM_BELNR_OLD"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PU",
+      "OBJECT_NAME": "PAI_OF_SELECTION_SCREEN",
+      "TECH_NAME": "/CBY/PURBOOK_FORMS",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_forms/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPU;name=PAI_OF_SELECTION_SCREEN"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PU",
+      "OBJECT_NAME": "PL_CHECK_DECL_SCREEN",
+      "TECH_NAME": "/CBY/BBK_DECL_F03",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fbbk_decl_f03/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPU;name=PL_CHECK_DECL_SCREEN"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PU",
+      "OBJECT_NAME": "PL_CHECK_DECL_START",
+      "TECH_NAME": "/CBY/BBK_DECL_F03",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fbbk_decl_f03/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPU;name=PL_CHECK_DECL_START"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PU",
+      "OBJECT_NAME": "PL_COMPARE_EXTRACT",
+      "TECH_NAME": "/CBY/BBK_DECL_F03",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fbbk_decl_f03/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPU;name=PL_COMPARE_EXTRACT"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PU",
+      "OBJECT_NAME": "PL_COMPARE_STRING",
+      "TECH_NAME": "/CBY/BBK_DECL_F03",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fbbk_decl_f03/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPU;name=PL_COMPARE_STRING"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PU",
+      "OBJECT_NAME": "PL_DECL_GET_TOTALS",
+      "TECH_NAME": "/CBY/BBK_DECL_F03",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fbbk_decl_f03/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPU;name=PL_DECL_GET_TOTALS"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PU",
+      "OBJECT_NAME": "PL_DECL_GET_TOTALS_BK",
+      "TECH_NAME": "/CBY/BBK_DECL_F03",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fbbk_decl_f03/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPU;name=PL_DECL_GET_TOTALS_BK"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PU",
+      "OBJECT_NAME": "PL_DECL_INCOMING_TOTALS",
+      "TECH_NAME": "/CBY/BBK_DECL_F03",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fbbk_decl_f03/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPU;name=PL_DECL_INCOMING_TOTALS"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PU",
+      "OBJECT_NAME": "PL_MERGE_EXTRACTS",
+      "TECH_NAME": "/CBY/BBK_DECL_F03",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fbbk_decl_f03/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPU;name=PL_MERGE_EXTRACTS"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PU",
+      "OBJECT_NAME": "PL_PROCESS_DATA",
+      "TECH_NAME": "/CBY/BBK_DECL_F03",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fbbk_decl_f03/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPU;name=PL_PROCESS_DATA"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PU",
+      "OBJECT_NAME": "PL_SAVE_DECL_DATA",
+      "TECH_NAME": "/CBY/BBK_DECL_F03",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fbbk_decl_f03/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPU;name=PL_SAVE_DECL_DATA"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PU",
+      "OBJECT_NAME": "PREPARE_INTERFACE",
+      "TECH_NAME": "/CBY/PURBOOK_FORMS",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_forms/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPU;name=PREPARE_INTERFACE"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PU",
+      "OBJECT_NAME": "PRINT_FC",
+      "TECH_NAME": "/CBY/PURBOOK_FORMS",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_forms/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPU;name=PRINT_FC"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PU",
+      "OBJECT_NAME": "PRINT_FORM",
+      "TECH_NAME": "/CBY/PURBOOK_FORMS",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_forms/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPU;name=PRINT_FORM"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PU",
+      "OBJECT_NAME": "PRINT_INIT",
+      "TECH_NAME": "/CBY/PURBOOK_FORMS",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_forms/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPU;name=PRINT_INIT"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PU",
+      "OBJECT_NAME": "PRINT_LEGAL_FORM",
+      "TECH_NAME": "/CBY/PURBOOK_FORMS",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_forms/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPU;name=PRINT_LEGAL_FORM"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PU",
+      "OBJECT_NAME": "PROCESS_DOCLIST",
+      "TECH_NAME": "/CBY/PURBOOK_FORMS",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_forms/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPU;name=PROCESS_DOCLIST"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PU",
+      "OBJECT_NAME": "PROCESS_TOTALS",
+      "TECH_NAME": "/CBY/PURBOOK_FORMS",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_forms/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPU;name=PROCESS_TOTALS"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PU",
+      "OBJECT_NAME": "READ_DECL_EXTRACTS",
+      "TECH_NAME": "/CBY/BBK_DECL_F01",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fbbk_decl_f01/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPU;name=READ_DECL_EXTRACTS"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PU",
+      "OBJECT_NAME": "READ_KNA1",
+      "TECH_NAME": "/CBY/PURBOOK_FORMS",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_forms/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPU;name=READ_KNA1"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PU",
+      "OBJECT_NAME": "READ_LFA1",
+      "TECH_NAME": "/CBY/PURBOOK_FORMS",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_forms/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPU;name=READ_LFA1"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PU",
+      "OBJECT_NAME": "READ_TEXTS",
+      "TECH_NAME": "/CBY/PURBOOK_FORMS",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_forms/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPU;name=READ_TEXTS"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PU",
+      "OBJECT_NAME": "READ_XML_CUSTOMIZING",
+      "TECH_NAME": "/CBY/BBK_XML_F02",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fbbk_xml_f02/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPU;name=READ_XML_CUSTOMIZING"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PU",
+      "OBJECT_NAME": "REMOVE_FORGOTTEN_PREFIX",
+      "TECH_NAME": "/CBY/PURBOOK_FORMS",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_forms/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPU;name=REMOVE_FORGOTTEN_PREFIX"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PU",
+      "OBJECT_NAME": "REMOVE_GTD_DUPLICATES",
+      "TECH_NAME": "/CBY/PURBOOK_FORMS",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_forms/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPU;name=REMOVE_GTD_DUPLICATES"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PU",
+      "OBJECT_NAME": "RESTART_PROGRAM",
+      "TECH_NAME": "/CBY/PURBOOK_FORMS",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_forms/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPU;name=RESTART_PROGRAM"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PU",
+      "OBJECT_NAME": "SAVE_DECL_EXTRACTS",
+      "TECH_NAME": "/CBY/BBK_DECL_F01",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fbbk_decl_f01/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPU;name=SAVE_DECL_EXTRACTS"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PU",
+      "OBJECT_NAME": "SELECT_ADDR",
+      "TECH_NAME": "/CBY/PURBOOK_FORMS",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_forms/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPU;name=SELECT_ADDR"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PU",
+      "OBJECT_NAME": "SELECT_MM_EIPO",
+      "TECH_NAME": "/CBY/PURBOOK_FORMS",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_forms/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPU;name=SELECT_MM_EIPO"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PU",
+      "OBJECT_NAME": "SELECT_MM_EKBE",
+      "TECH_NAME": "/CBY/PURBOOK_FORMS",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_forms/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPU;name=SELECT_MM_EKBE"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PU",
+      "OBJECT_NAME": "SELECT_MM_EKBE_PO",
+      "TECH_NAME": "/CBY/PURBOOK_FORMS",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_forms/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPU;name=SELECT_MM_EKBE_PO"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PU",
+      "OBJECT_NAME": "SELECT_MM_EKKO_EIKP",
+      "TECH_NAME": "/CBY/PURBOOK_FORMS",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_forms/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPU;name=SELECT_MM_EKKO_EIKP"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PU",
+      "OBJECT_NAME": "SELECT_MM_ESSR",
+      "TECH_NAME": "/CBY/PURBOOK_FORMS",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_forms/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPU;name=SELECT_MM_ESSR"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PU",
+      "OBJECT_NAME": "SELECT_MM_RSEG_PO",
+      "TECH_NAME": "/CBY/PURBOOK_FORMS",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_forms/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPU;name=SELECT_MM_RSEG_PO"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PU",
+      "OBJECT_NAME": "SELECT_VARIANT",
+      "TECH_NAME": "/CBY/PURBOOK_FORMS",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_forms/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPU;name=SELECT_VARIANT"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PU",
+      "OBJECT_NAME": "SET_ARCHIVING_PARAMS",
+      "TECH_NAME": "/CBY/PURBOOK_FORMS",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_forms/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPU;name=SET_ARCHIVING_PARAMS"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PU",
+      "OBJECT_NAME": "SET_DEFAULT_OUTPUT_PARAMS",
+      "TECH_NAME": "/CBY/PURBOOK_FORMS",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_forms/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPU;name=SET_DEFAULT_OUTPUT_PARAMS"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PU",
+      "OBJECT_NAME": "SET_STATUS",
+      "TECH_NAME": "/CBY/PURBOOK_FORMS",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_forms/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPU;name=SET_STATUS"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PU",
+      "OBJECT_NAME": "SHOW_TEXT_ID_F4",
+      "TECH_NAME": "/CBY/PURBOOK_FORMS",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_forms/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPU;name=SHOW_TEXT_ID_F4"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PU",
+      "OBJECT_NAME": "SORT_FIELDS_BY_VARIANT",
+      "TECH_NAME": "/CBY/PURBOOK_FORMS",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_forms/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPU;name=SORT_FIELDS_BY_VARIANT"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PU",
+      "OBJECT_NAME": "TEXT_UPDATE",
+      "TECH_NAME": "/CBY/PURBOOK_FORMS",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_forms/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPU;name=TEXT_UPDATE"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PU",
+      "OBJECT_NAME": "TOP_OF_LIST",
+      "TECH_NAME": "/CBY/PURBOOK_FORMS",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_forms/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPU;name=TOP_OF_LIST"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PU",
+      "OBJECT_NAME": "USER_COMMAND",
+      "TECH_NAME": "/CBY/PURBOOK_FORMS",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_forms/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPU;name=USER_COMMAND"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PU",
+      "OBJECT_NAME": "VARIANT_INIT",
+      "TECH_NAME": "/CBY/PURBOOK_FORMS",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_forms/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPU;name=VARIANT_INIT"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PU",
+      "OBJECT_NAME": "VAT_DECL_INIT",
+      "TECH_NAME": "/CBY/BBK_DECL_F01",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fbbk_decl_f01/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPU;name=VAT_DECL_INIT"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PU",
+      "OBJECT_NAME": "VIEW_EXTRACT",
+      "TECH_NAME": "/CBY/PURBOOK_FORMS",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_forms/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPU;name=VIEW_EXTRACT"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PU",
+      "OBJECT_NAME": "XML_GET_SIGNATURE",
+      "TECH_NAME": "/CBY/BBK_XML_F02",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fbbk_xml_f02/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPU;name=XML_GET_SIGNATURE"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PU",
+      "OBJECT_NAME": "XML_GUID_PERIOD",
+      "TECH_NAME": "/CBY/BBK_XML_F02",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fbbk_xml_f02/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPU;name=XML_GUID_PERIOD"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PU",
+      "OBJECT_NAME": "XML_INIT",
+      "TECH_NAME": "/CBY/BBK_XML_F01",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fbbk_xml_f01/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPU;name=XML_INIT"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PX",
+      "OBJECT_NAME": "/CBY/PURBOOK_EN",
+      "TECH_NAME": "/CBY/PURBOOK_EN",
+      "OBJECT_URI": "/sap/bc/adt/textelements/programs/%2fcby%2fpurbook_en"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PY",
+      "OBJECT_NAME": "J3RDL_T_DOCLIST_EXT",
+      "TECH_NAME": "/CBY/PURBOOK_DATA",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_data/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPY;name=J3RDL_T_DOCLIST_EXT"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PY",
+      "OBJECT_NAME": "J_3RBUY",
+      "TECH_NAME": "/CBY/PURBOOK_DATA",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_data/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPY;name=J_3RBUY"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PY",
+      "OBJECT_NAME": "J_3R_TOTALS",
+      "TECH_NAME": "/CBY/PURBOOK_DATA",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_data/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPY;name=J_3R_TOTALS"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PY",
+      "OBJECT_NAME": "J_3R_T_BUY",
+      "TECH_NAME": "/CBY/PURBOOK_DATA",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_data/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPY;name=J_3R_T_BUY"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PY",
+      "OBJECT_NAME": "J_3R_T_TOTALS",
+      "TECH_NAME": "/CBY/PURBOOK_DATA",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_data/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPY;name=J_3R_T_TOTALS"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PY",
+      "OBJECT_NAME": "TS_BKPF_CACHE",
+      "TECH_NAME": "/CBY/PURBOOK_TYPE_POOL",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_type_pool/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPY;name=TS_BKPF_CACHE"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PY",
+      "OBJECT_NAME": "TS_BK_PARAMS",
+      "TECH_NAME": "/CBY/PURBOOK_TYPE_POOL",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_type_pool/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPY;name=TS_BK_PARAMS"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PY",
+      "OBJECT_NAME": "TS_BSEG_CACHE",
+      "TECH_NAME": "/CBY/PURBOOK_TYPE_POOL",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_type_pool/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPY;name=TS_BSEG_CACHE"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PY",
+      "OBJECT_NAME": "TS_COMM_PRINCIPAL",
+      "TECH_NAME": "/CBY/PURBOOK_TYPE_POOL",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_type_pool/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPY;name=TS_COMM_PRINCIPAL"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PY",
+      "OBJECT_NAME": "TS_COMM_TRADE",
+      "TECH_NAME": "/CBY/PURBOOK_TYPE_POOL",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_type_pool/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPY;name=TS_COMM_TRADE"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PY",
+      "OBJECT_NAME": "TS_CUSTOMIZING",
+      "TECH_NAME": "/CBY/PURBOOK_TYPE_POOL",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_type_pool/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPY;name=TS_CUSTOMIZING"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PY",
+      "OBJECT_NAME": "TS_DOCLIST",
+      "TECH_NAME": "/CBY/PURBOOK_TYPE_POOL",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_type_pool/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPY;name=TS_DOCLIST"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PY",
+      "OBJECT_NAME": "TS_EKBE",
+      "TECH_NAME": "/CBY/PURBOOK_DATA",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_data/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPY;name=TS_EKBE"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PY",
+      "OBJECT_NAME": "TS_GTD",
+      "TECH_NAME": "/CBY/PURBOOK_DATA",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_data/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPY;name=TS_GTD"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PY",
+      "OBJECT_NAME": "TS_GTD_POS",
+      "TECH_NAME": "/CBY/PURBOOK_DATA",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_data/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPY;name=TS_GTD_POS"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PY",
+      "OBJECT_NAME": "TS_ITAB_RSEG",
+      "TECH_NAME": "/CBY/PURBOOK_DATA",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_data/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPY;name=TS_ITAB_RSEG"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PY",
+      "OBJECT_NAME": "TS_J3RDL_DOCLIST_EXT",
+      "TECH_NAME": "/CBY/PURBOOK_DATA",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_data/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPY;name=TS_J3RDL_DOCLIST_EXT"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PY",
+      "OBJECT_NAME": "TS_J_3RBUY_12A",
+      "TECH_NAME": "/CBY/PURBOOK_EXTRACT_DATA",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_extract_data/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPY;name=TS_J_3RBUY_12A"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PY",
+      "OBJECT_NAME": "TS_J_3RBUY_12B",
+      "TECH_NAME": "/CBY/PURBOOK_EXTRACT_DATA",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_extract_data/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPY;name=TS_J_3RBUY_12B"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PY",
+      "OBJECT_NAME": "TS_J_3RBUY_12C",
+      "TECH_NAME": "/CBY/PURBOOK_EXTRACT_DATA",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_extract_data/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPY;name=TS_J_3RBUY_12C"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PY",
+      "OBJECT_NAME": "TS_J_3RBUY_12D",
+      "TECH_NAME": "/CBY/PURBOOK_EXTRACT_DATA",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_extract_data/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPY;name=TS_J_3RBUY_12D"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PY",
+      "OBJECT_NAME": "TS_J_3RBUY_12E",
+      "TECH_NAME": "/CBY/PURBOOK_EXTRACT_DATA",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_extract_data/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPY;name=TS_J_3RBUY_12E"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PY",
+      "OBJECT_NAME": "TS_J_3RBUY_12F",
+      "TECH_NAME": "/CBY/PURBOOK_EXTRACT_DATA",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_extract_data/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPY;name=TS_J_3RBUY_12F"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PY",
+      "OBJECT_NAME": "TS_J_3RBUY_12G",
+      "TECH_NAME": "/CBY/PURBOOK_EXTRACT_DATA",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_extract_data/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPY;name=TS_J_3RBUY_12G"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PY",
+      "OBJECT_NAME": "TS_J_3RBUY_12H",
+      "TECH_NAME": "/CBY/PURBOOK_EXTRACT_DATA",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_extract_data/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPY;name=TS_J_3RBUY_12H"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PY",
+      "OBJECT_NAME": "TS_J_3RBUY_14A",
+      "TECH_NAME": "/CBY/PURBOOK_EXTRACT_DATA",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_extract_data/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPY;name=TS_J_3RBUY_14A"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PY",
+      "OBJECT_NAME": "TS_J_3RBUY_283",
+      "TECH_NAME": "/CBY/PURBOOK_DATA",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_data/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPY;name=TS_J_3RBUY_283"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PY",
+      "OBJECT_NAME": "TS_J_3RBUY_ALV",
+      "TECH_NAME": "/CBY/PURBOOK_DATA",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_data/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPY;name=TS_J_3RBUY_ALV"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PY",
+      "OBJECT_NAME": "TS_J_3RBUY_EX",
+      "TECH_NAME": "/CBY/PURBOOK_DATA",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_data/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPY;name=TS_J_3RBUY_EX"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PY",
+      "OBJECT_NAME": "TS_J_3RBUY_OLD",
+      "TECH_NAME": "/CBY/PURBOOK_DATA",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_data/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPY;name=TS_J_3RBUY_OLD"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PY",
+      "OBJECT_NAME": "TS_REF_MM_DOC",
+      "TECH_NAME": "/CBY/PURBOOK_DATA",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_data/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPY;name=TS_REF_MM_DOC"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PY",
+      "OBJECT_NAME": "TS_TAB_GTD_POS",
+      "TECH_NAME": "/CBY/PURBOOK_DATA",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_data/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPY;name=TS_TAB_GTD_POS"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PY",
+      "OBJECT_NAME": "TT_ADOBE_TAB",
+      "TECH_NAME": "/CBY/PURBOOK_DATA",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_data/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPY;name=TT_ADOBE_TAB"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PY",
+      "OBJECT_NAME": "TT_BKPF_CACHE",
+      "TECH_NAME": "/CBY/PURBOOK_TYPE_POOL",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_type_pool/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPY;name=TT_BKPF_CACHE"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PY",
+      "OBJECT_NAME": "TT_BOOK_NUM",
+      "TECH_NAME": "/CBY/PURBOOK_DATA",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_data/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPY;name=TT_BOOK_NUM"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PY",
+      "OBJECT_NAME": "TT_BSEG_CACHE",
+      "TECH_NAME": "/CBY/PURBOOK_TYPE_POOL",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_type_pool/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPY;name=TT_BSEG_CACHE"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PY",
+      "OBJECT_NAME": "TT_DECLCOMPARE",
+      "TECH_NAME": "/CBY/PURBOOK_DECL_DATA",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_decl_data/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPY;name=TT_DECLCOMPARE"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PY",
+      "OBJECT_NAME": "TT_DOCLIST",
+      "TECH_NAME": "/CBY/PURBOOK_TYPE_POOL",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_type_pool/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPY;name=TT_DOCLIST"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PY",
+      "OBJECT_NAME": "TT_EKBE",
+      "TECH_NAME": "/CBY/PURBOOK_DATA",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_data/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPY;name=TT_EKBE"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PY",
+      "OBJECT_NAME": "TT_EXNAME",
+      "TECH_NAME": "/CBY/PURBOOK_TYPE_POOL",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_type_pool/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPY;name=TT_EXNAME"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PY",
+      "OBJECT_NAME": "TT_GTD_POS",
+      "TECH_NAME": "/CBY/PURBOOK_DATA",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_data/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPY;name=TT_GTD_POS"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PY",
+      "OBJECT_NAME": "TT_ITAB_RSEG",
+      "TECH_NAME": "/CBY/PURBOOK_DATA",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_data/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPY;name=TT_ITAB_RSEG"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PY",
+      "OBJECT_NAME": "TT_J_3RBUY_T_ALV",
+      "TECH_NAME": "/CBY/PURBOOK_DATA",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_data/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPY;name=TT_J_3RBUY_T_ALV"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PY",
+      "OBJECT_NAME": "TT_J_3R_T_BUY_EX",
+      "TECH_NAME": "/CBY/PURBOOK_DATA",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_data/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPY;name=TT_J_3R_T_BUY_EX"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PY",
+      "OBJECT_NAME": "TT_REF_MM_DOC_TAB",
+      "TECH_NAME": "/CBY/PURBOOK_DATA",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_data/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPY;name=TT_REF_MM_DOC_TAB"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PY",
+      "OBJECT_NAME": "TT_TAB_GTD_POS",
+      "TECH_NAME": "/CBY/PURBOOK_DATA",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_data/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPY;name=TT_TAB_GTD_POS"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PY",
+      "OBJECT_NAME": "TY_ADOBE_LINE",
+      "TECH_NAME": "/CBY/PURBOOK_DATA",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_data/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPY;name=TY_ADOBE_LINE"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PY",
+      "OBJECT_NAME": "TY_ADOBE_TOTAL",
+      "TECH_NAME": "/CBY/PURBOOK_DATA",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_data/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPY;name=TY_ADOBE_TOTAL"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PY",
+      "OBJECT_NAME": "TY_DECLCOMPARE",
+      "TECH_NAME": "/CBY/PURBOOK_DECL_DATA",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_decl_data/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPY;name=TY_DECLCOMPARE"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PY",
+      "OBJECT_NAME": "T_CORR_REV",
+      "TECH_NAME": "/CBY/PURBOOK_TYPE_POOL",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_type_pool/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPY;name=T_CORR_REV"
+    },
+    {
+      "OBJECT_TYPE": "PROG/PY",
+      "OBJECT_NAME": "T_DECL_SECTION",
+      "TECH_NAME": "/CBY/PURBOOK_TYPE_POOL",
+      "OBJECT_URI": "/sap/bc/adt/programs/includes/%2fcby%2fpurbook_type_pool/source/main?context=%2fsap%2fbc%2fadt%2fprograms%2fprograms%2f%252fcby%252fpurbook_en#type=PROG%2FPY;name=T_DECL_SECTION"
+    },
+    {
+      "OBJECT_TYPE": "TRAN/T",
+      "OBJECT_NAME": "/CBY/PURBOOK",
+      "TECH_NAME": "/CBY/PURBOOK",
+      "OBJECT_URI": "/sap/bc/adt/vit/wb/object_type/trant/object_name/%2fCBY%2fPURBOOK"
+    }
+  ]
+}
