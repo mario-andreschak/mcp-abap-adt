@@ -188,23 +188,23 @@ export async function handleGetIncludesList(args: any) {
             return result;
         } else {
             // Return minimal text response (original format)
-            const responseData = includeNames.length > 0 
-                ? `Found ${includeNames.length} includes in ${object_type} '${object_name}':\n${includeNames.join('\n')}`
-                : `No includes found in ${object_type} '${object_name}'.`;
-            
-            const mockResponse = {
-                data: responseData,
-                status: 200,
-                statusText: 'OK',
-                headers: {},
-                config: {}
-            } as any;
+const responseData = includeNames.length > 0 
+    ? includeNames.join('\n')
+    : '';
 
-            const plainResult = return_response(mockResponse);
-            if (args.filePath) {
-                writeResultToFile(plainResult, args.filePath);
-            }
-            return plainResult;
+const mockResponse = {
+    data: responseData,
+    status: 200,
+    statusText: 'OK',
+    headers: {},
+    config: {}
+} as any;
+
+const plainResult = return_response(mockResponse);
+if (args.filePath) {
+    writeResultToFile({ content: [{ type: "text", text: responseData }] }, args.filePath);
+}
+return plainResult;
         }
 
     } catch (error) {
