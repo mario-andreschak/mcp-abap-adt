@@ -1,18 +1,25 @@
 // Test for handleGetTypeInfo
 
 const { handleGetTypeInfo } = require('../dist/handlers/handleGetTypeInfo');
+const assert = require('assert');
 
-async function main() {
-  try {
-    const typeName = process.argv[2] || 'ZMY_TYPE';
-    const args = { type_name: typeName };
-    const result = await handleGetTypeInfo(args);
-    console.log('handleGetTypeInfo result:', JSON.stringify(result, null, 2));
+async function run() {
+    // Дозволяємо передавати type_name через командний рядок
+    const type_name = process.argv[2] || '/CBY/MMSKLCARD';
+
+    const result = await handleGetTypeInfo({ type_name });
+
+    assert(result && result.content && Array.isArray(result.content), 'Result must have content array');
+    console.dir(result, { depth: null });
+    const jsonBlock = result.content.find(x => x.type === 'json');
+    assert(jsonBlock, 'Result must contain JSON block');
+    console.dir(jsonBlock.json, { depth: null });
+
+    console.log('handleGetTypeInfo test passed');
     process.exit(0);
-  } catch (e) {
-    console.error('Error:', e);
-    process.exit(1);
-  }
 }
 
-main();
+run().catch(e => {
+    console.error('handleGetTypeInfo test failed:', e);
+    process.exit(1);
+});
