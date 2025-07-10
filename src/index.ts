@@ -626,6 +626,18 @@ export class mcp_abap_adt_server {
           return await handleGetWhereUsed(request.params.arguments);
         case "GetBdef":
           return await handleGetBdef(request.params.arguments);
+        case "GetObjectsList":
+          return await (await import("./handlers/handleGetObjectsList.js")).handleGetObjectsList(request.params.arguments as any);
+        case "GetObjectsByType":
+          return await (await import("./handlers/handleGetObjectsByType.js")).handleGetObjectsByType(request.params.arguments as any);
+        case "GetProgFullCode":
+          return await (await import("./handlers/handleGetProgFullCode.js")).handleGetProgFullCode(request.params.arguments as any);
+        case "GetIncludesList":
+          return await handleGetIncludesList(request.params.arguments);
+        case "GetObjectNodeFromCache":
+          return await (await import("./handlers/handleGetObjectNodeFromCache.js")).handleGetObjectNodeFromCache(request.params.arguments as any);
+        case "GetRelatedObjectTypes":
+          return await handleGetRelatedObjectTypes(request.params.arguments);
         case "GetDescription":
           return await (await import("./handlers/handleGetDescription.js")).handleGetDescription(request.params.arguments as any);
         default:
