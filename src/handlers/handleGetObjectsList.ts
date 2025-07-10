@@ -138,8 +138,8 @@ export async function handleGetObjectsList(args: any) {
             objects
         };
 
-        // Зберігаємо у кеш
-        saveObjectsListCache(result);
+        // Зберігаємо у кеш (тільки в памʼяті)
+        (global as any).__getObjectsListCache = result;
 
         if (filePath) {
             writeResultToFile(result, filePath);
@@ -151,7 +151,9 @@ export async function handleGetObjectsList(args: any) {
                     type: "json",
                     json: result
                 }
-            ]
+            ],
+            // Додаємо кеш для можливого використання в інших модулях
+            cache: (global as any).__getObjectsListCache
         };
     } catch (error) {
         return return_error(error);

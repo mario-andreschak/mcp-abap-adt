@@ -262,6 +262,9 @@ The project includes comprehensive test suites located in the `tests/` directory
 # Quick performance tests (recommended for development)
 node tests/test-rm07docs-fast.js
 
+# ABAP program full code summary (outputs only object names and count, not full code)
+npx ts-node tests/run-get-prog-full-code.js <PROGRAM_NAME>
+
 # Comprehensive enhancement tests
 node tests/test-rm07docs-enhancements.js
 
@@ -270,6 +273,16 @@ node tests/test-get-includes-list.js
 
 # Large program handling
 node tests/test-sapmv45a-large-program-fixed.js
+```
+
+#### ABAP Program Full Code Summary CLI
+
+A new CLI script `tests/run-get-prog-full-code.js` allows you to get a summary of all code objects (main program and includes) for a given ABAP program.  
+**Output:** Only the object type, name, and total count are printed (no full code), and the script always exits cleanly.
+
+**Usage example:**
+```bash
+npx ts-node tests/run-get-prog-full-code.js /CBY/MMSKLCARD
 ```
 
 ### Test Categories
