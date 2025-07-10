@@ -13,189 +13,181 @@
  * Purpose: mass code export, audit, dependency analysis, migration, backup.
  */
 
-import { handleGetObjectsList } from './handleGetObjectsList';
 import { handleGetProgram } from './handleGetProgram';
 import { handleGetFunctionGroup } from './handleGetFunctionGroup';
 import { handleGetInclude } from './handleGetInclude';
 
-type ObjectEntry = {
-  OBJECT_TYPE: string;
-  OBJECT_NAME: string;
-  TECH_NAME: string;
-  OBJECT_URI: string;
-};
+/**
+ * handleGetProgFullCode: returns full code for program (report) or function group with all includes.
+ * @param args { name: string, type: "PROG/P" | "FUGR" }
+ */
+export async function handleGetProgFullCode(args: { name: string; type: "PROG/P" | "FUGR" }) {
+  const { name, type } = args;
 
-const HANDLER_MAP: Record<string, (args: any) => Promise<any>> = {
-  // Programs (reports)
-  'PROG/P': async (obj) => handleGetProgram({ program_name: obj.OBJECT_NAME }),
-  // Includes
-  'PROG/I': async (obj) => handleGetInclude({ include_name: obj.OBJECT_NAME }),
-  // Function groups
-  'FUGR': async (obj) => handleGetFunctionGroup({ function_group: obj.OBJECT_NAME }),
-};
+  // Helper to recursively collect includes for a program/include
+  async function collectIncludes(objectName: string, collected: Set<string> = new Set()): Promise<string[]> {
+    if (collected.has(objectName)) return [];
+    collected.add(objectName);
 
-import { objectsListCache } from '../lib/getObjectsListCache';
+    // Try to get include source
+    const includeResult = await handleGetInclude({ include_name: objectName });
+    let code = null;
+    if (Array.isArray(includeResult?.content) && includeResult.content.length > 0) {
+      const c = includeResult.content[0];
+      if (c.type === 'text' && 'text' in c) code = c.text;
+    }
 
-export async function handleGetProgFullCode(args: any) {
-  const { parent_name, parent_tech_name, parent_type, with_short_descriptions } = args;
-  const objectsListResult = await handleGetObjectsList({
-    parent_name,
-    parent_tech_name,
-    parent_type,
-    with_short_descriptions,
-  });
-
-  if (!objectsListResult || !objectsListResult.content || !Array.isArray(objectsListResult.content)) {
-    return { isError: true, content: [{ type: 'text', text: 'GetObjectsList failed' }] };
-  }
-
-  const jsonBlock = objectsListResult.content.find(
-    (x: any) =>
-      x &&
-      x.type === 'json' &&
-      typeof x.json === 'object' &&
-      x.json &&
-      Array.isArray(x.json.objects)
-  );
-  if (!jsonBlock) {
-    return { isError: true, content: [{ type: 'text', text: 'No objects found' }] };
-  }
-
-  // Safely extract objects array and ensure correct structure
-  const objectsRaw = (jsonBlock as any).json?.objects ?? [];
-  const objects: ObjectEntry[] = Array.isArray(objectsRaw)
-    ? objectsRaw
-        .map((obj: any) => {
-          // If object is { type: 'json', json: {...} }
-          if (obj && obj.type === 'json' && typeof obj.json === 'object') {
-            return {
-              OBJECT_TYPE: obj.json.OBJECT_TYPE ?? obj.json.object_type ?? '',
-              OBJECT_NAME: obj.json.OBJECT_NAME ?? obj.json.object_name ?? '',
-              TECH_NAME: obj.json.TECH_NAME ?? obj.json.tech_name ?? '',
-              OBJECT_URI: obj.json.OBJECT_URI ?? obj.json.object_uri ?? '',
-            };
-          }
-          // If object is plain object with fields
-          return {
-            OBJECT_TYPE: obj.OBJECT_TYPE ?? obj.object_type ?? '',
-            OBJECT_NAME: obj.OBJECT_NAME ?? obj.object_name ?? '',
-            TECH_NAME: obj.TECH_NAME ?? obj.tech_name ?? '',
-            OBJECT_URI: obj.OBJECT_URI ?? obj.object_uri ?? '',
-          };
-        })
-        .filter((o: ObjectEntry) => o.OBJECT_TYPE && o.OBJECT_NAME)
-    : [];
-  let rootCodeObj: any = null;
-
-  if (parent_type === 'PROG/P') {
-    try {
-      const codeResult = await handleGetProgram({ program_name: parent_name });
-      let code: any = null;
-      if (Array.isArray(codeResult?.content) && codeResult.content.length > 0) {
-        const c = codeResult.content[0];
-        if (c.type === 'text' && 'text' in c) code = c.text;
-        else if (c.type === 'json' && 'json' in c) code = c.json;
+    // Find nested includes in code (ABAP: INCLUDE <name>. or 'INCLUDE <name> .')
+    const includeRegex = /^\s*INCLUDE\s+([A-Z0-9_\/]+)\s*\.\s*$/gim;
+    const nested: string[] = [];
+    if (typeof code === 'string') {
+      let match;
+      while ((match = includeRegex.exec(code)) !== null) {
+        nested.push(match[1]);
       }
-      rootCodeObj = {
-        OBJECT_TYPE: parent_type,
-        OBJECT_NAME: parent_name,
-        TECH_NAME: parent_tech_name,
-        OBJECT_URI: '',
-        code,
-      };
-    } catch (e) {
-      rootCodeObj = {
-        OBJECT_TYPE: parent_type,
-        OBJECT_NAME: parent_name,
-        TECH_NAME: parent_tech_name,
-        OBJECT_URI: '',
-        code: null,
-        error: e instanceof Error ? e.message : String(e),
-      };
     }
-  } else if (parent_type === 'FUGR') {
-    try {
-      const codeResult = await handleGetFunctionGroup({ function_group: parent_name });
-      let code: any = null;
-      if (Array.isArray(codeResult?.content) && codeResult.content.length > 0) {
-        const c = codeResult.content[0];
-        if (c.type === 'text' && 'text' in c) code = c.text;
-        else if (c.type === 'json' && 'json' in c) code = c.json;
-      }
-      rootCodeObj = {
-        OBJECT_TYPE: parent_type,
-        OBJECT_NAME: parent_name,
-        TECH_NAME: parent_tech_name,
-        OBJECT_URI: '',
-        code,
-      };
-    } catch (e) {
-      rootCodeObj = {
-        OBJECT_TYPE: parent_type,
-        OBJECT_NAME: parent_name,
-        TECH_NAME: parent_tech_name,
-        OBJECT_URI: '',
-        code: null,
-        error: e instanceof Error ? e.message : String(e),
-      };
+
+    // Recursively collect all nested includes
+    let allNested: string[] = [];
+    for (const inc of nested) {
+      allNested = allNested.concat(await collectIncludes(inc, collected));
     }
+
+    return [objectName, ...allNested];
   }
 
-  // Add rootCodeObj first, then all others (without duplication)
-  const codeObjects: any[] = [];
-  if (rootCodeObj) codeObjects.push(rootCodeObj);
+  try {
+    let codeObjects: any[] = [];
+    if (type === 'PROG/P') {
+      // Get main program code
+      const progResult = await handleGetProgram({ program_name: name });
+      let progCode: string | null = null;
+      let debug = { handleGetProgram: progResult };
+      if (Array.isArray(progResult?.content) && progResult.content.length > 0) {
+        const c = progResult.content[0];
+        if (c.type === 'text' && 'text' in c) progCode = c.text as string;
+      }
+      if (!progCode || (typeof progCode !== 'string') || (progCode && progCode.trim() === '')) {
+        return {
+          isError: true,
+          content: [
+            {
+              type: 'text',
+              text: `No program code found for ${name}. Debug: ${JSON.stringify(debug, null, 2)}`
+            }
+          ]
+        };
+      }
+      codeObjects.push({
+        OBJECT_TYPE: 'PROG/P',
+        OBJECT_NAME: name,
+        code: progCode,
+      });
 
-  for (const obj of objects) {
-    // Skip duplicate root object (to avoid two PROG/P or FUGR with the same name)
-    if (
-      rootCodeObj &&
-      obj.OBJECT_TYPE === parent_type &&
-      obj.OBJECT_NAME === parent_name
-    ) {
-      continue;
-    }
-    const handler = HANDLER_MAP[obj.OBJECT_TYPE];
-    if (handler) {
-      try {
-        const codeResult = await handler(obj);
-        let code = null;
-        if (Array.isArray(codeResult?.content) && codeResult.content.length > 0) {
-          const c = codeResult.content[0];
-          if (c && typeof c === 'object' && 'type' in c) {
-            if (c.type === 'text' && 'text' in c) code = c.text;
-            else if (c.type === 'json' && 'json' in c) code = c.json;
+      // Find all includes in program code
+      const includeRegex = /^\s*INCLUDE\s+([A-Z0-9_\/]+)\s*\.\s*$/gim;
+      const includes: string[] = [];
+      if (typeof progCode === 'string') {
+        let match;
+        while ((match = includeRegex.exec(progCode)) !== null) {
+          includes.push(match[1]);
+        }
+      }
+
+      // Recursively collect all includes (with deduplication)
+      const collected = new Set<string>();
+      for (const inc of includes) {
+        const all = await collectIncludes(inc, collected);
+        for (const incName of all) {
+          if (!codeObjects.some(obj => obj.OBJECT_TYPE === 'PROG/I' && obj.OBJECT_NAME === incName)) {
+            // Get code for each include
+            const incResult = await handleGetInclude({ include_name: incName });
+            let incCode = null;
+            if (Array.isArray(incResult?.content) && incResult.content.length > 0) {
+              const c = incResult.content[0];
+              if (c.type === 'text' && 'text' in c) incCode = c.text;
+            }
+            codeObjects.push({
+              OBJECT_TYPE: 'PROG/I',
+              OBJECT_NAME: incName,
+              code: incCode,
+            });
           }
         }
-        codeObjects.push({
-          ...obj,
-          code,
-        });
-      } catch (e) {
-        codeObjects.push({
-          ...obj,
-          code: null,
-          error: e instanceof Error ? e.message : String(e),
-        });
       }
+    } else if (type === 'FUGR') {
+      // Get function group main code
+      const fgResult = await handleGetFunctionGroup({ function_group: name });
+      let fgCode = null;
+      if (Array.isArray(fgResult?.content) && fgResult.content.length > 0) {
+        const c = fgResult.content[0];
+        if (c.type === 'text' && 'text' in c) fgCode = c.text;
+      }
+      codeObjects.push({
+        OBJECT_TYPE: 'FUGR',
+        OBJECT_NAME: name,
+        code: fgCode,
+      });
+
+      // Find all includes in function group code
+      const includeRegex = /^\s*INCLUDE\s+([A-Z0-9_\/]+)\s*\.\s*$/gim;
+      const includes: string[] = [];
+      if (typeof fgCode === 'string') {
+        let match;
+        while ((match = includeRegex.exec(fgCode)) !== null) {
+          includes.push(match[1]);
+        }
+      }
+
+      // Recursively collect all includes (with deduplication)
+      const collected = new Set<string>();
+      for (const inc of includes) {
+        const all = await collectIncludes(inc, collected);
+        for (const incName of all) {
+          if (!codeObjects.some(obj => obj.OBJECT_TYPE === 'PROG/I' && obj.OBJECT_NAME === incName)) {
+            // Get code for each include
+            const incResult = await handleGetInclude({ include_name: incName });
+            let incCode = null;
+            if (Array.isArray(incResult?.content) && incResult.content.length > 0) {
+              const c = incResult.content[0];
+              if (c.type === 'text' && 'text' in c) incCode = c.text;
+            }
+            codeObjects.push({
+              OBJECT_TYPE: 'PROG/I',
+              OBJECT_NAME: incName,
+              code: incCode,
+            });
+          }
+        }
+      }
+    } else {
+      return { isError: true, content: [{ type: 'text', text: 'Unsupported type' }] };
     }
+
+    const fullResult = {
+      name,
+      type,
+      total_code_objects: codeObjects.length,
+      code_objects: codeObjects,
+    };
+
+    return {
+      content: [
+        {
+          type: 'text',
+          text: JSON.stringify(fullResult, null, 2),
+        },
+      ],
+    };
+  } catch (e) {
+    return {
+      isError: true,
+      content: [
+        {
+          type: 'text',
+          text: e instanceof Error ? e.message : String(e),
+        },
+      ],
+    };
   }
-
-  const fullResult = {
-    parent_name,
-    parent_tech_name,
-    parent_type,
-    total_code_objects: codeObjects.length,
-    code_objects: codeObjects,
-  };
-
-  const result = {
-    content: [
-      {
-        type: 'text',
-        text: JSON.stringify(fullResult, null, 2),
-      },
-    ],
-  };
-  objectsListCache.setCache(result);
-  return result;
 }
