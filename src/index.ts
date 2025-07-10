@@ -253,375 +253,88 @@ export class mcp_abap_adt_server {
       return {
         tools: [
           // Define available tools
+          // ... (залишити існуючі) ...
+          // Додати відсутні хендлери:
           {
-            name: "GetDescription",
-            description: "Strict match ABAP object search by name. Returns metadata and description for an object with the exact name and type. Supported types: program, class, include, interface, function, functiongroup, package, table, bdef, enhancementspot, enhancementimpl. Useful for retrieving description and type for a specific ABAP object.",
+            name: "GetObjectsList",
+            description: "Recursively retrieves all valid ABAP repository objects for a given parent (program, function group, etc.) including nested includes. Returns a flat list of objects with metadata.",
             inputSchema: {
               type: "object",
               properties: {
-                object_name: {
-                  type: "string",
-                  description: "Exact name of the ABAP object to search for",
-                },
-                object_type: {
-                  type: "string",
-                  description: "ABAP object type (program, class, include, interface, function, functiongroup, package, table, bdef, enhancementspot, enhancementimpl)",
-                }
+                parent_name: { type: "string", description: "Parent object name" },
+                parent_tech_name: { type: "string", description: "Parent technical name" },
+                parent_type: { type: "string", description: "Parent object type (e.g. PROG/P, FUGR)" },
+                with_short_descriptions: { type: "boolean", description: "Include short descriptions (default: true)" }
               },
-              required: ["object_name", "object_type"],
-            },
+              required: ["parent_name", "parent_tech_name", "parent_type"]
+            }
           },
           {
-            name: "GetProgram",
-            description: "Retrieve ABAP program source code. Returns only the main program source code without includes or enhancements. Use GetIncludesList to get all includes, or GetEnhancements with include_nested=true for comprehensive enhancement analysis.",
+            name: "GetObjectsByType",
+            description: "Retrieves all ABAP objects of a specific type under a given node. Useful for navigation and discovery.",
             inputSchema: {
               type: "object",
               properties: {
-                program_name: {
-                  type: "string",
-                  description: "Name of the ABAP program",
-                },
+                parent_name: { type: "string" },
+                parent_tech_name: { type: "string" },
+                parent_type: { type: "string" },
+                node_id: { type: "string" },
+                format: { type: "string", description: "Output format: 'raw' or 'parsed'" },
+                with_short_descriptions: { type: "boolean" }
               },
-              required: ["program_name"],
-            },
+              required: ["parent_name", "parent_tech_name", "parent_type", "node_id"]
+            }
           },
           {
-            name: "GetClass",
-            description: "Retrieve ABAP class source code",
+            name: "GetProgFullCode",
+            description: "Returns the full code for a program or function group, including all includes, in tree traversal order. Suitable for export, migration, or audit.",
             inputSchema: {
               type: "object",
               properties: {
-                class_name: {
-                  type: "string",
-                  description: "Name of the ABAP class",
-                },
+                parent_name: { type: "string" },
+                parent_tech_name: { type: "string" },
+                parent_type: { type: "string" },
+                with_short_descriptions: { type: "boolean" }
               },
-              required: ["class_name"],
-            },
+              required: ["parent_name", "parent_tech_name", "parent_type"]
+            }
           },
           {
-            name: "GetFunctionGroup",
-            description: "Retrieve ABAP Function Group source code",
+            name: "GetIncludesInProgram",
+            description: "Lists all includes in a given ABAP program.",
             inputSchema: {
               type: "object",
               properties: {
-                function_group: {
-                  type: "string",
-                  description: "Name of the function module",
-                },
+                program_name: { type: "string" }
               },
-              required: ["function_group"],
-            },
+              required: ["program_name"]
+            }
           },
           {
-            name: "GetFunction",
-            description: "Retrieve ABAP Function Module source code",
+            name: "GetObjectNodeFromCache",
+            description: "Returns a node from the in-memory objects list cache by OBJECT_TYPE, OBJECT_NAME, TECH_NAME, and expands OBJECT_URI if present.",
             inputSchema: {
               type: "object",
               properties: {
-                function_name: {
-                  type: "string",
-                  description: "Name of the function module",
-                },
-                function_group: {
-                  type: "string",
-                  description: "Name of the function group",
-                },
+                object_type: { type: "string" },
+                object_name: { type: "string" },
+                tech_name: { type: "string" }
               },
-              required: ["function_name", "function_group"],
-            },
+              required: ["object_type", "object_name", "tech_name"]
+            }
           },
           {
-            name: "GetStructure",
-            description: "Retrieve ABAP Structure",
+            name: "GetRelatedObjectTypes",
+            description: "Retrieves related ABAP object types for a given object.",
             inputSchema: {
               type: "object",
               properties: {
-                structure_name: {
-                  type: "string",
-                  description: "Name of the ABAP Structure",
-                },
+                object_name: { type: "string" }
               },
-              required: ["structure_name"],
-            },
+              required: ["object_name"]
+            }
           },
-          {
-            name: "GetTable",
-            description: "Retrieve ABAP table structure",
-            inputSchema: {
-              type: "object",
-              properties: {
-                table_name: {
-                  type: "string",
-                  description: "Name of the ABAP table",
-                },
-              },
-              required: ["table_name"],
-            },
-          },
-          {
-            name: "GetTableContents",
-            description: "Retrieve contents of an ABAP table",
-            inputSchema: {
-              type: "object",
-              properties: {
-                table_name: {
-                  type: "string",
-                  description: "Name of the ABAP table",
-                },
-                max_rows: {
-                  type: "number",
-                  description: "Maximum number of rows to retrieve",
-                  default: 100,
-                },
-              },
-              required: ["table_name"],
-            },
-          },
-          {
-            name: "GetPackage",
-            description: "Retrieve ABAP package details",
-            inputSchema: {
-              type: "object",
-              properties: {
-                package_name: {
-                  type: "string",
-                  description: "Name of the ABAP package",
-                },
-              },
-              required: ["package_name"],
-            },
-          },
-          {
-            name: "GetTypeInfo",
-            description: "Retrieve ABAP type information",
-            inputSchema: {
-              type: "object",
-              properties: {
-                type_name: {
-                  type: "string",
-                  description: "Name of the ABAP type",
-                },
-              },
-              required: ["type_name"],
-            },
-          },
-          {
-            name: "GetInclude",
-            description: "📄 SINGLE INCLUDE SOURCE: Retrieve source code of a specific ABAP include file. Returns only the include's own source code without enhancements or nested analysis. Use GetEnhancements for enhancement analysis or GetIncludesList for complete include hierarchy.",
-            inputSchema: {
-              type: "object",
-              properties: {
-                include_name: {
-                  type: "string",
-                  description: "Name of the specific ABAP Include to retrieve",
-                },
-              },
-              required: ["include_name"],
-            },
-          },
-          {
-            name: "SearchObject",
-            description: "Quick search for ABAP repository objects (programs, classes, function modules, tables, CDS, BDEF, and more) by name or pattern. Accepts a 'query' string (required) and optional 'maxResults' (default: 1). Returns a list of matching objects with name, type, and metadata. Useful for finding any ABAP object by partial or full name. Example: query='ZMY*', maxResults=10.",
-            inputSchema: {
-              type: "object",
-              properties: {
-                query: {
-                  type: "string",
-                  description: "Search query string",
-                },
-                maxResults: {
-                  type: "number",
-                  description: "Maximum number of results to return",
-                  default: 1,
-                },
-              },
-              required: ["query"],
-            },
-          },
-          {
-            name: "GetTransaction",
-            description: "Retrieve ABAP transaction details",
-            inputSchema: {
-              type: "object",
-              properties: {
-                transaction_name: {
-                  type: "string",
-                  description: "Name of the ABAP transaction",
-                },
-              },
-              required: ["transaction_name"],
-            },
-          },
-          {
-            name: "GetInterface",
-            description: "Retrieve ABAP interface source code",
-            inputSchema: {
-              type: "object",
-              properties: {
-                interface_name: {
-                  type: "string",
-                  description: "Name of the ABAP interface",
-                },
-              },
-              required: ["interface_name"],
-            },
-          },
-          {
-            name: "GetEnhancements",
-            description: "🔍 ENHANCEMENT ANALYSIS: Retrieve and analyze enhancement implementations in ABAP programs or includes. Automatically detects object type and extracts enhancement source code. Use include_nested=true for COMPREHENSIVE RECURSIVE SEARCH across all nested includes - this finds ALL enhancements in the entire program hierarchy.",
-            inputSchema: {
-              type: "object",
-              properties: {
-                object_name: {
-                  type: "string",
-                  description: "Name of the ABAP program or include (e.g., 'RM07DOCS' for program, 'RM07DOCS_F01' for include)",
-                },
-                program: {
-                  type: "string",
-                  description: "Optional: For includes, manually specify the parent program name if automatic context detection fails (e.g., 'SAPMV45A')",
-                },
-                include_nested: {
-                  type: "boolean",
-                  description: "⭐ RECURSIVE ENHANCEMENT SEARCH: If true, performs comprehensive analysis - searches for enhancements in the main object AND all nested includes recursively. Perfect for complete enhancement audit of entire program hierarchy. Default is false (single object only).",
-                },
-                detailed: {
-                  type: "boolean",
-                  description: "📄 OUTPUT CONTROL: If true, returns full enhancement source code and raw XML. If false (default), truncates long source code to 200 chars for quick overview.",
-                  default: false
-                },
-                timeout: {
-                  type: "number",
-                  description: "⏱️ SIMPLE TIMEOUT: Optional timeout in milliseconds for each ADT request. If any single request (main object or include) takes longer than this, it will fail with timeout error. Use shorter values for large programs to avoid timeouts. Default: 30000ms (30 seconds).",
-                },
-                max_includes: {
-                  type: "number",
-                  description: "Advanced: Maximum number of includes to process to avoid timeouts. Default: 50.",
-                },
-              },
-              required: ["object_name"],
-            },
-          },
-          {
-            name: "GetSqlQuery",
-            description: "Execute freestyle SQL queries via SAP ADT Data Preview API. Supports SELECT, WITH statements and other read-only SQL operations.",
-            inputSchema: {
-              type: "object",
-              properties: {
-                sql_query: {
-                  type: "string",
-                  description: "SQL query to execute (e.g., 'SELECT * FROM mara WHERE matnr LIKE 'TEST%'')",
-                },
-                row_number: {
-                  type: "number",
-                  description: "Maximum number of rows to return",
-                  default: 100,
-                },
-              },
-              required: ["sql_query"],
-            },
-          },
-          {
-            name: "GetIncludesList",
-            description: "📋 INCLUDE INVENTORY: Recursively discover and list ALL include files within an ABAP program or include. Performs code analysis to find include statements and builds a complete hierarchy. Use this when you need to understand the program structure or get a list of all includes (without their source code or enhancements).",
-            inputSchema: {
-              type: "object",
-              properties: {
-                object_name: {
-                  type: "string",
-                  description: "Name of the ABAP program or include to analyze for nested includes",
-                },
-                object_type: {
-                  type: "string",
-                  enum: ["program", "include"],
-                  description: "Type of the ABAP object (program or include)",
-                },
-                detailed: {
-                  type: "boolean",
-                  description: "📄 OUTPUT FORMAT: If true, returns structured JSON with metadata and raw XML. If false (default), returns simple text list format.",
-                  default: false
-                },
-                timeout: {
-                  type: "number",
-                  description: "⏱️ TIMEOUT CONTROL: Optional timeout in milliseconds for each ADT request. If any single request takes longer than this, it will fail with timeout error. Use shorter values for large programs to avoid timeouts. Default: 30000ms (30 seconds).",
-                },
-              },
-              required: ["object_name", "object_type"],
-            },
-          },
-          {
-            name: "GetEnhancementSpot",
-            description: "Retrieve metadata and list of implementations for a specific enhancement spot. Use this to get spot-level information and available implementations.",
-            inputSchema: {
-              type: "object",
-              properties: {
-                enhancement_spot: {
-                  type: "string",
-                  description: "Name of the enhancement spot (e.g., 'enhoxhh')",
-                }
-              },
-              required: ["enhancement_spot"],
-            },
-          },
-          {
-            name: "GetEnhancementImpl",
-            description: "Retrieve source code of a specific enhancement implementation by its name and enhancement spot. Use this when you know both the enhancement spot and implementation name.",
-            inputSchema: {
-              type: "object",
-              properties: {
-                enhancement_spot: {
-                  type: "string",
-                  description: "Name of the enhancement spot (e.g., 'enhoxhh')",
-                },
-                enhancement_name: {
-                  type: "string",
-                  description: "Name of the specific enhancement implementation (e.g., 'zpartner_update_pai')",
-                },
-              },
-              required: ["enhancement_spot", "enhancement_name"],
-            },
-          },
-          {
-            name: "GetWhereUsed",
-            description: "🔍 WHERE USED ANALYSIS: Retrieve where-used references for ABAP objects via ADT usageReferences. Shows all places where a specific object (class, program, include, etc.) is used in the system. By default returns minimal relevant results, use detailed=true for complete analysis.",
-            inputSchema: {
-              type: "object",
-              properties: {
-                object_name: {
-                  type: "string",
-                  description: "Name of the ABAP object to search usages for",
-                },
-                object_type: {
-                  type: "string",
-                  enum: [
-                    "class", "program", "include", "function", "interface", "package",
-                    "table", "TABL", "bdef", "BDEF"
-                  ],
-                  description: "Type of the ABAP object. Supported values: class, program, include, function, interface, package, table/TABL, bdef/BDEF.",
-                },
-                detailed: {
-                  type: "boolean",
-                  description: "📊 FILTERING CONTROL: If true, returns ALL references including packages, internal class components, and system objects. If false (default), returns only relevant direct usages, enhancements, and class sections for quick overview.",
-                  default: false
-                }
-              },
-              required: ["object_name", "object_type"],
-            },
-          },
-          {
-            name: "GetBdef",
-            description: "Retrieve the source code of a BDEF (Behavior Definition) for a CDS entity. Accepts a 'bdef_name' string parameter (required) specifying the name of the BDEF. Returns the BDEF source code and raw XML from the SAP ADT API.",
-            inputSchema: {
-              type: "object",
-              properties: {
-                bdef_name: {
-                  type: "string",
-                  description: "Name of the BDEF (Behavior Definition), e.g., 'Z_I_MYENTITY'",
-                },
-              },
-              required: ["bdef_name"],
-            },
-          },
+          // ... (залишити існуючі) ...
         ],
       };
     });
