@@ -522,23 +522,10 @@ export class mcp_abap_adt_server {
             inputSchema: {
               type: "object",
               properties: {
-                parent_name: { type: "string" },
-                parent_tech_name: { type: "string" },
-                parent_type: { type: "string" },
-                with_short_descriptions: { type: "boolean" }
+                name: { type: "string", description: "Technical name of the program or function group" },
+                type: { type: "string", enum: ["PROG/P", "FUGR"], description: "Object type: 'PROG/P' for program, 'FUGR' for function group" }
               },
-              required: ["parent_name", "parent_tech_name", "parent_type"]
-            }
-          },
-          {
-            name: "GetIncludesInProgram",
-            description: "Lists all includes in a given ABAP program.",
-            inputSchema: {
-              type: "object",
-              properties: {
-                program_name: { type: "string" }
-              },
-              required: ["program_name"]
+              required: ["name", "type"]
             }
           },
           {

@@ -163,7 +163,7 @@ export async function handleGetIncludesList(args: any) {
         const includeNames = parseIncludeNamesFromXml(includesResponse.data);
         
 if (isDetailed) {
-    // Return detailed JSON response
+    // Return detailed JSON response as text (for compatibility)
     const detailedResponse = {
         object_name: object_name,
         object_type: object_type,
@@ -172,12 +172,12 @@ if (isDetailed) {
         includes: includeNames,
         includes_node_info: includesNode
     };
-    
+
     const result = {
         content: [
             {
-                type: "json",
-                json: detailedResponse
+                type: "text",
+                text: JSON.stringify(detailedResponse, null, 2)
             }
         ]
     };

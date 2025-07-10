@@ -1,15 +1,34 @@
 /**
- * handleGetProgFullCode: retrieves full code for programs (reports) and function groups together with all includes.
+ * handleGetProgFullCode: returns full code for program (report) or function group with all includes.
  *
  * Description for MCP server:
  * Name: Get full code for program or function group
- * Description: Returns the full code for a given ABAP program (report) or function group, including all includes. Suitable for export, analysis, migration, code audit. The main object (report or function group) always comes first in the response, followed by all child includes in tree traversal order.
+ * Description: Returns the full code for a given ABAP program (report) or function group, including all includes. The main object (report or function group) always comes first in the response, followed by all child includes in tree traversal order.
+ *
  * Parameters:
- * - parent_name: technical name of the program (e.g., /CBY/MMSKLCARD) or function group
- * - parent_tech_name: technical name (usually same as parent_name)
- * - parent_type: 'PROG/P' for program or 'FUGR' for function group
- * - with_short_descriptions: whether to return short descriptions (true/false, optional)
- * Returns: array of objects with code (OBJECT_TYPE, OBJECT_NAME, TECH_NAME, OBJECT_URI, code)
+ * - name: technical name of the program or function group (string, e.g., "/CBY/MM_INVENTORY") — required
+ * - type: "PROG/P" for program or "FUGR" for function group (string, required)
+ *
+ * Returns: JSON:
+ *   {
+ *     name: string, // technical name of the main object
+ *     type: string, // "PROG/P" or "FUGR"
+ *     total_code_objects: number, // total number of code objects (main + all includes)
+ *     code_objects: [
+ *       {
+ *         OBJECT_TYPE: string, // "PROG/P" (main program), "FUGR" (function group), or "PROG/I" (include)
+ *         OBJECT_NAME: string, // technical name of the object
+ *         code: string         // full ABAP source code of the object (entire code, not a fragment)
+ *       }
+ *     ]
+ *   }
+ *
+ * Notes:
+ * - The "code" field always contains the full source code for each object (not truncated).
+ * - All includes are resolved recursively and added after the main object.
+ * - The order is: main object first, then all includes in tree traversal order.
+ * - If the object or code is not found, an error is returned.
+ *
  * Purpose: mass code export, audit, dependency analysis, migration, backup.
  */
 
@@ -21,8 +40,9 @@ import { handleGetInclude } from './handleGetInclude';
  * handleGetProgFullCode: returns full code for program (report) or function group with all includes.
  * @param args { name: string, type: "PROG/P" | "FUGR" }
  */
-export async function handleGetProgFullCode(args: { name: string; type: "PROG/P" | "FUGR" }) {
+export async function handleGetProgFullCode(args: { name: string; type: string }) {
   const { name, type } = args;
+  const typeUpper = type.toUpperCase();
 
   // Helper to recursively collect includes for a program/include
   async function collectIncludes(objectName: string, collected: Set<string> = new Set()): Promise<string[]> {
@@ -58,7 +78,7 @@ export async function handleGetProgFullCode(args: { name: string; type: "PROG/P"
 
   try {
     let codeObjects: any[] = [];
-    if (type === 'PROG/P') {
+    if (typeUpper === 'PROG/P') {
       // Get main program code
       const progResult = await handleGetProgram({ program_name: name });
       let progCode: string | null = null;
@@ -115,7 +135,7 @@ export async function handleGetProgFullCode(args: { name: string; type: "PROG/P"
           }
         }
       }
-    } else if (type === 'FUGR') {
+    } else if (typeUpper === 'FUGR') {
       // Get function group main code
       const fgResult = await handleGetFunctionGroup({ function_group: name });
       let fgCode = null;
@@ -163,6 +183,12 @@ export async function handleGetProgFullCode(args: { name: string; type: "PROG/P"
     } else {
       return { isError: true, content: [{ type: 'text', text: 'Unsupported type' }] };
     }
+
+    // Normalize spaces in code fields: replace 2+ spaces with 1
+    codeObjects = codeObjects.map(obj => ({
+      ...obj,
+      code: typeof obj.code === 'string' ? obj.code.replace(/ {2,}/g, ' ') : obj.code,
+    }));
 
     const fullResult = {
       name,
