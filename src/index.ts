@@ -252,26 +252,243 @@ export class mcp_abap_adt_server {
     this.server.setRequestHandler(ListToolsRequestSchema, async () => {
       return {
         tools: [
-          // Define available tools
-          // ... (залишити існуючі) ...
-          // Додати відсутні хендлери:
+          // FULL MCP TOOL LIST (standard + new)
           {
-            name: "GetObjectsList",
-            description: "Recursively retrieves all valid ABAP repository objects for a given parent (program, function group, etc.) including nested includes. Returns a flat list of objects with metadata.",
+            name: "GetProgram",
+            description: "Retrieve ABAP program source code. Returns only the main program source code without includes or enhancements.",
             inputSchema: {
               type: "object",
               properties: {
-                parent_name: { type: "string", description: "Parent object name" },
-                parent_tech_name: { type: "string", description: "Parent technical name" },
-                parent_type: { type: "string", description: "Parent object type (e.g. PROG/P, FUGR)" },
-                with_short_descriptions: { type: "boolean", description: "Include short descriptions (default: true)" }
+                program_name: { type: "string", description: "Name of the ABAP program" }
               },
-              required: ["parent_name", "parent_tech_name", "parent_type"]
+              required: ["program_name"]
+            }
+          },
+          {
+            name: "GetClass",
+            description: "Retrieve ABAP class source code.",
+            inputSchema: {
+              type: "object",
+              properties: {
+                class_name: { type: "string", description: "Name of the ABAP class" }
+              },
+              required: ["class_name"]
+            }
+          },
+          {
+            name: "GetFunctionGroup",
+            description: "Retrieve ABAP Function Group source code.",
+            inputSchema: {
+              type: "object",
+              properties: {
+                function_group: { type: "string", description: "Name of the function group" }
+              },
+              required: ["function_group"]
+            }
+          },
+          {
+            name: "GetFunction",
+            description: "Retrieve ABAP Function Module source code.",
+            inputSchema: {
+              type: "object",
+              properties: {
+                function_name: { type: "string", description: "Name of the function module" },
+                function_group: { type: "string", description: "Name of the function group" }
+              },
+              required: ["function_name", "function_group"]
+            }
+          },
+          {
+            name: "GetTable",
+            description: "Retrieve ABAP table structure.",
+            inputSchema: {
+              type: "object",
+              properties: {
+                table_name: { type: "string", description: "Name of the ABAP table" }
+              },
+              required: ["table_name"]
+            }
+          },
+          {
+            name: "GetStructure",
+            description: "Retrieve ABAP Structure.",
+            inputSchema: {
+              type: "object",
+              properties: {
+                structure_name: { type: "string", description: "Name of the ABAP Structure" }
+              },
+              required: ["structure_name"]
+            }
+          },
+          {
+            name: "GetTableContents",
+            description: "Retrieve contents of an ABAP table.",
+            inputSchema: {
+              type: "object",
+              properties: {
+                table_name: { type: "string", description: "Name of the ABAP table" },
+                max_rows: { type: "number", description: "Maximum number of rows to retrieve", default: 100 }
+              },
+              required: ["table_name"]
+            }
+          },
+          {
+            name: "GetPackage",
+            description: "Retrieve ABAP package details.",
+            inputSchema: {
+              type: "object",
+              properties: {
+                package_name: { type: "string", description: "Name of the ABAP package" }
+              },
+              required: ["package_name"]
+            }
+          },
+          {
+            name: "GetInclude",
+            description: "Retrieve source code of a specific ABAP include file.",
+            inputSchema: {
+              type: "object",
+              properties: {
+                include_name: { type: "string", description: "Name of the ABAP Include" }
+              },
+              required: ["include_name"]
+            }
+          },
+          {
+            name: "GetIncludesList",
+            description: "Recursively discover and list ALL include files within an ABAP program or include.",
+            inputSchema: {
+              type: "object",
+              properties: {
+                object_name: { type: "string", description: "Name of the ABAP program or include" },
+                object_type: { type: "string", enum: ["program", "include"], description: "Type of the ABAP object" },
+                detailed: { type: "boolean", description: "If true, returns structured JSON with metadata and raw XML.", default: false },
+                timeout: { type: "number", description: "Timeout in ms for each ADT request." }
+              },
+              required: ["object_name", "object_type"]
+            }
+          },
+          {
+            name: "GetTypeInfo",
+            description: "Retrieve ABAP type information.",
+            inputSchema: {
+              type: "object",
+              properties: {
+                type_name: { type: "string", description: "Name of the ABAP type" }
+              },
+              required: ["type_name"]
+            }
+          },
+          {
+            name: "GetInterface",
+            description: "Retrieve ABAP interface source code.",
+            inputSchema: {
+              type: "object",
+              properties: {
+                interface_name: { type: "string", description: "Name of the ABAP interface" }
+              },
+              required: ["interface_name"]
+            }
+          },
+          {
+            name: "GetTransaction",
+            description: "Retrieve ABAP transaction details.",
+            inputSchema: {
+              type: "object",
+              properties: {
+                transaction_name: { type: "string", description: "Name of the ABAP transaction" }
+              },
+              required: ["transaction_name"]
+            }
+          },
+          {
+            name: "SearchObject",
+            description: "Quick search for ABAP repository objects by name or pattern.",
+            inputSchema: {
+              type: "object",
+              properties: {
+                query: { type: "string", description: "Search query string" },
+                maxResults: { type: "number", description: "Maximum number of results to return", default: 1 }
+              },
+              required: ["query"]
+            }
+          },
+          {
+            name: "GetEnhancements",
+            description: "Retrieve and analyze enhancement implementations in ABAP programs or includes.",
+            inputSchema: {
+              type: "object",
+              properties: {
+                object_name: { type: "string", description: "Name of the ABAP program or include" },
+                program: { type: "string", description: "Parent program name (for includes)" },
+                include_nested: { type: "boolean", description: "If true, performs recursive enhancement search." },
+                detailed: { type: "boolean", description: "If true, returns full enhancement source code and raw XML.", default: false },
+                timeout: { type: "number", description: "Timeout in ms for each ADT request." },
+                max_includes: { type: "number", description: "Maximum number of includes to process." }
+              },
+              required: ["object_name"]
+            }
+          },
+          {
+            name: "GetEnhancementImpl",
+            description: "Retrieve source code of a specific enhancement implementation by its name and enhancement spot.",
+            inputSchema: {
+              type: "object",
+              properties: {
+                enhancement_spot: { type: "string", description: "Name of the enhancement spot" },
+                enhancement_name: { type: "string", description: "Name of the enhancement implementation" }
+              },
+              required: ["enhancement_spot", "enhancement_name"]
+            }
+          },
+          {
+            name: "GetEnhancementSpot",
+            description: "Retrieve metadata and list of implementations for a specific enhancement spot.",
+            inputSchema: {
+              type: "object",
+              properties: {
+                enhancement_spot: { type: "string", description: "Name of the enhancement spot" }
+              },
+              required: ["enhancement_spot"]
+            }
+          },
+          {
+            name: "GetBdef",
+            description: "Retrieve the source code of a BDEF (Behavior Definition) for a CDS entity.",
+            inputSchema: {
+              type: "object",
+              properties: {
+                bdef_name: { type: "string", description: "Name of the BDEF (Behavior Definition)" }
+              },
+              required: ["bdef_name"]
+            }
+          },
+          {
+            name: "GetSqlQuery",
+            description: "Execute freestyle SQL queries via SAP ADT Data Preview API.",
+            inputSchema: {
+              type: "object",
+              properties: {
+                sql_query: { type: "string", description: "SQL query to execute" },
+                row_number: { type: "number", description: "Maximum number of rows to return", default: 100 }
+              },
+              required: ["sql_query"]
+            }
+          },
+          {
+            name: "GetRelatedObjectTypes",
+            description: "Retrieves related ABAP object types for a given object.",
+            inputSchema: {
+              type: "object",
+              properties: {
+                object_name: { type: "string", description: "Name of the ABAP object" }
+              },
+              required: ["object_name"]
             }
           },
           {
             name: "GetObjectsByType",
-            description: "Retrieves all ABAP objects of a specific type under a given node. Useful for navigation and discovery.",
+            description: "Retrieves all ABAP objects of a specific type under a given node.",
             inputSchema: {
               type: "object",
               properties: {
@@ -286,8 +503,22 @@ export class mcp_abap_adt_server {
             }
           },
           {
+            name: "GetObjectsList",
+            description: "Recursively retrieves all valid ABAP repository objects for a given parent (program, function group, etc.) including nested includes.",
+            inputSchema: {
+              type: "object",
+              properties: {
+                parent_name: { type: "string", description: "Parent object name" },
+                parent_tech_name: { type: "string", description: "Parent technical name" },
+                parent_type: { type: "string", description: "Parent object type (e.g. PROG/P, FUGR)" },
+                with_short_descriptions: { type: "boolean", description: "Include short descriptions (default: true)" }
+              },
+              required: ["parent_name", "parent_tech_name", "parent_type"]
+            }
+          },
+          {
             name: "GetProgFullCode",
-            description: "Returns the full code for a program or function group, including all includes, in tree traversal order. Suitable for export, migration, or audit.",
+            description: "Returns the full code for a program or function group, including all includes, in tree traversal order.",
             inputSchema: {
               type: "object",
               properties: {
@@ -324,17 +555,30 @@ export class mcp_abap_adt_server {
             }
           },
           {
-            name: "GetRelatedObjectTypes",
-            description: "Retrieves related ABAP object types for a given object.",
+            name: "GetWhereUsed",
+            description: "Retrieve where-used references for ABAP objects via ADT usageReferences.",
             inputSchema: {
               type: "object",
               properties: {
-                object_name: { type: "string" }
+                object_name: { type: "string", description: "Name of the ABAP object" },
+                object_type: { type: "string", description: "Type of the ABAP object" },
+                detailed: { type: "boolean", description: "If true, returns all references including packages and internal components.", default: false }
               },
-              required: ["object_name"]
+              required: ["object_name", "object_type"]
             }
           },
-          // ... (залишити існуючі) ...
+          {
+            name: "GetDescription",
+            description: "Strict match ABAP object search by name. Returns metadata and description for an object with the exact name and type.",
+            inputSchema: {
+              type: "object",
+              properties: {
+                object_name: { type: "string", description: "Exact name of the ABAP object to search for" },
+                object_type: { type: "string", description: "ABAP object type" }
+              },
+              required: ["object_name", "object_type"]
+            }
+          }
         ],
       };
     });
