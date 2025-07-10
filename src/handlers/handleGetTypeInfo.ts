@@ -1,6 +1,7 @@
 import { McpError, ErrorCode, AxiosResponse } from '../lib/utils';
 import { makeAdtRequestWithTimeout, return_error, return_response, getBaseUrl, encodeSapObjectName } from '../lib/utils';
 import { XMLParser } from 'fast-xml-parser';
+import { objectsListCache } from '../lib/getObjectsListCache';
 
 function parseTypeInfoXml(xml: string) {
     const parser = new XMLParser({
@@ -70,10 +71,7 @@ export async function handleGetTypeInfo(args: any) {
                 }
             ]
         };
-        if (args.filePath) {
-            const fs = require('fs');
-            fs.writeFileSync(args.filePath, JSON.stringify(result, null, 2), 'utf-8');
-        }
+        objectsListCache.setCache(result);
         return result;
     } catch (error) {
         // no domain found, try data element
@@ -89,10 +87,7 @@ export async function handleGetTypeInfo(args: any) {
                     }
                 ]
             };
-            if (args.filePath) {
-                const fs = require('fs');
-                fs.writeFileSync(args.filePath, JSON.stringify(result, null, 2), 'utf-8');
-            }
+            objectsListCache.setCache(result);
             return result;
         } catch (error) {
             // no data element found, try table type
@@ -108,10 +103,7 @@ export async function handleGetTypeInfo(args: any) {
                         }
                     ]
                 };
-                if (args.filePath) {
-                    const fs = require('fs');
-                    fs.writeFileSync(args.filePath, JSON.stringify(result, null, 2), 'utf-8');
-                }
+                objectsListCache.setCache(result);
                 return result;
             } catch (error) {
                 // fallback: try repository informationsystem for domain
@@ -129,10 +121,7 @@ export async function handleGetTypeInfo(args: any) {
                                 }
                             ]
                         };
-                        if (args.filePath) {
-                            const fs = require('fs');
-                            fs.writeFileSync(args.filePath, JSON.stringify(result, null, 2), 'utf-8');
-                        }
+                        objectsListCache.setCache(result);
                         return result;
                 } catch (error) {
                     return return_error(error);

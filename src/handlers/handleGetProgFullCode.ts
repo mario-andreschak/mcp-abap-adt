@@ -34,20 +34,22 @@ const HANDLER_MAP: Record<string, (args: any) => Promise<any>> = {
   'FUGR': async (obj) => handleGetFunctionGroup({ function_group: obj.OBJECT_NAME }),
 };
 
+import { objectsListCache } from '../lib/getObjectsListCache';
+
 export async function handleGetProgFullCode(args: any) {
   const { parent_name, parent_tech_name, parent_type, with_short_descriptions } = args;
-  const result = await handleGetObjectsList({
+  const objectsListResult = await handleGetObjectsList({
     parent_name,
     parent_tech_name,
     parent_type,
     with_short_descriptions,
   });
 
-  if (!result || !result.content || !Array.isArray(result.content)) {
+  if (!objectsListResult || !objectsListResult.content || !Array.isArray(objectsListResult.content)) {
     return { isError: true, content: [{ type: 'text', text: 'GetObjectsList failed' }] };
   }
 
-  const jsonBlock = result.content.find(
+  const jsonBlock = objectsListResult.content.find(
     (x: any) =>
       x &&
       x.type === 'json' &&
@@ -186,7 +188,7 @@ export async function handleGetProgFullCode(args: any) {
     code_objects: codeObjects,
   };
 
-  return {
+  const result = {
     content: [
       {
         type: 'json',
@@ -194,4 +196,6 @@ export async function handleGetProgFullCode(args: any) {
       },
     ],
   };
+  objectsListCache.setCache(result);
+  return result;
 }

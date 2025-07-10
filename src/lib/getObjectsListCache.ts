@@ -1,48 +1,21 @@
-// Простий файловий кеш для GetObjectsList
+// In-memory cache for GetObjectsList
 
-import * as fs from 'fs';
-import * as path from 'path';
+type ObjectsListCacheType = any | null;
 
-const CACHE_FILE = path.join(process.cwd(), '.getobjectslist.cache.json');
+class ObjectsListCache {
+    private cache: ObjectsListCacheType = null;
 
-export function saveObjectsListCache(data: any) {
-    fs.writeFileSync(CACHE_FILE, JSON.stringify(data, null, 2), 'utf-8');
-}
-
-export function loadObjectsListCache(): any | null {
-    if (fs.existsSync(CACHE_FILE)) {
-        const raw = fs.readFileSync(CACHE_FILE, 'utf-8');
-        try {
-            return JSON.parse(raw);
-        } catch {
-            return null;
-        }
+    setCache(data: any) {
+        this.cache = data;
     }
-    return null;
-}
 
-export function findNodeInCache(object_type: string, object_name: string, tech_name: string): any | null {
-    const cache = loadObjectsListCache();
-    if (!cache || !Array.isArray(cache.objects)) return null;
-    return cache.objects.find(
-        (obj: any) =>
-            obj.OBJECT_TYPE === object_type &&
-            obj.OBJECT_NAME === object_name &&
-            obj.TECH_NAME === tech_name
-    ) || null;
-}
+    getCache(): ObjectsListCacheType {
+        return this.cache;
+    }
 
-export function updateNodeInCache(object_type: string, object_name: string, tech_name: string, update: any) {
-    const cache = loadObjectsListCache();
-    if (!cache || !Array.isArray(cache.objects)) return;
-    const idx = cache.objects.findIndex(
-        (obj: any) =>
-            obj.OBJECT_TYPE === object_type &&
-            obj.OBJECT_NAME === object_name &&
-            obj.TECH_NAME === tech_name
-    );
-    if (idx >= 0) {
-        cache.objects[idx] = { ...cache.objects[idx], ...update };
-        saveObjectsListCache(cache);
+    clearCache() {
+        this.cache = null;
     }
 }
+
+export const objectsListCache = new ObjectsListCache();

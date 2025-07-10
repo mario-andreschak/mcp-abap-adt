@@ -1,5 +1,6 @@
 import { McpError, ErrorCode } from '../lib/utils';
 import { makeAdtRequestWithTimeout, return_error, getBaseUrl, encodeSapObjectName } from '../lib/utils';
+import { objectsListCache } from '../lib/getObjectsListCache';
 
 interface WhereUsedReference {
     name: string;
@@ -424,10 +425,7 @@ export async function handleGetWhereUsed(args: any) {
                 },
             ],
         };
-        if (args.filePath) {
-            const fs = require('fs');
-            fs.writeFileSync(args.filePath, JSON.stringify(result, null, 2), 'utf-8');
-        }
+        objectsListCache.setCache(result);
         return result;
         
     } catch (error) {

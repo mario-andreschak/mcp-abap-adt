@@ -2,8 +2,7 @@
 
 import { McpError, ErrorCode } from '../lib/utils';
 import { fetchNodeStructure, return_error } from '../lib/utils';
-import { saveObjectsListCache } from '../lib/getObjectsListCache';
-import { writeResultToFile } from '../lib/writeResultToFile';
+import { objectsListCache } from '../lib/getObjectsListCache';
 
 /**
  * Парсить всі SEU_ADT_REPOSITORY_OBJ_NODE з XML, повертає масив об'єктів з потрібними полями
@@ -101,11 +100,11 @@ async function collectValidObjectsStrict(
 
 /**
  * Головний handler для GetObjectsListStrict
- * @param args { parent_name, parent_tech_name, parent_type, with_short_descriptions, filePath }
+ * @param args { parent_name, parent_tech_name, parent_type, with_short_descriptions }
  */
 export async function handleGetObjectsList(args: any) {
     try {
-        const { parent_name, parent_tech_name, parent_type, with_short_descriptions, filePath } = args;
+        const { parent_name, parent_tech_name, parent_type, with_short_descriptions } = args;
 
         if (!parent_name || typeof parent_name !== 'string' || parent_name.trim() === '') {
             throw new McpError(ErrorCode.InvalidParams, 'Parameter "parent_name" (string) is required and cannot be empty.');
@@ -139,11 +138,7 @@ export async function handleGetObjectsList(args: any) {
         };
 
         // Зберігаємо у кеш (тільки в памʼяті)
-        (global as any).__getObjectsListCache = result;
-
-        if (filePath) {
-            writeResultToFile(result, filePath);
-        }
+        objectsListCache.setCache(result);
 
         return {
             content: [
@@ -153,7 +148,7 @@ export async function handleGetObjectsList(args: any) {
                 }
             ],
             // Додаємо кеш для можливого використання в інших модулях
-            cache: (global as any).__getObjectsListCache
+            cache: objectsListCache.getCache()
         };
     } catch (error) {
         return return_error(error);

@@ -10,6 +10,12 @@ This project provides a server that allows you to interact with SAP ABAP systems
 
 ## 🆕 What's New in BTP Branch
 
+### Centralized In-Memory Caching (July 2025)
+
+- All handler modules now use a unified in-memory caching mechanism via `objectsListCache`. This allows for consistent, easily swappable cache logic across the codebase.
+- The `filePath` parameter and all file write logic have been removed from all handlers. Results are no longer saved to disk from handler logic; only in-memory caching is used.
+- This change improves maintainability, testability, and performance by eliminating redundant file operations and centralizing cache management.
+
 This branch includes several powerful new features:
 
 - **🔍 Enhancement Analysis Tools**: `GetEnhancements`, `GetEnhancementByName` - Comprehensive enhancement discovery and analysis

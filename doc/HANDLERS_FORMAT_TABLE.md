@@ -1,33 +1,31 @@
 # MCP ABAP ADT Handlers: Return & File Formats
 
-| Handler Name                | Повертає (return)                | Формат повернення         | Зберігає у файл (filePath) | Формат у файлі         |
-|-----------------------------|----------------------------------|---------------------------|----------------------------|------------------------|
-| handleGetProgram            | JSON: { isError, content[{type:"text", text}] } | JSON (старий формат)      | plain text                | багаторядковий текст   |
-| handleGetInclude            | JSON: { isError, content[{type:"text", text}] } | JSON (старий формат)      | plain text                | багаторядковий текст   |
-| handleGetFunction           | JSON: { isError, content[{type:"text", text}] } або {isError, content[{type:"json", json}]} | JSON (старий формат)      | plain text або JSON     | багаторядковий текст або JSON |
-| handleGetClass              | JSON: { isError, content[{type:"text", text}]} або {isError, content[{type:"json", json}]}  | JSON (старий формат)      | plain text або JSON     | багаторядковий текст або JSON |
-| handleGetFunctionGroup      | JSON: { isError, content[{type:"json", json}]}  | JSON (старий формат)      | JSON                      | JSON                  |
-| handleGetStructure          | JSON: { isError, content[{type:"json", json}]}  | JSON (старий формат)      | JSON                      | JSON                  |
-| handleGetTable              | JSON: { isError, content[{type:"json", json}]}  | JSON (старий формат)      | JSON                      | JSON                  |
-| handleGetTableContents      | JSON: { isError, content[{type:"text", text}]}  | JSON (старий формат)      | JSON                      | JSON                  |
-| handleGetPackage            | JSON: { isError, content[{type:"text", text}]}  | JSON (старий формат)      | JSON                      | JSON                  |
-| handleGetTypeInfo           | JSON: { isError, content[{type:"json", json}]}  | JSON (старий формат)      | JSON                      | JSON                  |
-| handleGetInterface          | JSON: { isError, content[{type:"text", text}]}  | JSON (старий формат)      | JSON                      | JSON                  |
-| handleGetTransaction        | JSON: { isError, content[{type:"json", json}]}  | JSON (старий формат)      | JSON                      | JSON                  |
-| handleSearchObject          | JSON: { isError, content[{type:"text", text}]}  | JSON (старий формат)      | JSON                      | JSON                  |
-| handleGetEnhancements       | JSON: { isError, content[{type:"text", text}]}  | JSON (старий формат)      | JSON                      | JSON                  |
-| handleGetEnhancementSpot    | JSON: { isError, content[{type:"json", json}]}  | JSON (старий формат)      | JSON                      | JSON                  |
-| handleGetEnhancementImpl    | JSON: { isError, content[{type:"json", json}]}  | JSON (старий формат)      | JSON                      | JSON                  |
-| handleGetSqlQuery           | JSON: { isError, content[{type:"text", text}]}  | JSON (старий формат)      | JSON                      | JSON                  |
-| handleGetIncludesList       | JSON: { isError, content[{type:"text", text}]} або {type:"json", json} | JSON (старий формат)      | JSON                      | JSON                  |
-| handleGetObjectsByType      | JSON: { isError, content[{type:"text", text}]} або {type:"json", json} | JSON (старий формат)      | JSON                      | JSON                  |
-| handleGetObjectsList        | JSON: { content: [{type:"json", json: {parent_name, parent_tech_name, parent_type, total_objects, objects: [ { ...fields..., object_uri_response? } ]}}] } | JSON (новий формат) | JSON | JSON (масив об'єктів, для кожного з OBJECT_URI додається object_uri_response з результатом запиту) |
-| handleGetWhereUsed          | JSON: { isError, content[{type:"text", text}]}  | JSON (старий формат)      | JSON                      | JSON                  |
-| handleGetBdef               | JSON: { isError, content[{type:"text", text}]} або {type:"json", json} | JSON (старий формат)      | JSON                      | JSON                  |
+| Handler Name                | Повертає (return)                | Формат повернення         |
+|-----------------------------|----------------------------------|---------------------------|
+| handleGetProgram            | JSON: { isError, content[{type:"text", text}] } | JSON (старий формат)      |
+| handleGetInclude            | JSON: { isError, content[{type:"text", text}] } | JSON (старий формат)      |
+| handleGetFunction           | JSON: { isError, content[{type:"text", text}]} або {isError, content[{type:"json", json}]} | JSON (старий формат)      |
+| handleGetClass              | JSON: { isError, content[{type:"text", text}]} або {isError, content[{type:"json", json}]}  | JSON (старий формат)      |
+| handleGetFunctionGroup      | JSON: { isError, content[{type:"json", json}]}  | JSON (старий формат)      |
+| handleGetStructure          | JSON: { isError, content[{type:"json", json}]}  | JSON (старий формат)      |
+| handleGetTable              | JSON: { isError, content[{type:"json", json}]}  | JSON (старий формат)      |
+| handleGetTableContents      | JSON: { isError, content[{type:"text", text}]}  | JSON (старий формат)      |
+| handleGetPackage            | JSON: { isError, content[{type:"text", text}]}  | JSON (старий формат)      |
+| handleGetTypeInfo           | JSON: { isError, content[{type:"json", json}]}  | JSON (старий формат)      |
+| handleGetInterface          | JSON: { isError, content[{type:"text", text}]}  | JSON (старий формат)      |
+| handleGetTransaction        | JSON: { isError, content[{type:"json", json}]}  | JSON (старий формат)      |
+| handleSearchObject          | JSON: { isError, content[{type:"text", text}]}  | JSON (старий формат)      |
+| handleGetEnhancements       | JSON: { isError, content[{type:"text", text}]}  | JSON (старий формат)      |
+| handleGetEnhancementSpot    | JSON: { isError, content[{type:"json", json}]}  | JSON (старий формат)      |
+| handleGetEnhancementImpl    | JSON: { isError, content[{type:"json", json}]}  | JSON (старий формат)      |
+| handleGetSqlQuery           | JSON: { isError, content[{type:"text", text}]}  | JSON (старий формат)      |
+| handleGetIncludesList       | JSON: { isError, content[{type:"text", text}]} або {type:"json", json} | JSON (старий формат)      |
+| handleGetObjectsByType      | JSON: { isError, content[{type:"text", text}]} або {type:"json", json} | JSON (старий формат)      |
+| handleGetObjectsList        | JSON: { content: [{type:"json", json: {parent_name, parent_tech_name, parent_type, total_objects, objects: [ { ...fields... } ]}}] } | JSON (новий формат) |
+| handleGetWhereUsed          | JSON: { isError, content[{type:"text", text}]}  | JSON (старий формат)      |
+| handleGetBdef               | JSON: { isError, content[{type:"text", text}]} або {type:"json", json} | JSON (старий формат)      |
 
 **Примітки:**
-- Для plain text (ісходний код програм, інклюдів, функцій, класів) у файл завжди зберігається багаторядковий текст, а не JSON.
-- Для структурованих даних (структури, таблиці, групи функцій) повертається і зберігається JSON.
 - Якщо повертається помилка — завжди { isError: true, content: [{type: "text", text: "..."}] }.
 
 Оновлено: 2025-07-08

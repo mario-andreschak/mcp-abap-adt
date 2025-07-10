@@ -1,6 +1,6 @@
 // handleGetObjectNodeFromCache: повертає вузол з кешу за OBJECT_TYPE, OBJECT_NAME, TECH_NAME, розгортає OBJECT_URI
 
-import { findNodeInCache, updateNodeInCache } from '../lib/getObjectsListCache';
+import { objectsListCache } from '../lib/getObjectsListCache';
 import { makeAdtRequest, getBaseUrl } from '../lib/utils';
 
 /**
@@ -15,7 +15,16 @@ export async function handleGetObjectNodeFromCache(args: any) {
             content: [{ type: 'text', text: 'object_type, object_name, tech_name required' }]
         };
     }
-    const node = findNodeInCache(object_type, object_name, tech_name);
+    const cache = objectsListCache.getCache();
+    let node: any = null;
+    if (cache && Array.isArray(cache.objects)) {
+        node = (cache.objects as any[]).find(
+            (obj: any) =>
+                obj.OBJECT_TYPE === object_type &&
+                obj.OBJECT_NAME === object_name &&
+                obj.TECH_NAME === tech_name
+        ) || null;
+    }
     if (!node) {
         return {
             isError: true,
@@ -30,7 +39,18 @@ export async function handleGetObjectNodeFromCache(args: any) {
                 : baseUrl.replace(/\/$/, '') + node.OBJECT_URI;
             const resp = await makeAdtRequest(url, 'GET', 15000);
             node.object_uri_response = typeof resp.data === 'string' ? resp.data : JSON.stringify(resp.data);
-            updateNodeInCache(object_type, object_name, tech_name, { object_uri_response: node.object_uri_response });
+
+            // Оновлюємо вузол у кеші
+            const idx = cache.objects.findIndex(
+                (obj: any) =>
+                    obj.OBJECT_TYPE === object_type &&
+                    obj.OBJECT_NAME === object_name &&
+                    obj.TECH_NAME === tech_name
+            );
+            if (idx >= 0) {
+                cache.objects[idx] = { ...cache.objects[idx], object_uri_response: node.object_uri_response };
+                objectsListCache.setCache(cache);
+            }
         } catch (e) {
             node.object_uri_response = `ERROR: ${e instanceof Error ? e.message : String(e)}`;
         }
