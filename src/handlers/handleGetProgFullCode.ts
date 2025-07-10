@@ -191,8 +191,8 @@ export async function handleGetProgFullCode(args: any) {
   const result = {
     content: [
       {
-        type: 'json',
-        json: fullResult,
+        type: 'text',
+        text: JSON.stringify(fullResult, null, 2),
       },
     ],
   };

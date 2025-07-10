@@ -143,8 +143,8 @@ export async function handleGetObjectsList(args: any) {
         return {
             content: [
                 {
-                    type: "json",
-                    json: result
+                    type: "text",
+                    text: JSON.stringify(result, null, 2)
                 }
             ],
             // Додаємо кеш для можливого використання в інших модулях
