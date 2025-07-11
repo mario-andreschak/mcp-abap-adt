@@ -451,6 +451,7 @@ export class mcp_abap_adt_server {
             name: "DetectObjectTypeList",
             description: "Batch detection of ABAP object types. Accepts either a 'global' array or a 'list' array (both optional, at least one required): { global: [...], list: [...] }. Returns array of detected objects with type and metadata. If neither is provided, returns MCP format error.",
             inputSchema: {
+              type: "object",
               properties: {
                 global: {
                   type: "array",
