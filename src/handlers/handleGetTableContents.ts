@@ -280,12 +280,13 @@ export async function handleGetTableContents(args: any) {
             content: [
                 {
                     type: 'text',
-                    text: JSON.stringify(parsedData, null, 2)
+                    data: JSON.stringify(parsedData, null, 2),
+                    mimeType: 'application/json'
                 }
             ]
         };
         if (args.filePath) {
-            writeResultToFile(result, args.filePath);
+            writeResultToFile(JSON.stringify(result, null, 2), args.filePath);
         }
         return result;
     } catch (error) {
@@ -293,6 +294,15 @@ export async function handleGetTableContents(args: any) {
             error: error instanceof Error ? error.message : String(error),
             tableName: args?.table_name 
         });
-        return return_error(error);
+        return {
+            isError: true,
+            content: [
+                {
+                    type: "text",
+                    data: error instanceof Error ? error.message : String(error),
+                    mimeType: "text/plain"
+                }
+            ]
+        };
     }
 }

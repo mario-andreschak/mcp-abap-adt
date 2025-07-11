@@ -33,15 +33,23 @@ export async function handleGetPackage(args: any) {
             isError: false,
             content: [{
                 type: 'text',
-                text: JSON.stringify(extractedData)
+                data: JSON.stringify(extractedData, null, 2),
+                mimeType: 'application/json'
             }]
         };
         if (args.filePath) {
-            writeResultToFile(finalResult, args.filePath);
+            writeResultToFile(JSON.stringify(finalResult, null, 2), args.filePath);
         }
         return finalResult;
 
     } catch (error) {
-        return return_error(error);
+        return {
+            isError: true,
+            content: [{
+                type: 'text',
+                data: error instanceof Error ? error.message : String(error),
+                mimeType: 'text/plain'
+            }]
+        };
     }
 }

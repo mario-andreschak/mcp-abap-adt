@@ -18,11 +18,21 @@ export async function handleGetInclude(args: any) {
             content: [
                 {
                     type: "text",
-                    text: plainText
+                    data: plainText,
+                    mimeType: "text/plain"
                 }
             ]
         };
     } catch (error) {
-        return return_error(error);
+        return {
+            isError: true,
+            content: [
+                {
+                    type: "text",
+                    data: error instanceof Error ? error.message : String(error),
+                    mimeType: "text/plain"
+                }
+            ]
+        };
     }
 }

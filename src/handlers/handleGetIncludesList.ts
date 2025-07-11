@@ -1,5 +1,5 @@
 import { McpError, ErrorCode, AxiosResponse } from '../lib/utils';
-import { fetchNodeStructure, return_error, return_response } from '../lib/utils';
+import { fetchNodeStructure, return_error } from '../lib/utils';
 import { writeResultToFile } from '../lib/writeResultToFile';
 
 /**
@@ -135,14 +135,16 @@ export async function handleGetIncludesList(args: any) {
         
         if (!includesNode) {
             // Return empty result if no includes node found
-            const mockResponse = {
-                data: `No includes found in ${object_type} '${object_name}'.`,
-                status: 200,
-                statusText: 'OK',
-                headers: {},
-                config: {}
-            } as any;
-            return return_response(mockResponse);
+            return {
+                isError: false,
+                content: [
+                    {
+                        type: "text",
+                        data: `No includes found in ${object_type} '${object_name}'.`,
+                        mimeType: "text/plain"
+                    }
+                ]
+            };
         }
 
         // Step 3: Get includes list using the found node ID (with timeout)
@@ -162,53 +164,63 @@ export async function handleGetIncludesList(args: any) {
         // Step 4: Parse the includes response to extract include names
         const includeNames = parseIncludeNamesFromXml(includesResponse.data);
         
-if (isDetailed) {
-    // Return detailed JSON response as text (for compatibility)
-    const detailedResponse = {
-        object_name: object_name,
-        object_type: object_type,
-        detailed: true,
-        total_includes: includeNames.length,
-        includes: includeNames,
-        includes_node_info: includesNode
-    };
+        if (isDetailed) {
+            // Return detailed JSON response as text (for compatibility)
+            const detailedResponse = {
+                object_name: object_name,
+                object_type: object_type,
+                detailed: true,
+                total_includes: includeNames.length,
+                includes: includeNames,
+                includes_node_info: includesNode
+            };
 
-    const result = {
-        content: [
-            {
-                type: "text",
-                text: JSON.stringify(detailedResponse, null, 2)
+            const result = {
+                isError: false,
+                content: [
+                    {
+                        type: "text",
+                        data: JSON.stringify(detailedResponse, null, 2),
+                        mimeType: "application/json"
+                    }
+                ]
+            };
+            if (args.filePath) {
+                writeResultToFile(JSON.stringify(result, null, 2), args.filePath);
             }
-        ]
-    };
-    if (args.filePath) {
-        const fs = require('fs');
-        fs.writeFileSync(args.filePath, JSON.stringify(result, null, 2), 'utf-8');
-    }
-    return result;
-} else {
+            return result;
+        } else {
             // Return minimal text response (original format)
-const responseData = includeNames.length > 0 
-    ? includeNames.join('\n')
-    : '';
+            const responseData = includeNames.length > 0 
+                ? includeNames.join('\n')
+                : '';
 
-const mockResponse = {
-    data: responseData,
-    status: 200,
-    statusText: 'OK',
-    headers: {},
-    config: {}
-} as any;
-
-const plainResult = return_response(mockResponse);
-if (args.filePath) {
-    const fs = require('fs');
-    fs.writeFileSync(args.filePath, responseData, 'utf-8');
-}
-return plainResult;
+            const plainResult = {
+                isError: false,
+                content: [
+                    {
+                        type: "text",
+                        data: responseData,
+                        mimeType: "text/plain"
+                    }
+                ]
+            };
+            if (args.filePath) {
+                writeResultToFile(responseData, args.filePath);
+            }
+            return plainResult;
         }
 
     } catch (error) {
-        return return_error(error);
+        return {
+            isError: true,
+            content: [
+                {
+                    type: "text",
+                    data: error instanceof Error ? error.message : String(error),
+                    mimeType: "text/plain"
+                }
+            ]
+        };
     }
 }

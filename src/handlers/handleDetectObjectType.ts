@@ -26,7 +26,13 @@ export async function handleDetectObjectType(args: any) {
         if (!refs) {
             return {
                 isError: true,
-                content: [{ type: 'text', text: 'No result' }]
+                content: [
+                    {
+                        type: 'text',
+                        data: 'No result',
+                        mimeType: 'text/plain'
+                    }
+                ]
             };
         }
         if (!Array.isArray(refs)) refs = [refs];
@@ -43,14 +49,27 @@ export async function handleDetectObjectType(args: any) {
         }));
 
         objectsListCache.setCache(result);
+
         return {
             isError: false,
-            content: result
+            content: [
+                {
+                    type: 'text',
+                    data: JSON.stringify(result, null, 2),
+                    mimeType: 'application/json'
+                }
+            ]
         };
     } catch (error) {
         return {
             isError: true,
-            content: [{ type: 'text', text: error instanceof Error ? error.message : String(error) }]
+            content: [
+                {
+                    type: 'text',
+                    data: error instanceof Error ? error.message : String(error),
+                    mimeType: 'text/plain'
+                }
+            ]
         };
     }
 }

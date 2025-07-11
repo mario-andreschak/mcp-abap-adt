@@ -80,12 +80,14 @@ export async function handleGetFunction(args: any) {
         const response = await makeAdtRequestWithTimeout(url, 'GET', 'default');
         // Якщо XML — парсимо і повертаємо JSON, якщо ні — повертаємо plain text напряму
         if (typeof response.data === 'string' && response.data.trim().startsWith('<?xml')) {
+            const resultObj = parseFunctionXml(response.data);
             const result = {
                 isError: false,
                 content: [
                     {
-                        type: "json",
-                        json: parseFunctionXml(response.data)
+                        type: "text",
+                        data: JSON.stringify(resultObj, null, 2),
+                        mimeType: "application/json"
                     }
                 ]
             };
@@ -94,7 +96,7 @@ export async function handleGetFunction(args: any) {
             }
             return result;
         } else {
-            // Plain text: повертаємо у старому JSON-форматі, у файл — багаторядковий текст
+            // Plain text: MCP-формат
             if (args.filePath) {
                 writeResultToFile(response.data, args.filePath);
             }
@@ -103,12 +105,22 @@ export async function handleGetFunction(args: any) {
                 content: [
                     {
                         type: "text",
-                        text: response.data
+                        data: response.data,
+                        mimeType: "text/plain"
                     }
                 ]
             };
         }
     } catch (error) {
-        return return_error(error);
+        return {
+            isError: true,
+            content: [
+                {
+                    type: "text",
+                    data: error instanceof Error ? error.message : String(error),
+                    mimeType: "text/plain"
+                }
+            ]
+        };
     }
 }

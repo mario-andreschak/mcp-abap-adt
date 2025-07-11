@@ -49,27 +49,47 @@ export async function handleGetTable(args: any) {
         const response = await makeAdtRequestWithTimeout(url, 'GET', 'default');
         // Якщо XML — парсимо, якщо ні — повертаємо як є
         if (typeof response.data === 'string' && response.data.trim().startsWith('<?xml')) {
+            const resultObj = parseTableXml(response.data);
             const result = {
                 isError: false,
                 content: [
                     {
-                        type: "json",
-                        json: parseTableXml(response.data)
+                        type: "text",
+                        data: JSON.stringify(resultObj, null, 2),
+                        mimeType: "application/json"
                     }
                 ]
             };
             if (args.filePath) {
-                writeResultToFile(result, args.filePath);
+                writeResultToFile(JSON.stringify(result, null, 2), args.filePath);
             }
             return result;
         } else {
-            const plainResult = return_response(response);
+            const plainResult = {
+                isError: false,
+                content: [
+                    {
+                        type: "text",
+                        data: response.data,
+                        mimeType: "text/plain"
+                    }
+                ]
+            };
             if (args.filePath) {
-                writeResultToFile(plainResult, args.filePath);
+                writeResultToFile(response.data, args.filePath);
             }
             return plainResult;
         }
     } catch (error) {
-        return return_error(error);
+        return {
+            isError: true,
+            content: [
+                {
+                    type: "text",
+                    data: error instanceof Error ? error.message : String(error),
+                    mimeType: "text/plain"
+                }
+            ]
+        };
     }
 }

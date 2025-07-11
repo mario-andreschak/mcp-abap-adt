@@ -69,12 +69,14 @@ export async function handleGetClass(args: any) {
         const response = await makeAdtRequestWithTimeout(url, 'GET', 'default');
         // Якщо XML — парсимо, якщо ні — повертаємо як є
         if (typeof response.data === 'string' && response.data.trim().startsWith('<?xml')) {
+            const resultObj = parseClassXml(response.data);
             const result = {
                 isError: false,
                 content: [
                     {
-                        type: "json",
-                        json: parseClassXml(response.data)
+                        type: "text",
+                        data: JSON.stringify(resultObj, null, 2),
+                        mimeType: "application/json"
                     }
                 ]
             };
@@ -83,7 +85,7 @@ export async function handleGetClass(args: any) {
             }
             return result;
         } else {
-            // Plain text: повертаємо у старому JSON-форматі, у файл — багаторядковий текст
+            // Plain text: повертаємо у MCP-форматі
             if (args.filePath) {
                 writeResultToFile(response.data, args.filePath);
             }
@@ -92,12 +94,22 @@ export async function handleGetClass(args: any) {
                 content: [
                     {
                         type: "text",
-                        text: response.data
+                        data: response.data,
+                        mimeType: "text/plain"
                     }
                 ]
             };
         }
     } catch (error) {
-        return return_error(error);
+        return {
+            isError: true,
+            content: [
+                {
+                    type: "text",
+                    data: error instanceof Error ? error.message : String(error),
+                    mimeType: "text/plain"
+                }
+            ]
+        };
     }
 }
