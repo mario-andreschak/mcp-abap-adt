@@ -51,10 +51,10 @@ export async function handleGetProgFullCode(args: { name: string; type: string }
 
     // Try to get include source
     const includeResult = await handleGetInclude({ include_name: objectName });
-    let code = null;
+    let code: string | null = null;
     if (Array.isArray(includeResult?.content) && includeResult.content.length > 0) {
       const c = includeResult.content[0];
-      if (c.type === 'text' && 'text' in c) code = c.text;
+      if (c.type === 'text' && 'data' in c) code = c.data as string;
     }
 
     // Find nested includes in code (ABAP: INCLUDE <name>. or 'INCLUDE <name> .')
@@ -85,7 +85,7 @@ export async function handleGetProgFullCode(args: { name: string; type: string }
       let debug = { handleGetProgram: progResult };
       if (Array.isArray(progResult?.content) && progResult.content.length > 0) {
         const c = progResult.content[0];
-        if (c.type === 'text' && 'text' in c) progCode = c.text as string;
+        if (c.type === 'text' && 'data' in c) progCode = c.data as string;
       }
       if (!progCode || (typeof progCode !== 'string') || (progCode && progCode.trim() === '')) {
         return {
@@ -93,7 +93,8 @@ export async function handleGetProgFullCode(args: { name: string; type: string }
           content: [
             {
               type: 'text',
-              text: `No program code found for ${name}. Debug: ${JSON.stringify(debug, null, 2)}`
+              data: `No program code found for ${name}. Debug: ${JSON.stringify(debug, null, 2)}`,
+              mimeType: 'text/plain'
             }
           ]
         };
@@ -122,10 +123,10 @@ export async function handleGetProgFullCode(args: { name: string; type: string }
           if (!codeObjects.some(obj => obj.OBJECT_TYPE === 'PROG/I' && obj.OBJECT_NAME === incName)) {
             // Get code for each include
             const incResult = await handleGetInclude({ include_name: incName });
-            let incCode = null;
+            let incCode: string | null = null;
             if (Array.isArray(incResult?.content) && incResult.content.length > 0) {
               const c = incResult.content[0];
-              if (c.type === 'text' && 'text' in c) incCode = c.text;
+              if (c.type === 'text' && 'data' in c) incCode = c.data as string;
             }
             codeObjects.push({
               OBJECT_TYPE: 'PROG/I',
@@ -138,10 +139,10 @@ export async function handleGetProgFullCode(args: { name: string; type: string }
     } else if (typeUpper === 'FUGR') {
       // Get function group main code
       const fgResult = await handleGetFunctionGroup({ function_group: name });
-      let fgCode = null;
+      let fgCode: string | null = null;
       if (Array.isArray(fgResult?.content) && fgResult.content.length > 0) {
         const c = fgResult.content[0];
-        if (c.type === 'text' && 'text' in c) fgCode = c.text;
+        if (c.type === 'text' && 'data' in c) fgCode = c.data as string;
       }
       codeObjects.push({
         OBJECT_TYPE: 'FUGR',
@@ -167,10 +168,10 @@ export async function handleGetProgFullCode(args: { name: string; type: string }
           if (!codeObjects.some(obj => obj.OBJECT_TYPE === 'PROG/I' && obj.OBJECT_NAME === incName)) {
             // Get code for each include
             const incResult = await handleGetInclude({ include_name: incName });
-            let incCode = null;
+            let incCode: string | null = null;
             if (Array.isArray(incResult?.content) && incResult.content.length > 0) {
               const c = incResult.content[0];
-              if (c.type === 'text' && 'text' in c) incCode = c.text;
+              if (c.type === 'text' && 'data' in c) incCode = c.data as string;
             }
             codeObjects.push({
               OBJECT_TYPE: 'PROG/I',
@@ -181,7 +182,16 @@ export async function handleGetProgFullCode(args: { name: string; type: string }
         }
       }
     } else {
-      return { isError: true, content: [{ type: 'text', text: 'Unsupported type' }] };
+      return {
+        isError: true,
+        content: [
+          {
+            type: 'text',
+            data: 'Unsupported type',
+            mimeType: 'text/plain'
+          }
+        ]
+      };
     }
 
     // Normalize spaces in code fields: replace 2+ spaces with 1
@@ -198,10 +208,12 @@ export async function handleGetProgFullCode(args: { name: string; type: string }
     };
 
     return {
+      isError: false,
       content: [
         {
           type: 'text',
-          text: JSON.stringify(fullResult, null, 2),
+          data: JSON.stringify(fullResult, null, 2),
+          mimeType: 'application/json'
         },
       ],
     };
@@ -211,7 +223,8 @@ export async function handleGetProgFullCode(args: { name: string; type: string }
       content: [
         {
           type: 'text',
-          text: e instanceof Error ? e.message : String(e),
+          data: e instanceof Error ? e.message : String(e),
+          mimeType: 'text/plain'
         },
       ],
     };
