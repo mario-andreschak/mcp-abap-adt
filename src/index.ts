@@ -417,6 +417,22 @@ export class mcp_abap_adt_server {
           }
         },
         {
+          name: "GetObjectsByType",
+          description: "Retrieves all ABAP objects of a specific type under a given node.",
+          inputSchema: {
+            type: "object",
+            properties: {
+              parent_name: { type: "string" },
+              parent_tech_name: { type: "string" },
+              parent_type: { type: "string" },
+              node_id: { type: "string" },
+              format: { type: "string", description: "Output format: 'raw' or 'parsed'" },
+              with_short_descriptions: { type: "boolean" }
+            },
+            required: ["parent_name", "parent_tech_name", "parent_type", "node_id"]
+          }
+        },
+        {
           name: "DetectObjectTypeListJson",
           description: "Batch detection of ABAP object types. Accepts 'payload' object with 'objects' array: { payload: { objects: [{ name, type? }] } }.",
           inputSchema: {
