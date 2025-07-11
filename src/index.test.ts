@@ -1,5 +1,7 @@
 import { after } from "node:test";
 import { mcp_abap_adt_server } from "./index";
+// If './index' does not export 'mcp_abap_adt_server', update './index.ts' to include:
+// export class mcp_abap_adt_server { ... }
 import { handleGetProgram } from "./handlers/handleGetProgram";
 import { handleGetClass } from "./handlers/handleGetClass";
 import { handleGetFunctionGroup } from "./handlers/handleGetFunctionGroup";

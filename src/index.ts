@@ -560,46 +560,118 @@ export class mcp_abap_adt_server {
         },
         {
           name: "DetectObjectTypeListArray",
-          description: "Batch detection of ABAP object types. Accepts 'objects' array: { objects: [{ name, type? }] }.",
+          description: `Batch detection of ABAP object types.
+
+Parameters expected:
+- objects: Array of objects, each with:
+    - name: string (required)
+    - type: string (optional)
+
+Use this tool ONLY if your input is a direct array of objects:
+{
+  "objects": [
+    { "name": "ZCL_MY_CLASS" },
+    { "name": "ZCL_OTHER", "type": "CLAS/OC" }
+  ]
+}
+Do NOT use if your input is wrapped in a 'payload' object.
+
+Example of correct input:
+{
+  "objects": [
+    { "name": "ZCL_MY_CLASS" },
+    { "name": "ZCL_OTHER", "type": "CLAS/OC" }
+  ]
+}
+
+Incorrect (for this tool):
+{
+  "payload": {
+    "objects": [ ... ]
+  }
+}
+
+For 'payload' input, use DetectObjectTypeListJson.`,
           inputSchema: {
             type: "object",
             properties: {
               objects: {
                 type: "array",
-                description: "Array of objects with name and optional type",
+                description: "Array of objects with name and optional type. Each item: { name: string, type?: string }",
                 items: {
+                  type: "object",
                   properties: {
-                    name: { type: "string", description: "Object name" },
+                    name: { type: "string", description: "Object name (required)" },
                     type: { type: "string", description: "Optional type" }
-                  }
+                  },
+                  required: ["name"]
                 }
               }
-            }
+            },
+            required: ["objects"]
           }
         },
         {
           name: "DetectObjectTypeListJson",
-          description: "Batch detection of ABAP object types. Accepts 'payload' object with 'objects' array: { payload: { objects: [{ name, type? }] } }.",
+          description: `Batch detection of ABAP object types.
+
+Parameters expected:
+- payload: object, with:
+    - objects: Array of objects, each with:
+        - name: string (required)
+        - type: string (optional)
+
+Use this tool ONLY if your input is wrapped in a 'payload' object:
+{
+  "payload": {
+    "objects": [
+      { "name": "ZCL_MY_CLASS" },
+      { "name": "ZCL_OTHER", "type": "CLAS/OC" }
+    ]
+  }
+}
+Do NOT use if your input is a direct array.
+
+Example of correct input:
+{
+  "payload": {
+    "objects": [
+      { "name": "ZCL_MY_CLASS" },
+      { "name": "ZCL_OTHER", "type": "CLAS/OC" }
+    ]
+  }
+}
+
+Incorrect (for this tool):
+{
+  "objects": [ ... ]
+}
+
+For direct array input, use DetectObjectTypeListArray.`,
           inputSchema: {
             type: "object",
             properties: {
               payload: {
                 type: "object",
-                description: "JSON object with 'objects' array",
+                description: "JSON object with 'objects' array. Each item: { name: string, type?: string }",
                 properties: {
                   objects: {
                     type: "array",
                     description: "Array of objects with name and optional type",
                     items: {
+                      type: "object",
                       properties: {
-                        name: { type: "string", description: "Object name" },
+                        name: { type: "string", description: "Object name (required)" },
                         type: { type: "string", description: "Optional type" }
-                      }
+                      },
+                      required: ["name"]
                     }
                   }
-                }
+                },
+                required: ["objects"]
               }
-            }
+            },
+            required: ["payload"]
           }
         }
       ]
