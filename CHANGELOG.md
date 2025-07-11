@@ -1,8 +1,21 @@
 # Changelog
 
+## [Unreleased]
+- Added two new tools for batch ABAP object type detection:
+  - DetectObjectTypeListArray: accepts array of objects via 'objects' parameter.
+  - DetectObjectTypeListJson: accepts JSON payload with 'objects' array via 'payload' parameter.
+- Added documentation for both tools: see [doc/DetectObjectTypeListTools.md](doc/DetectObjectTypeListTools.md).
 All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
+
+### Added
+- New MCP tool: `DetectObjectTypeList`
+  - Batch detection of ABAP object types by a list of names.
+  - Input: `{ global: [{ name: string, type?: string }] }`
+  - Output: `{ isError: boolean, content: Array<{ name, detectedType, description, shortText, longText, text, package, uri }> }`
+  - Available via MCP API and web interface.
+  - All comments and documentation in English.
 
 ### Changed
 - All handler modules now use a unified in-memory caching mechanism via `objectsListCache`. This provides consistent, easily swappable cache logic across the codebase.

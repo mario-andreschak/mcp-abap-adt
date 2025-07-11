@@ -401,32 +401,76 @@ export class mcp_abap_adt_server {
               required: ["transaction_name"]
             }
           },
+// DetectObjectTypeListArray: accepts array of objects
           {
-            name: "SearchObject",
-            description: "Quick search for ABAP repository objects by name or pattern.",
+            name: "DetectObjectTypeListArray",
+            description: "Batch detection of ABAP object types. Accepts 'objects' array: { objects: [{ name, type? }] }.",
             inputSchema: {
-              type: "object",
               properties: {
-                query: { type: "string", description: "Search query string" },
-                maxResults: { type: "number", description: "Maximum number of results to return", default: 1 }
-              },
-              required: ["query"]
+                objects: {
+                  type: "array",
+                  description: "Array of objects with name and optional type",
+                  items: {
+                    properties: {
+                      name: { type: "string", description: "Object name" },
+                      type: { type: "string", description: "Optional type" }
+                    }
+                  }
+                }
+              }
+            }
+          },
+// DetectObjectTypeListJson: accepts JSON payload with objects array
+          {
+            name: "DetectObjectTypeListJson",
+            description: "Batch detection of ABAP object types. Accepts 'payload' object with 'objects' array: { payload: { objects: [{ name, type? }] } }.",
+            inputSchema: {
+              properties: {
+                payload: {
+                  type: "object",
+                  description: "JSON object with 'objects' array",
+                  properties: {
+                    objects: {
+                      type: "array",
+                      description: "Array of objects with name and optional type",
+                      items: {
+                        properties: {
+                          name: { type: "string", description: "Object name" },
+                          type: { type: "string", description: "Optional type" }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
             }
           },
           {
-            name: "GetEnhancements",
-            description: "Retrieve and analyze enhancement implementations in ABAP programs or includes.",
+            name: "DetectObjectTypeList",
+            description: "Batch detection of ABAP object types. Accepts either a 'global' array or a 'list' array (both optional, at least one required): { global: [...], list: [...] }. Returns array of detected objects with type and metadata. If neither is provided, returns MCP format error.",
             inputSchema: {
-              type: "object",
               properties: {
-                object_name: { type: "string", description: "Name of the ABAP program or include" },
-                program: { type: "string", description: "Parent program name (for includes)" },
-                include_nested: { type: "boolean", description: "If true, performs recursive enhancement search." },
-                detailed: { type: "boolean", description: "If true, returns full enhancement source code and raw XML.", default: false },
-                timeout: { type: "number", description: "Timeout in ms for each ADT request." },
-                max_includes: { type: "number", description: "Maximum number of includes to process." }
-              },
-              required: ["object_name"]
+                global: {
+                  type: "array",
+                  description: "Array of objects with name and optional type",
+                  items: {
+                    properties: {
+                      name: { type: "string", description: "Object name" },
+                      type: { type: "string", description: "Optional type" }
+                    }
+                  }
+                },
+                list: {
+                  type: "array",
+                  description: "Alternative array of objects with name and optional type",
+                  items: {
+                    properties: {
+                      name: { type: "string", description: "Object name" },
+                      type: { type: "string", description: "Optional type" }
+                    }
+                  }
+                }
+              }
             }
           },
           {
@@ -565,6 +609,51 @@ export class mcp_abap_adt_server {
               },
               required: ["object_name", "object_type"]
             }
+          },
+          {
+            name: "DetectObjectType",
+            description: "Detects the ABAP object type by exact object name (no mask, no fuzzy). Returns the same structure as SearchObject, but only for exact matches. Use to determine the type of an object by its name.",
+            inputSchema: {
+              type: "object",
+              properties: {
+                name: { type: "string", description: "Exact object name to detect type for" },
+                maxResults: { type: "number", description: "Maximum number of results to return", default: 1 }
+              },
+              required: ["name"]
+            }
+          },
+          {
+            name: "DetectObjectTypeList",
+            description: "Batch detection of ABAP object types. Accepts either a 'global' array or a 'list' array (both optional, at least one required): { global: [...], list: [...] }. Returns array of detected objects with type and metadata. If neither is provided, returns MCP format error.",
+            inputSchema: {
+              type: "object",
+              properties: {
+                global: {
+                  type: "array",
+                  description: "Array of objects with name and optional type",
+                  items: {
+                    type: "object",
+                    properties: {
+                      name: { type: "string", description: "Object name" },
+                      type: { type: "string", description: "Optional type" }
+                    },
+                    required: ["name"]
+                  }
+                },
+                list: {
+                  type: "array",
+                  description: "Alternative array of objects with name and optional type",
+                  items: {
+                    type: "object",
+                    properties: {
+                      name: { type: "string", description: "Object name" },
+                      type: { type: "string", description: "Optional type" }
+                    },
+                    required: ["name"]
+                  }
+                }
+              }
+            }
           }
         ],
       };
@@ -627,6 +716,16 @@ export class mcp_abap_adt_server {
           return await handleGetRelatedObjectTypes(request.params.arguments);
         case "GetDescription":
           return await (await import("./handlers/handleGetDescription.js")).handleGetDescription(request.params.arguments as any);
+        case "DetectObjectType":
+          return await (await import("./handlers/handleDetectObjectType.js")).handleDetectObjectType(request.params.arguments as any);
+// DetectObjectTypeListArray handler
+        case "DetectObjectTypeListArray":
+          return await (await import("./handlers/handleDetectObjectTypeListArray.js")).handleDetectObjectTypeListArray(request.params.arguments as any);
+// DetectObjectTypeListJson handler
+        case "DetectObjectTypeListJson":
+          return await (await import("./handlers/handleDetectObjectTypeListJson.js")).handleDetectObjectTypeListJson(request.params.arguments as any);
+        case "DetectObjectTypeList":
+          return await (await import("./handlers/handleDetectObjectTypeList.js")).handleDetectObjectTypeList(request.params.arguments as any);
         default:
           throw new McpError(
             ErrorCode.MethodNotFound,
