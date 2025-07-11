@@ -406,6 +406,7 @@ export class mcp_abap_adt_server {
             name: "DetectObjectTypeListArray",
             description: "Batch detection of ABAP object types. Accepts 'objects' array: { objects: [{ name, type? }] }.",
             inputSchema: {
+              type: "object",
               properties: {
                 objects: {
                   type: "array",
@@ -425,6 +426,7 @@ export class mcp_abap_adt_server {
             name: "DetectObjectTypeListJson",
             description: "Batch detection of ABAP object types. Accepts 'payload' object with 'objects' array: { payload: { objects: [{ name, type? }] } }.",
             inputSchema: {
+              type: "object",
               properties: {
                 payload: {
                   type: "object",
