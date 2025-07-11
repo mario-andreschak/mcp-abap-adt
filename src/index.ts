@@ -398,22 +398,72 @@ export class mcp_abap_adt_server {
           }
         },
         {
-          name: "DetectObjectTypeListArray",
-          description: "Batch detection of ABAP object types. Accepts 'objects' array: { objects: [{ name, type? }] }.",
+          name: "GetEnhancements",
+          description: "Retrieve a list of enhancements for a given ABAP object.",
           inputSchema: {
             type: "object",
             properties: {
-              objects: {
-                type: "array",
-                description: "Array of objects with name and optional type",
-                items: {
-                  properties: {
-                    name: { type: "string", description: "Object name" },
-                    type: { type: "string", description: "Optional type" }
-                  }
-                }
-              }
-            }
+              object_name: { type: "string", description: "Name of the ABAP object" },
+              object_type: { type: "string", description: "Type of the ABAP object" }
+            },
+            required: ["object_name", "object_type"]
+          }
+        },
+        {
+          name: "GetEnhancementImpl",
+          description: "Retrieve source code of a specific enhancement implementation by its name and enhancement spot.",
+          inputSchema: {
+            type: "object",
+            properties: {
+              enhancement_spot: { type: "string", description: "Name of the enhancement spot" },
+              enhancement_name: { type: "string", description: "Name of the enhancement implementation" }
+            },
+            required: ["enhancement_spot", "enhancement_name"]
+          }
+        },
+        {
+          name: "GetEnhancementSpot",
+          description: "Retrieve metadata and list of implementations for a specific enhancement spot.",
+          inputSchema: {
+            type: "object",
+            properties: {
+              enhancement_spot: { type: "string", description: "Name of the enhancement spot" }
+            },
+            required: ["enhancement_spot"]
+          }
+        },
+        {
+          name: "GetBdef",
+          description: "Retrieve the source code of a BDEF (Behavior Definition) for a CDS entity.",
+          inputSchema: {
+            type: "object",
+            properties: {
+              bdef_name: { type: "string", description: "Name of the BDEF (Behavior Definition)" }
+            },
+            required: ["bdef_name"]
+          }
+        },
+        {
+          name: "GetSqlQuery",
+          description: "Execute freestyle SQL queries via SAP ADT Data Preview API.",
+          inputSchema: {
+            type: "object",
+            properties: {
+              sql_query: { type: "string", description: "SQL query to execute" },
+              row_number: { type: "number", description: "Maximum number of rows to return", default: 100 }
+            },
+            required: ["sql_query"]
+          }
+        },
+        {
+          name: "GetRelatedObjectTypes",
+          description: "Retrieves related ABAP object types for a given object.",
+          inputSchema: {
+            type: "object",
+            properties: {
+              object_name: { type: "string", description: "Name of the ABAP object" }
+            },
+            required: ["object_name"]
           }
         },
         {
@@ -430,6 +480,101 @@ export class mcp_abap_adt_server {
               with_short_descriptions: { type: "boolean" }
             },
             required: ["parent_name", "parent_tech_name", "parent_type", "node_id"]
+          }
+        },
+        {
+          name: "GetObjectsList",
+          description: "Recursively retrieves all valid ABAP repository objects for a given parent (program, function group, etc.) including nested includes.",
+          inputSchema: {
+            type: "object",
+            properties: {
+              parent_name: { type: "string", description: "Parent object name" },
+              parent_tech_name: { type: "string", description: "Parent technical name" },
+              parent_type: { type: "string", description: "Parent object type (e.g. PROG/P, FUGR)" },
+              with_short_descriptions: { type: "boolean", description: "Include short descriptions (default: true)" }
+            },
+            required: ["parent_name", "parent_tech_name", "parent_type"]
+          }
+        },
+        {
+          name: "GetProgFullCode",
+          description: "Returns the full code for a program or function group, including all includes, in tree traversal order.",
+          inputSchema: {
+            type: "object",
+            properties: {
+              name: { type: "string", description: "Technical name of the program or function group" },
+              type: { type: "string", enum: ["PROG/P", "FUGR"], description: "Object type: 'PROG/P' for program, 'FUGR' for function group" }
+            },
+            required: ["name", "type"]
+          }
+        },
+        {
+          name: "GetObjectNodeFromCache",
+          description: "Returns a node from the in-memory objects list cache by OBJECT_TYPE, OBJECT_NAME, TECH_NAME, and expands OBJECT_URI if present.",
+          inputSchema: {
+            type: "object",
+            properties: {
+              object_type: { type: "string" },
+              object_name: { type: "string" },
+              tech_name: { type: "string" }
+            },
+            required: ["object_type", "object_name", "tech_name"]
+          }
+        },
+        {
+          name: "GetWhereUsed",
+          description: "Retrieve where-used references for ABAP objects via ADT usageReferences.",
+          inputSchema: {
+            type: "object",
+            properties: {
+              object_name: { type: "string", description: "Name of the ABAP object" },
+              object_type: { type: "string", description: "Type of the ABAP object" },
+              detailed: { type: "boolean", description: "If true, returns all references including packages and internal components.", default: false }
+            },
+            required: ["object_name", "object_type"]
+          }
+        },
+        {
+          name: "GetDescription",
+          description: "Strict match ABAP object search by name. Returns metadata and description for an object with the exact name and type.",
+          inputSchema: {
+            type: "object",
+            properties: {
+              object_name: { type: "string", description: "Exact name of the ABAP object to search for" },
+              object_type: { type: "string", description: "ABAP object type" }
+            },
+            required: ["object_name", "object_type"]
+          }
+        },
+        {
+          name: "DetectObjectType",
+          description: "Detects the ABAP object type by exact object name (no mask, no fuzzy). Returns the same structure as SearchObject, but only for exact matches. Use to determine the type of an object by its name.",
+          inputSchema: {
+            type: "object",
+            properties: {
+              name: { type: "string", description: "Exact object name to detect type for" },
+              maxResults: { type: "number", description: "Maximum number of results to return", default: 1 }
+            },
+            required: ["name"]
+          }
+        },
+        {
+          name: "DetectObjectTypeListArray",
+          description: "Batch detection of ABAP object types. Accepts 'objects' array: { objects: [{ name, type? }] }.",
+          inputSchema: {
+            type: "object",
+            properties: {
+              objects: {
+                type: "array",
+                description: "Array of objects with name and optional type",
+                items: {
+                  properties: {
+                    name: { type: "string", description: "Object name" },
+                    type: { type: "string", description: "Optional type" }
+                  }
+                }
+              }
+            }
           }
         },
         {
@@ -457,7 +602,6 @@ export class mcp_abap_adt_server {
             }
           }
         }
-        // ... (інші MCP tools, як було раніше)
       ]
     }));
 
