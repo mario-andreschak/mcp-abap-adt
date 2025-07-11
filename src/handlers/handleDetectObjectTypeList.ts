@@ -1,51 +1,35 @@
-import { handleDetectObjectType } from './handleDetectObjectType';
-import { McpError, ErrorCode } from '../lib/utils';
-import { handleGetDescription } from './handleGetDescription';
+import { handleDetectObjectType } from "./handleDetectObjectType";
 
 /**
- * Batch detection of ABAP object types.
- * Accepts:
- *   - Array of objects: [{ name: string, type?: string }]
- *   - Object with array property (e.g. { global: [...] }) containing such objects
- * Returns: array of detected objects with type and metadata.
+ * Batch detection of ABAP object types for a list of names.
+ * @param args { objects: [{ name: string }] }
  */
-export async function handleDetectObjectTypeList(args: any) {
-    // DEBUG: log input for troubleshooting
-    // eslint-disable-next-line no-console
-    console.log('[handleDetectObjectTypeList] args:', JSON.stringify(args));
-
-    // Accepts: { global: [...] } or { list: [...] }
-    let items: any[] | undefined = undefined;
-    if (args?.global && Array.isArray(args.global)) {
-        items = args.global;
-    } else if (args?.list && Array.isArray(args.list)) {
-        items = args.list;
-    }
-
-    // Якщо жоден не вказано — помилка формату MCP
-    if (!items) {
-        throw new McpError(ErrorCode.InvalidParams, 'MCP error: Input must contain at least one of the following array properties: "global" або "list"');
+export async function handleDetectObjectTypeList(args: { objects: Array<{ name: string }> }) {
+    const { objects } = args;
+    if (!Array.isArray(objects) || objects.length === 0) {
+        return {
+            isError: true,
+            content: [
+                {
+                    type: "text",
+                    data: "No objects provided",
+                    mimeType: "text/plain"
+                }
+            ]
+        };
     }
 
     const results: any[] = [];
-
-    for (const item of items) {
-        if (!item?.name) continue;
-
-        // Detect object type
-        const detectResult = await handleDetectObjectType({ name: item.name });
-        // Runtime check: must be object with isError/content
-        if (
-            !detectResult ||
-            typeof detectResult !== 'object' ||
-            !('isError' in detectResult) ||
-            !('content' in detectResult) ||
-            detectResult.isError ||
-            !Array.isArray(detectResult.content) ||
-            detectResult.content.length === 0
-        ) continue;
-
-        for (const detected of detectResult.content) {
+    for (const obj of objects) {
+        const res = await handleDetectObjectType({ name: obj.name });
+        if (Array.isArray(res.content) && res.content.length > 0) {
+            // Parse MCP content data as JSON
+            let detected: any;
+            try {
+                detected = JSON.parse(res.content[0].data);
+            } catch {
+                detected = {};
+            }
             if (!detected?.objectType || !detected?.objectName) continue;
             results.push({
                 name: detected.objectName,
@@ -62,6 +46,12 @@ export async function handleDetectObjectTypeList(args: any) {
 
     return {
         isError: false,
-        content: results
+        content: [
+            {
+                type: "text",
+                data: JSON.stringify(results, null, 2),
+                mimeType: "application/json"
+            }
+        ]
     };
 }
