@@ -735,7 +735,7 @@ For direct array input, use DetectObjectTypeListArray.`,
         case "GetDescription":
           return await (await import("./handlers/handleGetDescription.js")).handleGetDescription(request.params.arguments as any);
         case "DetectObjectType":
-          return await (await import("./handlers/handleDetectObjectType.js")).handleDetectObjectType(request.params.arguments as any);
+          return await (await import("./handlers/handleDetectObjectType.js")).handleSearchObject(request.params.arguments as any);
         case "DetectObjectTypeListArray":
           return await (await import("./handlers/handleDetectObjectTypeListArray.js")).handleDetectObjectTypeListArray(request.params.arguments as any);
         case "DetectObjectTypeListJson":

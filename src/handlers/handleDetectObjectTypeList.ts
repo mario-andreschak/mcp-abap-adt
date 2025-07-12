@@ -1,4 +1,4 @@
-import { handleDetectObjectType } from "./handleDetectObjectType";
+import { handleSearchObject } from "./handleDetectObjectType";
 
 /**
  * Batch detection of ABAP object types for a list of names.
@@ -21,7 +21,7 @@ export async function handleDetectObjectTypeList(args: { objects: Array<{ name: 
 
     const results: any[] = [];
     for (const obj of objects) {
-        const res = await handleDetectObjectType({ name: obj.name });
+        const res = await handleSearchObject({ name: obj.name });
         if (Array.isArray(res.content) && res.content.length > 0) {
             // Parse MCP content data as JSON
             let detected: any;

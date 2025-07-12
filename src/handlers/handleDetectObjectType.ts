@@ -4,12 +4,12 @@ import { objectsListCache } from '../lib/getObjectsListCache';
 import { XMLParser } from 'fast-xml-parser';
 
 /**
- * Detect object type handler: determines the ABAP object type by exact name (no mask *).
+ * Search object type handler: determines the ABAP object type by exact name (no mask *).
  * Uses the ADT endpoint quickSearch, but does not add * to the query.
  * Returns a result only for an exact name, without fuzzy/mask search.
  * @param args { name: string, maxResults?: number }
  */
-export async function handleDetectObjectType(args: any) {
+export async function handleSearchObject(args: any) {
     try {
         if (!args?.name) {
             throw new McpError(ErrorCode.InvalidParams, 'Object name is required');
