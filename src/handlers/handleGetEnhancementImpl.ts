@@ -2,6 +2,29 @@ import { McpError, ErrorCode } from '../lib/utils';
 import { makeAdtRequestWithTimeout, return_error, getBaseUrl, logger, encodeSapObjectName } from '../lib/utils';
 import { writeResultToFile } from '../lib/writeResultToFile';
 
+
+export const TOOL_DEFINITION = {
+  "name": "GetEnhancementImpl",
+  "description": "Retrieve source code of a specific enhancement implementation by its name and enhancement spot.",
+  "inputSchema": {
+    "type": "object",
+    "properties": {
+      "enhancement_spot": {
+        "type": "string",
+        "description": "Name of the enhancement spot"
+      },
+      "enhancement_name": {
+        "type": "string",
+        "description": "Name of the enhancement implementation"
+      }
+    },
+    "required": [
+      "enhancement_spot",
+      "enhancement_name"
+    ]
+  }
+} as const;
+
 /**
  * Interface for enhancement by name response
  */

@@ -2,6 +2,42 @@ import { McpError, ErrorCode, AxiosResponse } from '../lib/utils';
 import { fetchNodeStructure, return_error } from '../lib/utils';
 import { writeResultToFile } from '../lib/writeResultToFile';
 
+
+export const TOOL_DEFINITION = {
+  "name": "GetIncludesList",
+  "description": "Recursively discover and list ALL include files within an ABAP program or include.",
+  "inputSchema": {
+    "type": "object",
+    "properties": {
+      "object_name": {
+        "type": "string",
+        "description": "Name of the ABAP program or include"
+      },
+      "object_type": {
+        "type": "string",
+        "enum": [
+          "program",
+          "include"
+        ],
+        "description": "Type of the ABAP object"
+      },
+      "detailed": {
+        "type": "boolean",
+        "description": "If true, returns structured JSON with metadata and raw XML.",
+        "default": false
+      },
+      "timeout": {
+        "type": "number",
+        "description": "Timeout in ms for each ADT request."
+      }
+    },
+    "required": [
+      "object_name",
+      "object_type"
+    ]
+  }
+} as const;
+
 /**
  * Parses XML response to extract includes information
  * @param xmlData XML response data

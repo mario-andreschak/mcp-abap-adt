@@ -3,6 +3,18 @@ import { makeAdtRequestWithTimeout, return_error, return_response, getBaseUrl, e
 import { XMLParser } from 'fast-xml-parser';
 import { writeResultToFile } from '../lib/writeResultToFile';
 
+export const TOOL_DEFINITION = {
+  name: "GetClass",
+  description: "Retrieve ABAP class source code.",
+  inputSchema: {
+    type: "object",
+    properties: {
+      class_name: { type: "string", description: "Name of the ABAP class" }
+    },
+    required: ["class_name"]
+  }
+} as const;
+
 function parseClassXml(xml: string) {
     const parser = new XMLParser({
         ignoreAttributes: false,

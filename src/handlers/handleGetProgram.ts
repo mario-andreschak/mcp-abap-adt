@@ -2,6 +2,18 @@ import { McpError, ErrorCode, AxiosResponse } from '../lib/utils';
 import { makeAdtRequestWithTimeout, return_error, return_response, getBaseUrl, encodeSapObjectName } from '../lib/utils';
 import { writeResultToFile } from '../lib/writeResultToFile';
 
+export const TOOL_DEFINITION = {
+  name: "GetProgram",
+  description: "Retrieve ABAP program source code. Returns only the main program source code without includes or enhancements.",
+  inputSchema: {
+    type: "object",
+    properties: {
+      program_name: { type: "string", description: "Name of the ABAP program" }
+    },
+    required: ["program_name"]
+  }
+} as const;
+
 export async function handleGetProgram(args: any) {
     try {
         if (!args?.program_name) {

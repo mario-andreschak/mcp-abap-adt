@@ -1,6 +1,24 @@
 import { McpError, ErrorCode } from '../lib/utils';
 import { makeAdtRequestWithTimeout, return_error, getBaseUrl, logger, encodeSapObjectName } from '../lib/utils';
 
+
+export const TOOL_DEFINITION = {
+  "name": "GetBdef",
+  "description": "Retrieve the source code of a BDEF (Behavior Definition) for a CDS entity.",
+  "inputSchema": {
+    "type": "object",
+    "properties": {
+      "bdef_name": {
+        "type": "string",
+        "description": "Name of the BDEF (Behavior Definition)"
+      }
+    },
+    "required": [
+      "bdef_name"
+    ]
+  }
+} as const;
+
 /**
  * Interface for BDEF (Behavior Definition) response
  */

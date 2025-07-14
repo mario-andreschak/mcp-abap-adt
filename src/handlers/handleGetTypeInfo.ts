@@ -3,6 +3,24 @@ import { makeAdtRequestWithTimeout, return_error, return_response, getBaseUrl, e
 import { XMLParser } from 'fast-xml-parser';
 import { objectsListCache } from '../lib/getObjectsListCache';
 
+
+export const TOOL_DEFINITION = {
+  "name": "GetTypeInfo",
+  "description": "Retrieve ABAP type information.",
+  "inputSchema": {
+    "type": "object",
+    "properties": {
+      "type_name": {
+        "type": "string",
+        "description": "Name of the ABAP type"
+      }
+    },
+    "required": [
+      "type_name"
+    ]
+  }
+} as const;
+
 function parseTypeInfoXml(xml: string) {
     const parser = new XMLParser({
         ignoreAttributes: false,
@@ -130,5 +148,3 @@ export async function handleGetTypeInfo(args: any) {
         }
     }
 }
-
-module.exports = { handleGetTypeInfo };

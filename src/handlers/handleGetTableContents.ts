@@ -32,6 +32,29 @@ import { McpError, ErrorCode, AxiosResponse, logger } from '../lib/utils';
 import { makeAdtRequestWithTimeout, return_error, return_response, getBaseUrl, encodeSapObjectName } from '../lib/utils';
 import { writeResultToFile } from '../lib/writeResultToFile';
 
+
+export const TOOL_DEFINITION = {
+  "name": "GetTableContents",
+  "description": "Retrieve contents of an ABAP table.",
+  "inputSchema": {
+    "type": "object",
+    "properties": {
+      "table_name": {
+        "type": "string",
+        "description": "Name of the ABAP table"
+      },
+      "max_rows": {
+        "type": "number",
+        "description": "Maximum number of rows to retrieve",
+        "default": 100
+      }
+    },
+    "required": [
+      "table_name"
+    ]
+  }
+} as const;
+
 /**
  * Parse SAP ADT XML response and convert to JSON format with rows
  */

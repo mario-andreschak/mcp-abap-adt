@@ -3,6 +3,24 @@ import { makeAdtRequestWithTimeout, return_error, return_response, getBaseUrl, e
 import { XMLParser } from 'fast-xml-parser';
 import { writeResultToFile } from '../lib/writeResultToFile';
 
+
+export const TOOL_DEFINITION = {
+  "name": "GetTransaction",
+  "description": "Retrieve ABAP transaction details.",
+  "inputSchema": {
+    "type": "object",
+    "properties": {
+      "transaction_name": {
+        "type": "string",
+        "description": "Name of the ABAP transaction"
+      }
+    },
+    "required": [
+      "transaction_name"
+    ]
+  }
+} as const;
+
 function parseTransactionXml(xml: string) {
     const parser = new XMLParser({
         ignoreAttributes: false,

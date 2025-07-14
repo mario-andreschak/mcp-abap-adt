@@ -2,6 +2,34 @@ import { McpError, ErrorCode } from '../lib/utils';
 import { makeAdtRequestWithTimeout, return_error, getBaseUrl, encodeSapObjectName } from '../lib/utils';
 import { objectsListCache } from '../lib/getObjectsListCache';
 
+
+export const TOOL_DEFINITION = {
+  "name": "GetWhereUsed",
+  "description": "Retrieve where-used references for ABAP objects via ADT usageReferences.",
+  "inputSchema": {
+    "type": "object",
+    "properties": {
+      "object_name": {
+        "type": "string",
+        "description": "Name of the ABAP object"
+      },
+      "object_type": {
+        "type": "string",
+        "description": "Type of the ABAP object"
+      },
+      "detailed": {
+        "type": "boolean",
+        "description": "If true, returns all references including packages and internal components.",
+        "default": false
+      }
+    },
+    "required": [
+      "object_name",
+      "object_type"
+    ]
+  }
+} as const;
+
 interface WhereUsedReference {
     name: string;
     type: string;

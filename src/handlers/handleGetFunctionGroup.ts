@@ -3,6 +3,24 @@ import { makeAdtRequestWithTimeout, return_error, return_response, getBaseUrl, e
 import { XMLParser } from 'fast-xml-parser';
 import { writeResultToFile } from '../lib/writeResultToFile';
 
+
+export const TOOL_DEFINITION = {
+  "name": "GetFunctionGroup",
+  "description": "Retrieve ABAP Function Group source code.",
+  "inputSchema": {
+    "type": "object",
+    "properties": {
+      "function_group": {
+        "type": "string",
+        "description": "Name of the function group"
+      }
+    },
+    "required": [
+      "function_group"
+    ]
+  }
+} as const;
+
 function parseFunctionGroupXml(xml: string) {
     const parser = new XMLParser({
         ignoreAttributes: false,

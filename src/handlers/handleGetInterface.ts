@@ -3,6 +3,24 @@ import { makeAdtRequestWithTimeout, return_error, return_response, getBaseUrl, e
 import { XMLParser } from 'fast-xml-parser';
 import { writeResultToFile } from '../lib/writeResultToFile';
 
+
+export const TOOL_DEFINITION = {
+  "name": "GetInterface",
+  "description": "Retrieve ABAP interface source code.",
+  "inputSchema": {
+    "type": "object",
+    "properties": {
+      "interface_name": {
+        "type": "string",
+        "description": "Name of the ABAP interface"
+      }
+    },
+    "required": [
+      "interface_name"
+    ]
+  }
+} as const;
+
 function parseInterfaceXml(xml: string) {
     const parser = new XMLParser({
         ignoreAttributes: false,

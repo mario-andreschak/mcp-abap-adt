@@ -3,6 +3,24 @@ import { makeAdtRequestWithTimeout, return_error, return_response, getBaseUrl, e
 import { XMLParser } from 'fast-xml-parser';
 import { writeResultToFile } from '../lib/writeResultToFile';
 
+
+export const TOOL_DEFINITION = {
+  "name": "GetStructure",
+  "description": "Retrieve ABAP Structure.",
+  "inputSchema": {
+    "type": "object",
+    "properties": {
+      "structure_name": {
+        "type": "string",
+        "description": "Name of the ABAP Structure"
+      }
+    },
+    "required": [
+      "structure_name"
+    ]
+  }
+} as const;
+
 function parseStructureXml(xml: string) {
     const parser = new XMLParser({
         ignoreAttributes: false,

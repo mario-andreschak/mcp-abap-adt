@@ -2,6 +2,29 @@ import { McpError, ErrorCode } from '../lib/utils';
 import { makeAdtRequestWithTimeout, return_error, return_response, getBaseUrl, logger, encodeSapObjectName, fetchNodeStructure } from '../lib/utils';
 import { writeResultToFile } from '../lib/writeResultToFile';
 
+
+export const TOOL_DEFINITION = {
+  "name": "GetEnhancements",
+  "description": "Retrieve a list of enhancements for a given ABAP object.",
+  "inputSchema": {
+    "type": "object",
+    "properties": {
+      "object_name": {
+        "type": "string",
+        "description": "Name of the ABAP object"
+      },
+      "object_type": {
+        "type": "string",
+        "description": "Type of the ABAP object"
+      }
+    },
+    "required": [
+      "object_name",
+      "object_type"
+    ]
+  }
+} as const;
+
 /**
  * Interface for enhancement implementation data
  */

@@ -2,6 +2,24 @@ import { McpError, ErrorCode, AxiosResponse } from '../lib/utils';
 import { makeAdtRequestWithTimeout, return_error, return_response, getBaseUrl, encodeSapObjectName } from '../lib/utils';
 import { writeResultToFile } from '../lib/writeResultToFile';
 
+
+export const TOOL_DEFINITION = {
+  "name": "GetInclude",
+  "description": "Retrieve source code of a specific ABAP include file.",
+  "inputSchema": {
+    "type": "object",
+    "properties": {
+      "include_name": {
+        "type": "string",
+        "description": "Name of the ABAP Include"
+      }
+    },
+    "required": [
+      "include_name"
+    ]
+  }
+} as const;
+
 export async function handleGetInclude(args: any) {
     try {
         if (!args?.include_name) {

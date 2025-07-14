@@ -2,6 +2,24 @@ import { McpError, ErrorCode } from '../lib/utils';
 import { fetchNodeStructure, return_error, return_response } from '../lib/utils';
 import { writeResultToFile } from '../lib/writeResultToFile';
 
+
+export const TOOL_DEFINITION = {
+  "name": "GetRelatedObjectTypes",
+  "description": "Retrieves related ABAP object types for a given object.",
+  "inputSchema": {
+    "type": "object",
+    "properties": {
+      "object_name": {
+        "type": "string",
+        "description": "Name of the ABAP object"
+      }
+    },
+    "required": [
+      "object_name"
+    ]
+  }
+} as const;
+
 /**
  * Parses XML response to extract object type information
  * @param xmlData XML response data

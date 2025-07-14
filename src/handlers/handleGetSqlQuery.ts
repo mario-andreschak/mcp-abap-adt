@@ -2,6 +2,29 @@ import { McpError, ErrorCode } from '../lib/utils';
 import { makeAdtRequestWithTimeout, return_error, return_response, getBaseUrl, logger } from '../lib/utils';
 import { writeResultToFile } from '../lib/writeResultToFile';
 
+
+export const TOOL_DEFINITION = {
+  "name": "GetSqlQuery",
+  "description": "Execute freestyle SQL queries via SAP ADT Data Preview API.",
+  "inputSchema": {
+    "type": "object",
+    "properties": {
+      "sql_query": {
+        "type": "string",
+        "description": "SQL query to execute"
+      },
+      "row_number": {
+        "type": "number",
+        "description": "Maximum number of rows to return",
+        "default": 100
+      }
+    },
+    "required": [
+      "sql_query"
+    ]
+  }
+} as const;
+
 /**
  * Interface for SQL query execution response
  */

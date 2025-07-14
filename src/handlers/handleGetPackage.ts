@@ -3,6 +3,24 @@ import { makeAdtRequestWithTimeout, return_error, return_response, getBaseUrl } 
 import convert from 'xml-js';
 import { writeResultToFile } from '../lib/writeResultToFile';
 
+
+export const TOOL_DEFINITION = {
+  "name": "GetPackage",
+  "description": "Retrieve ABAP package details.",
+  "inputSchema": {
+    "type": "object",
+    "properties": {
+      "package_name": {
+        "type": "string",
+        "description": "Name of the ABAP package"
+      }
+    },
+    "required": [
+      "package_name"
+    ]
+  }
+} as const;
+
 export async function handleGetPackage(args: any) {
     try {
         if (!args?.package_name) {
