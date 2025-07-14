@@ -562,16 +562,22 @@ export class mcp_abap_adt_server {
           name: "DetectObjectTypeListArray",
           description: "Batch detection of ABAP object types. Input: direct array of objects [{ name: string, type?: string }]. Each object must have at least the 'name' property.",
           inputSchema: {
-            type: "array",
-            description: "Array of objects with name and optional type. Each item: { name: string, type?: string }",
-            items: {
-              type: "object",
-              properties: {
-                name: { type: "string", description: "Object name (required)" },
-                type: { type: "string", description: "Optional type" }
-              },
-              required: ["name"]
-            }
+            type: "object",
+            properties: {
+              objects: {
+                type: "array",
+                description: "Array of objects with name and optional type. Each item: { name: string, type?: string }",
+                items: {
+                  type: "object",
+                  properties: {
+                    name: { type: "string", description: "Object name (required)" },
+                    type: { type: "string", description: "Optional type" }
+                  },
+                  required: ["name"]
+                }
+              }
+            },
+            required: ["objects"]
           }
         },
         {
