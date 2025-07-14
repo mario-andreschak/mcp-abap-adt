@@ -85,16 +85,15 @@ export async function handleGetProgFullCode(args: { name: string; type: string }
       let debug = { handleGetProgram: progResult };
       if (Array.isArray(progResult?.content) && progResult.content.length > 0) {
         const c = progResult.content[0];
-        if (c.type === 'text' && 'data' in c) progCode = c.data as string;
+        if (c.type === 'text' && 'text' in c) progCode = c.text as string;
       }
-      if (!progCode || (typeof progCode !== 'string') || (progCode && progCode.trim() === '')) {
+      if (typeof progCode !== 'string') {
         return {
           isError: true,
           content: [
             {
               type: 'text',
-              data: `No program code found for ${name}. Debug: ${JSON.stringify(debug, null, 2)}`,
-              mimeType: 'text/plain'
+              text: `No program code found for ${name}. Debug: ${JSON.stringify(debug, null, 2)}`
             }
           ]
         };
@@ -126,7 +125,7 @@ export async function handleGetProgFullCode(args: { name: string; type: string }
             let incCode: string | null = null;
             if (Array.isArray(incResult?.content) && incResult.content.length > 0) {
               const c = incResult.content[0];
-              if (c.type === 'text' && 'data' in c) incCode = c.data as string;
+              if (c.type === 'text' && 'text' in c) incCode = c.text as string;
             }
             codeObjects.push({
               OBJECT_TYPE: 'PROG/I',
@@ -142,7 +141,7 @@ export async function handleGetProgFullCode(args: { name: string; type: string }
       let fgCode: string | null = null;
       if (Array.isArray(fgResult?.content) && fgResult.content.length > 0) {
         const c = fgResult.content[0];
-        if (c.type === 'text' && 'data' in c) fgCode = c.data as string;
+        if (c.type === 'text' && 'text' in c) fgCode = c.text as string;
       }
       codeObjects.push({
         OBJECT_TYPE: 'FUGR',
@@ -187,8 +186,7 @@ export async function handleGetProgFullCode(args: { name: string; type: string }
         content: [
           {
             type: 'text',
-            data: 'Unsupported type',
-            mimeType: 'text/plain'
+            text: 'Unsupported type'
           }
         ]
       };
@@ -213,8 +211,8 @@ export async function handleGetProgFullCode(args: { name: string; type: string }
         {
           type: 'text',
           text: JSON.stringify(fullResult, null, 2)
-        },
-      ],
+        }
+      ]
     };
   } catch (e) {
     return {
@@ -223,8 +221,8 @@ export async function handleGetProgFullCode(args: { name: string; type: string }
         {
           type: 'text',
           text: e instanceof Error ? e.message : String(e)
-        },
-      ],
+        }
+      ]
     };
   }
 }
