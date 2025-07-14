@@ -211,6 +211,18 @@ const TOOL_DEFINITIONS = {
       },
       required: ["object_name", "object_type"]
     }
+  },
+  'handleGetObjectInfo': {
+    name: "GetObjectInfo",
+    description: "Return all objects related to a given ABAP object using nodestructure, traversing at least two levels.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        parent_type: { type: "string", description: "Parent object type (e.g. DEVC/K, CLAS/OC, PROG/P)" },
+        parent_name: { type: "string", description: "Parent object name" }
+      },
+      required: ["parent_type", "parent_name"]
+    }
   }
 };
 

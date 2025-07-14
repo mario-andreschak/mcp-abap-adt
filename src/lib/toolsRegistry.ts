@@ -19,6 +19,7 @@ import { TOOL_DEFINITION as GetBdef_Tool } from '../handlers/handleGetBdef';
 import { TOOL_DEFINITION as GetSqlQuery_Tool } from '../handlers/handleGetSqlQuery';
 import { TOOL_DEFINITION as GetRelatedObjectTypes_Tool } from '../handlers/handleGetRelatedObjectTypes';
 import { TOOL_DEFINITION as GetWhereUsed_Tool } from '../handlers/handleGetWhereUsed';
+import { TOOL_DEFINITION as GetObjectInfo_Tool } from '../handlers/handleGetObjectInfo';
 
 // Тип для опису інструмента
 export interface ToolDefinition {
@@ -181,7 +182,8 @@ export const ALL_TOOLS: ToolDefinition[] = [
   GetSqlQuery_Tool,
   GetRelatedObjectTypes_Tool,
   GetWhereUsed_Tool,
-  ...DYNAMIC_IMPORT_TOOLS
+  ...DYNAMIC_IMPORT_TOOLS,
+  GetObjectInfo_Tool
 ];
 
 // Функція для отримання всіх інструментів

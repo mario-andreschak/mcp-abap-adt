@@ -33,6 +33,7 @@ import { handleGetSqlQuery } from "./handlers/handleGetSqlQuery";
 import { handleGetRelatedObjectTypes } from "./handlers/handleGetRelatedObjectTypes";
 import { handleGetObjectsByType } from "./handlers/handleGetObjectsByType";
 import { handleGetWhereUsed } from "./handlers/handleGetWhereUsed";
+import { handleGetObjectInfo } from "./handlers/handleGetObjectInfo";
 
 // Import shared utility functions and types
 import {
@@ -297,6 +298,11 @@ export class mcp_abap_adt_server {
           return await handleGetWhereUsed(request.params.arguments);
         case "GetBdef":
           return await handleGetBdef(request.params.arguments);
+        case "GetObjectInfo":
+          if (!request.params.arguments || typeof request.params.arguments !== "object") {
+            throw new McpError(ErrorCode.InvalidParams, "Missing or invalid arguments for GetObjectInfo");
+          }
+          return await handleGetObjectInfo(request.params.arguments as { parent_type: string; parent_name: string });
         case "GetObjectsList":
           return await (await import("./handlers/handleGetObjectsList.js")).handleGetObjectsList(request.params.arguments as any);
         case "GetObjectsByType":
