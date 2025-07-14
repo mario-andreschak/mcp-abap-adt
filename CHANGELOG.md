@@ -1,6 +1,15 @@
 # Changelog
 
 ## [Unreleased]
+
+### Changed
+- MCP protocol compliance: All handler responses now strictly follow the MCP protocol.
+- Removed all `mimeType` and `data` fields from handler responses.
+- For type `"text"` in `content`, only the `text` field is used.
+- For type `"json"` in `content`, only the `json` field is used.
+- Unified response format for all handlers: `{ isError, content: [{ type: "text", text: ... }] }` or `{ isError, content: [{ type: "json", json: ... }] }`.
+- Fixed all MCP client errors related to invalid response format.
+- Updated documentation and handler tables to reflect new response format.
 - Added two new tools for batch ABAP object type detection:
   - DetectObjectTypeListArray: accepts array of objects via 'objects' parameter.
   - DetectObjectTypeListJson: accepts JSON payload with 'objects' array via 'payload' parameter.
