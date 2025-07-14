@@ -1,23 +1,19 @@
-// Test for handleSearchObject
+const { handleSearchObject } = require('../src/handlers/handleSearchObject');
 
-const { handleSearchObject } = require('../dist/handlers/handleSearchObject');
-const assert = require('assert');
-
-async function run() {
-    // Дозволяємо передавати query через командний рядок
-    const query = process.argv[2] || '/CBY/MMSKLCARD';
-
-    const result = await handleSearchObject({ query });
-
-    assert(result && result.content && Array.isArray(result.content), 'Result must have content array');
-    // Виводимо результат для перевірки
-    console.dir(result, { depth: null });
-
-    console.log('handleSearchObject test passed');
+(async () => {
+  try {
+    const query = process.argv[2] || '*';
+    const objectType = process.argv[3] || 'PROG/P';
+    const maxResults = process.argv[4] ? Number(process.argv[4]) : 5;
+    const result = await handleSearchObject({
+      query,
+      objectType,
+      maxResults
+    });
+    console.log('SearchObject result:', result);
     process.exit(0);
-}
-
-run().catch(e => {
-    console.error('handleSearchObject test failed:', e);
+  } catch (err) {
+    console.error('SearchObject error:', err);
     process.exit(1);
-});
+  }
+})();

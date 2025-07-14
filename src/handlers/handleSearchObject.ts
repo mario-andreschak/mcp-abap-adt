@@ -39,10 +39,16 @@ export async function handleSearchObject(args: any) {
         if (args.objectType) {
             url += `&objectType=${encodeSapObjectName(args.objectType)}`;
         }
-        const response = await makeAdtRequestWithTimeout(url, 'GET', 'default');
-        const result = return_response(response);
-        objectsListCache.setCache(result);
-        return result;
+        try {
+            const response = await makeAdtRequestWithTimeout(url, 'GET', 'default');
+            console.log('ADT response:', response);
+            const result = return_response(response);
+            objectsListCache.setCache(result);
+            return result;
+        } catch (err) {
+            console.error('ADT error:', err);
+            throw err;
+        }
     } catch (error) {
         return return_error(error);
     }
