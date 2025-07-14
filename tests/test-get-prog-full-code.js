@@ -1,10 +1,13 @@
-// Тестовий скрипт для перевірки handleGetProgFullCode з параметрами для /CBY/MM_INVENTORY
+/**
+ * Тестовий скрипт для перевірки handleGetProgFullCode зі стандартним SAP об'єктом SAPMV45A
+ * Використовуються лише стандартні об'єкти, які існують у всіх системах.
+ */
 
 const { handleGetProgFullCode } = require('../dist/handlers/handleGetProgFullCode');
 
 async function runTest() {
   const params = {
-    name: '/CBY/MM_INVENTORY',
+    name: 'SAPMV45A',
     type: 'PROG/P'
   };
   try {
