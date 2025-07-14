@@ -212,7 +212,7 @@ export async function handleGetProgFullCode(args: { name: string; type: string }
       content: [
         {
           type: 'text',
-          data: JSON.stringify(fullResult, null, 2),
+          text: JSON.stringify(fullResult, null, 2),
           mimeType: 'application/json'
         },
       ],
@@ -223,7 +223,7 @@ export async function handleGetProgFullCode(args: { name: string; type: string }
       content: [
         {
           type: 'text',
-          data: e instanceof Error ? e.message : String(e),
+          text: e instanceof Error ? e.message : String(e),
           mimeType: 'text/plain'
         },
       ],
