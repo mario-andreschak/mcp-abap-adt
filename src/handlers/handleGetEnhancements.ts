@@ -518,15 +518,15 @@ export async function handleGetEnhancements(args: any) {
                 response = { ...response, detailed: true };
             }
             
-            const result = {
-                isError: false,
-                content: [
-                    {
-                        type: "json",
-                        json: response
-                    }
-                ]
-            };
+const result = {
+    isError: false,
+    content: [
+        {
+            type: "text",
+            text: JSON.stringify(response)
+        }
+    ]
+};
             if (args.filePath) {
                 writeResultToFile(JSON.stringify(result, null, 2), args.filePath);
             }
@@ -628,15 +628,15 @@ export async function handleGetEnhancements(args: any) {
             combinedResponse = { ...combinedResponse, detailed: true };
         }
         
-        const result = {
-            isError: false,
-            content: [
-                {
-                    type: "json",
-                    json: combinedResponse
-                }
-            ]
-        };
+const result = {
+    isError: false,
+    content: [
+        {
+            type: "text",
+            text: JSON.stringify(combinedResponse)
+        }
+    ]
+};
         if (args.filePath) {
             writeResultToFile(JSON.stringify(result, null, 2), args.filePath);
         }
