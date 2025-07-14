@@ -12,8 +12,7 @@ export async function handleDetectObjectTypeList(args: { objects: Array<{ name: 
             content: [
                 {
                     type: "text",
-                    data: "No objects provided",
-                    mimeType: "text/plain"
+                    text: "No objects provided"
                 }
             ]
         };
@@ -26,7 +25,7 @@ export async function handleDetectObjectTypeList(args: { objects: Array<{ name: 
             // Parse MCP content data as JSON
             let detected: any;
             try {
-                detected = JSON.parse(res.content[0].data);
+                detected = JSON.parse(res.content[0].text);
             } catch {
                 detected = {};
             }
@@ -49,8 +48,7 @@ export async function handleDetectObjectTypeList(args: { objects: Array<{ name: 
         content: [
             {
                 type: "text",
-                data: JSON.stringify(results, null, 2),
-                mimeType: "application/json"
+                text: JSON.stringify(results, null, 2)
             }
         ]
     };

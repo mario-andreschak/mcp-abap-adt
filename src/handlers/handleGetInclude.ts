@@ -18,8 +18,7 @@ export async function handleGetInclude(args: any) {
             content: [
                 {
                     type: "text",
-                    data: plainText,
-                    mimeType: "text/plain"
+                    text: plainText
                 }
             ]
         };
@@ -29,8 +28,7 @@ export async function handleGetInclude(args: any) {
             content: [
                 {
                     type: "text",
-                    data: error instanceof Error ? error.message : String(error),
-                    mimeType: "text/plain"
+                    text: error instanceof Error ? error.message : String(error)
                 }
             ]
         };

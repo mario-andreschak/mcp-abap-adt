@@ -280,8 +280,7 @@ export async function handleGetTableContents(args: any) {
             content: [
                 {
                     type: 'text',
-                    data: JSON.stringify(parsedData, null, 2),
-                    mimeType: 'application/json'
+                    text: JSON.stringify(parsedData, null, 2)
                 }
             ]
         };
@@ -299,8 +298,7 @@ export async function handleGetTableContents(args: any) {
             content: [
                 {
                     type: "text",
-                    data: error instanceof Error ? error.message : String(error),
-                    mimeType: "text/plain"
+                    text: error instanceof Error ? error.message : String(error)
                 }
             ]
         };

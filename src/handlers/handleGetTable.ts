@@ -55,8 +55,7 @@ export async function handleGetTable(args: any) {
                 content: [
                     {
                         type: "text",
-                        data: JSON.stringify(resultObj, null, 2),
-                        mimeType: "application/json"
+                        text: JSON.stringify(resultObj, null, 2)
                     }
                 ]
             };
@@ -70,8 +69,7 @@ export async function handleGetTable(args: any) {
                 content: [
                     {
                         type: "text",
-                        data: response.data,
-                        mimeType: "text/plain"
+                        text: response.data
                     }
                 ]
             };
@@ -85,9 +83,8 @@ export async function handleGetTable(args: any) {
             isError: true,
             content: [
                 {
-                    type: "text",
-                    data: error instanceof Error ? error.message : String(error),
-                    mimeType: "text/plain"
+                        type: "text",
+                        text: error instanceof Error ? error.message : String(error)
                 }
             ]
         };

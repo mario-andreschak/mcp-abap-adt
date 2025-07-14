@@ -127,7 +127,7 @@ describe("mcp_abap_adt_server - Integration Tests", () => {
       const result = await handleGetTableContents({});
       expect(result.isError).toBe(true);
       expect(Array.isArray(result.content)).toBe(true);
-      expect(result.content[0].data).toContain("Table name is required");
+      expect(result.content[0].text).toContain("Table name is required");
     });
 
     // Add test to verify SQL generation format

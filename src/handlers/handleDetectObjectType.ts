@@ -28,9 +28,8 @@ export async function handleSearchObject(args: any) {
                 isError: true,
                 content: [
                     {
-                        type: 'text',
-                        data: 'No result',
-                        mimeType: 'text/plain'
+                    type: 'text',
+                    text: 'No result'
                     }
                 ]
             };
@@ -55,8 +54,7 @@ export async function handleSearchObject(args: any) {
             content: [
                 {
                     type: 'text',
-                    data: JSON.stringify(result, null, 2),
-                    mimeType: 'application/json'
+                    text: JSON.stringify(result, null, 2)
                 }
             ]
         };
@@ -66,8 +64,7 @@ export async function handleSearchObject(args: any) {
             content: [
                 {
                     type: 'text',
-                    data: error instanceof Error ? error.message : String(error),
-                    mimeType: 'text/plain'
+                    text: error instanceof Error ? error.message : String(error)
                 }
             ]
         };

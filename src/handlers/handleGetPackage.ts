@@ -33,8 +33,7 @@ export async function handleGetPackage(args: any) {
             isError: false,
             content: [{
                 type: 'text',
-                data: JSON.stringify(extractedData, null, 2),
-                mimeType: 'application/json'
+                text: JSON.stringify(extractedData, null, 2)
             }]
         };
         if (args.filePath) {
@@ -47,8 +46,7 @@ export async function handleGetPackage(args: any) {
             isError: true,
             content: [{
                 type: 'text',
-                data: error instanceof Error ? error.message : String(error),
-                mimeType: 'text/plain'
+                text: error instanceof Error ? error.message : String(error)
             }]
         };
     }

@@ -140,8 +140,7 @@ export async function handleGetIncludesList(args: any) {
                 content: [
                     {
                         type: "text",
-                        data: `No includes found in ${object_type} '${object_name}'.`,
-                        mimeType: "text/plain"
+                        text: `No includes found in ${object_type} '${object_name}'.`
                     }
                 ]
             };
@@ -180,8 +179,7 @@ export async function handleGetIncludesList(args: any) {
                 content: [
                     {
                         type: "text",
-                        data: JSON.stringify(detailedResponse, null, 2),
-                        mimeType: "application/json"
+                        text: JSON.stringify(detailedResponse, null, 2)
                     }
                 ]
             };
@@ -200,8 +198,7 @@ export async function handleGetIncludesList(args: any) {
                 content: [
                     {
                         type: "text",
-                        data: responseData,
-                        mimeType: "text/plain"
+                        text: responseData
                     }
                 ]
             };
@@ -216,9 +213,8 @@ export async function handleGetIncludesList(args: any) {
             isError: true,
             content: [
                 {
-                    type: "text",
-                    data: error instanceof Error ? error.message : String(error),
-                    mimeType: "text/plain"
+                        type: "text",
+                        text: error instanceof Error ? error.message : String(error)
                 }
             ]
         };
