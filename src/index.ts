@@ -560,20 +560,7 @@ export class mcp_abap_adt_server {
         },
         {
           name: "DetectObjectTypeListArray",
-          description: `Batch detection of ABAP object types.
-
-Parameters expected:
-- Array of objects, each with:
-    - name: string (required)
-    - type: string (optional)
-
-Call format:
-[
-  { "name": "ZCL_MY_CLASS" },
-  { "name": "ZCL_OTHER", "type": "CLAS/OC" }
-]
-
-If you pass an object with "objects", you will get MCP error -32603: Parameter 'objects' must be an array.`,
+          description: "Batch detection of ABAP object types. Input: direct array of objects [{ name: string, type?: string }]. Each object must have at least the 'name' property.",
           inputSchema: {
             type: "array",
             description: "Array of objects with name and optional type. Each item: { name: string, type?: string }",
@@ -589,22 +576,7 @@ If you pass an object with "objects", you will get MCP error -32603: Parameter '
         },
         {
           name: "DetectObjectTypeListJson",
-          description: `Batch detection of ABAP object types.
-
-Parameters expected:
-- objects: Array of objects, each with:
-    - name: string (required)
-    - type: string (optional)
-
-Call format:
-{
-  "objects": [
-    { "name": "ZCL_MY_CLASS" },
-    { "name": "ZCL_OTHER", "type": "CLAS/OC" }
-  ]
-}
-
-If you pass a direct array, you will get MCP error -32603: Parameter 'objects' must be an array.`,
+          description: "Batch detection of ABAP object types. Input: object with 'objects' property: { objects: [{ name: string, type?: string }] }. Each item in 'objects' must have at least the 'name' property.",
           inputSchema: {
             type: "object",
             properties: {
