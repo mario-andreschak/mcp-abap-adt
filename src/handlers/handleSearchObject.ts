@@ -17,6 +17,10 @@ export const TOOL_DEFINITION = {
         "type": "number",
         "description": "Maximum number of results to return",
         "default": 100
+      },
+      "objectType": {
+        "type": "string",
+        "description": "Optional internal object type, e.g. PROG/P"
       }
     },
     "required": [
@@ -31,7 +35,10 @@ export async function handleSearchObject(args: any) {
             throw new McpError(ErrorCode.InvalidParams, 'Search query is required');
         }
         const maxResults = args.maxResults || 100;
-        const url = `${await getBaseUrl()}/sap/bc/adt/repository/informationsystem/search?operation=quickSearch&query=${encodeSapObjectName(args.query)}*&maxResults=${maxResults}`;
+        let url = `${await getBaseUrl()}/sap/bc/adt/repository/informationsystem/search?operation=quickSearch&query=${encodeSapObjectName(args.query)}*&maxResults=${maxResults}`;
+        if (args.objectType) {
+            url += `&objectType=${encodeSapObjectName(args.objectType)}`;
+        }
         const response = await makeAdtRequestWithTimeout(url, 'GET', 'default');
         const result = return_response(response);
         objectsListCache.setCache(result);
