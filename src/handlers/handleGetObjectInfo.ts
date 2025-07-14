@@ -6,7 +6,7 @@ import { XMLParser } from 'fast-xml-parser';
 
 export const TOOL_DEFINITION = {
   name: "GetObjectInfo",
-  description: "Return ABAP object tree: root, children, and subchildren up to maxDepth. Enrich each node via SearchObject if enrich=true. For nodestructure, node_id logic is respected. Only real objects (not group nodes) are included.",
+  description: "Return ABAP object tree: root, group nodes, and terminal leaves up to maxDepth. Enrich each node via SearchObject if enrich=true. Group nodes are included for hierarchy. Each node has node_type: root, point, end.",
   inputSchema: {
     type: "object",
     properties: {
@@ -77,12 +77,27 @@ async function enrichNodeWithSearchObject(objectType: string, objectName: string
 }
 
 function getText(node: any, key: string) {
-  return node?.[key]?._text || undefined;
+  if (!node) return undefined;
+  if (node[key] && typeof node[key] === 'object' && '_text' in node[key]) return node[key]._text;
+  if (typeof node[key] === 'string') return node[key];
+  return undefined;
 }
 
-// Only include nodes with OBJECT_TYPE and OBJECT_NAME (real objects), not group nodes
-function filterRealObjects(nodes: any[]): any[] {
-  return nodes.filter(n => getText(n, 'OBJECT_TYPE') && getText(n, 'OBJECT_NAME'));
+// Terminal leaf: has OBJECT_NAME and OBJECT_URI
+function isTerminalLeaf(node: any): boolean {
+  return !!getText(node, 'OBJECT_NAME') && !!getText(node, 'OBJECT_URI');
+}
+
+// Group node: has NODE_ID, OBJECT_TYPE, but no OBJECT_URI
+function isGroupNode(node: any): boolean {
+  return !!getText(node, 'NODE_ID') && !!getText(node, 'OBJECT_TYPE') && !getText(node, 'OBJECT_URI');
+}
+
+function getNodeType(node: any, depth: number): 'root' | 'point' | 'end' {
+  if (depth === 0) return 'root';
+  if (isTerminalLeaf(node)) return 'end';
+  if (isGroupNode(node)) return 'point';
+  return 'point';
 }
 
 async function buildTree(
@@ -103,20 +118,10 @@ async function buildTree(
   if (depth < maxDepth) {
     // Для root node_id = "0000", для інших - реальний NODE_ID
     const nodes = await fetchNodeStructureRaw(objectType, objectName, depth === 0 ? "0000" : node_id);
-    // Фільтруємо тільки реальні об'єкти (без групових вузлів)
-    const realObjects = filterRealObjects(nodes);
-    for (const node of realObjects) {
-      let childEnrichment: any = { packageName: undefined, description: undefined, type: getText(node, 'OBJECT_TYPE') };
-      if (enrich) {
-        childEnrichment = await enrichNodeWithSearchObject(
-          getText(node, 'OBJECT_TYPE'),
-          getText(node, 'OBJECT_NAME'),
-          getText(node, 'DESCRIPTION')
-        );
-      }
-      // Якщо вузол має NODE_ID — рекурсивно будуємо дерево
-      if (getText(node, 'NODE_ID')) {
-        const child = await buildTree(
+    for (const node of nodes) {
+      if (isGroupNode(node)) {
+        // Group node: recurse, attach its children
+        const groupChildren = await buildTree(
           getText(node, 'OBJECT_TYPE'),
           getText(node, 'OBJECT_NAME'),
           depth + 1,
@@ -125,28 +130,26 @@ async function buildTree(
           getText(node, 'NODE_ID')
         );
         children.push({
-          OBJECT_TYPE: childEnrichment.type || getText(node, 'OBJECT_TYPE'),
+          OBJECT_TYPE: getText(node, 'OBJECT_TYPE'),
           OBJECT_NAME: getText(node, 'OBJECT_NAME'),
-          OBJECT_DESCRIPTION: childEnrichment.description,
-          OBJECT_PACKAGE: childEnrichment.packageName,
-          OBJECT_URI: getText(node, 'OBJECT_URI'),
           NODE_ID: getText(node, 'NODE_ID'),
           PARENT_NODE_ID: getText(node, 'PARENT_NODE_ID'),
-          CHILDREN: child.CHILDREN
+          node_type: getNodeType(node, depth + 1),
+          CHILDREN: groupChildren.CHILDREN
         });
-      } else {
-        // Якщо NODE_ID нема — це лист, додаємо як є
+      } else if (isTerminalLeaf(node)) {
+        // Terminal leaf: add as is
         children.push({
-          OBJECT_TYPE: childEnrichment.type || getText(node, 'OBJECT_TYPE'),
+          OBJECT_TYPE: getText(node, 'OBJECT_TYPE'),
           OBJECT_NAME: getText(node, 'OBJECT_NAME'),
-          OBJECT_DESCRIPTION: childEnrichment.description,
-          OBJECT_PACKAGE: childEnrichment.packageName,
           OBJECT_URI: getText(node, 'OBJECT_URI'),
           NODE_ID: getText(node, 'NODE_ID'),
           PARENT_NODE_ID: getText(node, 'PARENT_NODE_ID'),
+          node_type: getNodeType(node, depth + 1),
           CHILDREN: []
         });
       }
+      // else: skip nodes that are neither group nor terminal leaf
     }
   }
   return {
@@ -155,6 +158,7 @@ async function buildTree(
     OBJECT_DESCRIPTION: enrichment.description,
     OBJECT_PACKAGE: enrichment.packageName,
     NODE_ID: depth === 0 ? "ROOT" : node_id,
+    node_type: getNodeType({ OBJECT_TYPE: objectType, OBJECT_NAME: objectName }, depth),
     CHILDREN: children
   };
 }
@@ -164,7 +168,7 @@ export async function handleGetObjectInfo(args: { parent_type: string; parent_na
     if (!args?.parent_type || !args?.parent_name) {
       throw new McpError(ErrorCode.InvalidParams, 'parent_type and parent_name are required');
     }
-    const maxDepth: number = Number.isInteger(args.maxDepth) ? args.maxDepth as number : 2;
+    const maxDepth = Number.isInteger(args.maxDepth) ? args.maxDepth as number : 2;
     const enrich = typeof args.enrich === 'boolean' ? args.enrich : true;
     const result = await buildTree(args.parent_type, args.parent_name, 0, maxDepth, enrich);
     return {
