@@ -34,5 +34,12 @@ export async function handleDescribeByListArray(args: any) {
   if (!Array.isArray(args.objects)) {
     throw new Error("Parameter 'objects' must be an array.");
   }
-  return await handleSearchObject({ objects: args.objects });
+  // Normalize type: if type exists and does not contain '/', add '/*'
+  const normalizedObjects = args.objects.map(obj => {
+    if (obj.type && typeof obj.type === "string" && !obj.type.includes("/")) {
+      return { ...obj, type: `${obj.type}/*` };
+    }
+    return obj;
+  });
+  return await handleSearchObject({ objects: normalizedObjects });
 }

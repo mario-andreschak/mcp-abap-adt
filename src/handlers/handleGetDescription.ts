@@ -23,13 +23,26 @@ import { objectsListCache } from '../lib/getObjectsListCache';
  */
 export async function handleGetDescription(args: any) {
     try {
-        if (!args?.query) {
-            throw new McpError(ErrorCode.InvalidParams, 'Search query is required');
+        const { object_name, object_type } = args;
+        if (!object_name || !object_type) {
+            throw new McpError(ErrorCode.InvalidParams, 'object_name and object_type are required');
         }
-        const maxResults = args.maxResults || 100;
-        const url = `${await getBaseUrl()}/sap/bc/adt/repository/informationsystem/search?operation=quickSearch&query=${encodeSapObjectName(args.query)}&maxResults=${maxResults}`;
+        const query = object_name;
+        // Максимальна кількість результатів (наприклад, 1000)
+        const url = `${await getBaseUrl()}/sap/bc/adt/repository/informationsystem/search?operation=quickSearch&query=${encodeSapObjectName(query)}&maxResults=1000`;
         const response = await makeAdtRequestWithTimeout(url, 'GET', 'default');
-        const result = return_response(response);
+        let result = return_response(response);
+
+        // Фільтрація по object_type
+        if (Array.isArray(result?.content)) {
+            result.content = result.content.filter(
+                (obj: any) =>
+                    obj.object_type === object_type ||
+                    obj.type === object_type ||
+                    obj.OBJECT_TYPE === object_type
+            );
+        }
+
         objectsListCache.setCache(result);
         return result;
     } catch (error) {
