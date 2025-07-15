@@ -1,6 +1,6 @@
 export const TOOL_DEFINITION = {
   name: "DescribeByListArray",
-  description: "Batch description by array payload.",
+  description: "Batch description by array payload. Each object may be of type: PROG/P (program), FUGR (function group), PROG/I (include), CLAS/OC (class), FUGR/FC (function), INTF/OI (interface), TABLE, STRUCTURE, etc.",
   inputSchema: {
     type: "object",
     properties: {

@@ -317,9 +317,9 @@ export class mcp_abap_adt_server {
           return await (await import("./handlers/handleGetDescription.js")).handleGetDescription(request.params.arguments as any);
         // case "DetectObjectType":
         //   return await (await import("./handlers/handleDetectObjectType.js")).handleSearchObject(request.params.arguments as any);
-        case "DetectObjectTypeListArray":
+        case "DescribeByListArray":
           return await (await import("./handlers/handleDescribeByListArray.js")).handleDescribeByListArray(request.params.arguments as any);
-        case "DetectObjectTypeListJson":
+        case "DescribeByListJSON":
           return await (await import("./handlers/handleDescribeByListJSON.js")).handleDescribeByListJSON(request.params.arguments as any);
         default:
           throw new McpError(

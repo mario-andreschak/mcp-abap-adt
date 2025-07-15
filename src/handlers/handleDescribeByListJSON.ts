@@ -1,6 +1,6 @@
 export const TOOL_DEFINITION = {
   name: "DescribeByListJSON",
-  description: "Batch description by JSON payload.",
+  description: "Batch description by JSON payload. Each object in payload.objects may be of type: PROG/P (program), FUGR (function group), PROG/I (include), CLAS/OC (class), FUGR/FC (function), INTF/OI (interface), TABLE, STRUCTURE, etc.",
   inputSchema: {
     type: "object",
     properties: {
