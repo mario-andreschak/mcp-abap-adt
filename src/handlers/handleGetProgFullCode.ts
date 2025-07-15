@@ -106,11 +106,22 @@ export async function handleGetProgFullCode(args: { name: string; type: string }
 
       // Find all includes in program code
       const includeRegex = /^\s*INCLUDE\s+([A-Z0-9_\/]+)\s*\.\s*$/gim;
+      const includeListRegex = /^\s*INCLUDE:\s*([A-Z0-9_\/,\s]+)\./gim;
       const includes: string[] = [];
       if (typeof progCode === 'string') {
         let match;
+        // Match single INCLUDE <name>.
         while ((match = includeRegex.exec(progCode)) !== null) {
           includes.push(match[1]);
+        }
+        // Match INCLUDE: <name1>, <name2>, ... .
+        let listMatch;
+        while ((listMatch = includeListRegex.exec(progCode)) !== null) {
+          const list = listMatch[1]
+            .split(',')
+            .map(s => s.trim())
+            .filter(Boolean);
+          includes.push(...list);
         }
       }
 
