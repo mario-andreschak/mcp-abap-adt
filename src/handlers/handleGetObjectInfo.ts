@@ -12,12 +12,19 @@ export const TOOL_DEFINITION = {
     properties: {
       parent_type: { type: "string", description: "Parent object type (e.g. DEVC/K, CLAS/OC, PROG/P)" },
       parent_name: { type: "string", description: "Parent object name" },
-      maxDepth: { type: "integer", description: "Максимальна глибина дерева (default 2)", default: 2 },
+      maxDepth: { type: "integer", description: "Максимальна глибина дерева (default depends on type)", default: 1 },
       enrich: { type: "boolean", description: "Чи додавати опис та пакет через SearchObject (default true)", default: true }
     },
     required: ["parent_type", "parent_name"]
   }
 } as const;
+
+// Визначаємо дефолтну глибину для різних типів
+function getDefaultDepth(parent_type: string): number {
+  const type = parent_type?.toUpperCase() || '';
+  if (type.startsWith('PROG/') || type.startsWith('FUGR/')) return 2;
+  return 1;
+}
 
 async function fetchNodeStructureRaw(parent_type: string, parent_name: string, node_id?: string) {
   const url = `${await getBaseUrl()}/sap/bc/adt/repository/nodestructure`;
@@ -106,7 +113,7 @@ async function buildTree(
   depth: number,
   maxDepth: number,
   enrich: boolean,
-  node_id?: string
+  node_id: string = ''
 ): Promise<any> {
   // 1. Enrich root node
   let enrichment: any = { packageName: undefined, description: undefined, type: objectType };
@@ -119,37 +126,53 @@ async function buildTree(
     // Для root node_id = "0000", для інших - реальний NODE_ID
     const nodes = await fetchNodeStructureRaw(objectType, objectName, depth === 0 ? "0000" : node_id);
     for (const node of nodes) {
-      if (isGroupNode(node)) {
-        // Group node: recurse, attach its children
-        const groupChildren = await buildTree(
-          getText(node, 'OBJECT_TYPE'),
-          getText(node, 'OBJECT_NAME'),
-          depth + 1,
-          maxDepth,
-          enrich,
-          getText(node, 'NODE_ID')
-        );
-        children.push({
-          OBJECT_TYPE: getText(node, 'OBJECT_TYPE'),
-          OBJECT_NAME: getText(node, 'OBJECT_NAME'),
-          NODE_ID: getText(node, 'NODE_ID'),
-          PARENT_NODE_ID: getText(node, 'PARENT_NODE_ID'),
-          node_type: getNodeType(node, depth + 1),
-          CHILDREN: groupChildren.CHILDREN
-        });
-      } else if (isTerminalLeaf(node)) {
-        // Terminal leaf: add as is
-        children.push({
-          OBJECT_TYPE: getText(node, 'OBJECT_TYPE'),
-          OBJECT_NAME: getText(node, 'OBJECT_NAME'),
-          OBJECT_URI: getText(node, 'OBJECT_URI'),
-          NODE_ID: getText(node, 'NODE_ID'),
-          PARENT_NODE_ID: getText(node, 'PARENT_NODE_ID'),
-          node_type: getNodeType(node, depth + 1),
-          CHILDREN: []
-        });
+      // Якщо наступний рівень буде максимальним — додаємо тільки термінальні листи
+      if (depth + 1 === maxDepth) {
+        if (isTerminalLeaf(node)) {
+          children.push({
+            OBJECT_TYPE: getText(node, 'OBJECT_TYPE'),
+            OBJECT_NAME: getText(node, 'OBJECT_NAME'),
+            OBJECT_URI: getText(node, 'OBJECT_URI'),
+            NODE_ID: getText(node, 'NODE_ID'),
+            PARENT_NODE_ID: getText(node, 'PARENT_NODE_ID'),
+            node_type: getNodeType(node, depth + 1),
+            CHILDREN: []
+          });
+        }
+        // вузли-групи не додаємо на максимальному рівні
+      } else {
+        if (isGroupNode(node)) {
+          // Group node: recurse, attach its children
+          const groupChildren = await buildTree(
+            getText(node, 'OBJECT_TYPE'),
+            getText(node, 'OBJECT_NAME'),
+            depth + 1,
+            maxDepth,
+            enrich,
+            String(getText(node, 'NODE_ID') ?? '')
+          );
+          children.push({
+            OBJECT_TYPE: getText(node, 'OBJECT_TYPE'),
+            OBJECT_NAME: getText(node, 'OBJECT_NAME'),
+            NODE_ID: getText(node, 'NODE_ID'),
+            PARENT_NODE_ID: getText(node, 'PARENT_NODE_ID'),
+            node_type: getNodeType(node, depth + 1),
+            CHILDREN: groupChildren.CHILDREN
+          });
+        } else if (isTerminalLeaf(node)) {
+          // Terminal leaf: add as is
+          children.push({
+            OBJECT_TYPE: getText(node, 'OBJECT_TYPE'),
+            OBJECT_NAME: getText(node, 'OBJECT_NAME'),
+            OBJECT_URI: getText(node, 'OBJECT_URI'),
+            NODE_ID: getText(node, 'NODE_ID'),
+            PARENT_NODE_ID: getText(node, 'PARENT_NODE_ID'),
+            node_type: getNodeType(node, depth + 1),
+            CHILDREN: []
+          });
+        }
+        // else: skip nodes that are neither group nor terminal leaf
       }
-      // else: skip nodes that are neither group nor terminal leaf
     }
   }
   return {
@@ -168,9 +191,12 @@ export async function handleGetObjectInfo(args: { parent_type: string; parent_na
     if (!args?.parent_type || !args?.parent_name) {
       throw new McpError(ErrorCode.InvalidParams, 'parent_type and parent_name are required');
     }
-    const maxDepth = Number.isInteger(args.maxDepth) ? args.maxDepth as number : 2;
+    // Визначаємо дефолтну глибину
+    const maxDepth = Number.isInteger(args.maxDepth)
+      ? args.maxDepth as number
+      : getDefaultDepth(args.parent_type);
     const enrich = typeof args.enrich === 'boolean' ? args.enrich : true;
-    const result = await buildTree(args.parent_type, args.parent_name, 0, maxDepth, enrich);
+    const result = await buildTree(args.parent_type, args.parent_name, 0, maxDepth ?? getDefaultDepth(args.parent_type), enrich);
     return {
       isError: false,
       content: [
