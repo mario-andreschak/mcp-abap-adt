@@ -2,7 +2,6 @@ import { McpError, ErrorCode, AxiosResponse } from '../lib/utils';
 import { makeAdtRequestWithTimeout, return_error, return_response, getBaseUrl, encodeSapObjectName } from '../lib/utils';
 import { objectsListCache } from '../lib/getObjectsListCache';
 
-
 export const TOOL_DEFINITION = {
   name: "SearchObject",
   description: "Search for ABAP objects by name pattern. Parameters: object_name (with or without mask), object_type (optional), maxResults (optional). If object_type is specified, results are filtered by type.",
@@ -17,6 +16,22 @@ export const TOOL_DEFINITION = {
   }
 } as const;
 
+// --- New function for ADT error handling ---
+function detectAdtSearchError(response: any): { isError: boolean, content: any[] } | null {
+  if (!response) return null;
+  const status = response.status || response?.response?.status;
+  if (status !== 200) {
+    let msg = `ADT request failed (status ${status})`;
+    if (status === 406) msg = "Invalid object_type (406 Not Acceptable)";
+    if (status === 400) msg = "Bad request (400)";
+    return {
+      isError: true,
+      content: [{ type: "error", text: msg }]
+    };
+  }
+  return null;
+}
+
 export async function handleSearchObject(args: any) {
   try {
     const { object_name, object_type, maxResults } = args;
@@ -30,11 +45,17 @@ export async function handleSearchObject(args: any) {
       url += `&objectType=${encodeSapObjectName(object_type)}`;
     }
     const response = await makeAdtRequestWithTimeout(url, 'GET', 'default');
+
+    // --- Error handling using new function ---
+    const adtError = detectAdtSearchError(response);
+    if (adtError) return adtError;
+
     let result = return_response(response);
 
     objectsListCache.setCache(result);
     return result;
   } catch (error) {
-    return return_error(error);
+    // Стандартна поведінка: будь-яка помилка повертається як isError: true
+    return { isError: true, content: [{ type: "error", text: String(error) }] };
   }
 }

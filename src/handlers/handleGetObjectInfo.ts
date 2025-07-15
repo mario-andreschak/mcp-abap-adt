@@ -54,7 +54,7 @@ async function enrichNodeWithSearchObject(objectType: string, objectName: string
     if (!searchResult.isError && Array.isArray(searchResult.content)) {
       const parser = new XMLParser({ ignoreAttributes: false, attributeNamePrefix: '' });
       for (const entry of searchResult.content) {
-        if (typeof entry.text === "string" && !entry.text.trim().startsWith("Error: <?xml")) {
+        if ('text' in entry && typeof entry.text === "string" && !entry.text.trim().startsWith("Error: <?xml")) {
           const parsed = parser.parse(entry.text);
           const refs = parsed?.['adtcore:objectReferences']?.['adtcore:objectReference'];
           const objects = refs

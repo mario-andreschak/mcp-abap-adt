@@ -1,19 +1,21 @@
-const { handleSearchObject } = require('../src/handlers/handleSearchObject');
+const { handleSearchObject } = require('../dist/handlers/handleSearchObject');
 
-(async () => {
-  try {
-    const query = process.argv[2] || '*';
-    const objectType = process.argv[3] || 'PROG/P';
-    const maxResults = process.argv[4] ? Number(process.argv[4]) : 5;
-    const result = await handleSearchObject({
-      query,
-      objectType,
-      maxResults
-    });
-    console.log('SearchObject result:', result);
-    process.exit(0);
-  } catch (err) {
-    console.error('SearchObject error:', err);
-    process.exit(1);
-  }
-})();
+async function runTest() {
+  // Тест: коректний тип
+  let result = await handleSearchObject({ object_name: 'MARA', object_type: 'TABL' });
+  console.log('SearchObject MARA TABL:', result);
+
+  // Тест: некоректний тип
+  result = await handleSearchObject({ object_name: 'MARA', object_type: 'TABLE' });
+  console.log('SearchObject MARA TABLE:', result);
+
+  // Тест: тільки ім'я
+  result = await handleSearchObject({ object_name: 'MARA' });
+  console.log('SearchObject MARA:', result);
+
+  // Тест: неіснуючий об'єкт
+  result = await handleSearchObject({ object_name: 'ZZZZZZZZ', object_type: 'TABL' });
+  console.log('SearchObject ZZZZZZZZ TABL:', result);
+}
+
+runTest().then(() => process.exit(0));

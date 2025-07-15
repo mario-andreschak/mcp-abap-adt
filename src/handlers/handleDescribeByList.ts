@@ -29,18 +29,41 @@ import { handleSearchObject } from "./handleSearchObject";
  * @returns Result of handleDetectObjectTypeList with objects
  */
 export async function handleDescribeByList(args: any) {
-  const objects = args.objects;
-  if (!Array.isArray(objects)) {
-    throw new Error("Parameter 'objects' must be an array.");
+  const objects = args?.objects;
+  console.error("DescribeByList args:", args);
+  console.error("DescribeByList objects:", objects);
+  if (!args || !Array.isArray(objects) || objects.length === 0) {
+    return { content: [] };
   }
   const results: any[] = [];
-  for (const obj of objects) {
-    let type = obj.type;
-    if (type && typeof type === "string" && !type.includes("/")) {
-      type = `${type}/*`;
+  try {
+    for (const obj of objects) {
+      let type = obj.type;
+      if (type === "TABLE") {
+        type = "TABL";
+      } else if (type && typeof type === "string" && !type.includes("/")) {
+        type = `${type}/*`;
+      }
+      const res = await handleSearchObject({ object_name: obj.name, object_type: type });
+      // Parse response and filter errors
+      let parsed;
+      try {
+        parsed = typeof res === "string" ? JSON.parse(res) : res;
+        if (parsed.isError === true) continue;
+        // Додаткова перевірка: якщо content порожній або XML не містить objectReference — пропускати
+        const xmlText = parsed.content?.[0]?.text || "";
+        if (!xmlText.includes("<adtcore:objectReference")) continue;
+        // Додаємо тільки якщо знайдено objectReference
+        results.push({ type: "text", text: JSON.stringify(res) });
+      } catch {
+        // If cannot parse, skip
+        continue;
+      }
     }
-    const res = await handleSearchObject({ object_name: obj.name, object_type: type });
-    results.push(res);
+    console.error("DescribeByList results:", results);
+    return { content: results };
+  } catch (e) {
+    console.error("DescribeByList error:", e);
+    return { content: [] };
   }
-  return { content: results };
 }
