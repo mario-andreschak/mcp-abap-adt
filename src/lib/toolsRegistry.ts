@@ -17,7 +17,6 @@ import { TOOL_DEFINITION as GetEnhancementImpl_Tool } from '../handlers/handleGe
 import { TOOL_DEFINITION as GetEnhancementSpot_Tool } from '../handlers/handleGetEnhancementSpot';
 import { TOOL_DEFINITION as GetBdef_Tool } from '../handlers/handleGetBdef';
 import { TOOL_DEFINITION as GetSqlQuery_Tool } from '../handlers/handleGetSqlQuery';
-import { TOOL_DEFINITION as GetRelatedObjectTypes_Tool } from '../handlers/handleGetRelatedObjectTypes';
 import { TOOL_DEFINITION as GetWhereUsed_Tool } from '../handlers/handleGetWhereUsed';
 import { TOOL_DEFINITION as GetObjectInfo_Tool } from '../handlers/handleGetObjectInfo';
 import { TOOL_DEFINITION as DetectObjectTypeListArray_Tool } from '../handlers/handleDescribeByListArray';
@@ -71,7 +70,6 @@ export const ALL_TOOLS: ToolDefinition[] = [
   GetEnhancementSpot_Tool,
   GetBdef_Tool,
   GetSqlQuery_Tool,
-  GetRelatedObjectTypes_Tool,
   GetWhereUsed_Tool,
   ...DYNAMIC_IMPORT_TOOLS,
   GetObjectInfo_Tool

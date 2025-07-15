@@ -30,7 +30,6 @@ import { handleGetEnhancementImpl } from "./handlers/handleGetEnhancementImpl";
 import { handleGetEnhancementSpot } from "./handlers/handleGetEnhancementSpot";
 import { handleGetBdef } from "./handlers/handleGetBdef";
 import { handleGetSqlQuery } from "./handlers/handleGetSqlQuery";
-import { handleGetRelatedObjectTypes } from "./handlers/handleGetRelatedObjectTypes";
 import { handleGetObjectsByType } from "./handlers/handleGetObjectsByType";
 import { handleGetWhereUsed } from "./handlers/handleGetWhereUsed";
 import { handleGetObjectInfo } from "./handlers/handleGetObjectInfo";
@@ -311,8 +310,6 @@ export class mcp_abap_adt_server {
           return await (await import("./handlers/handleGetProgFullCode.js")).handleGetProgFullCode(request.params.arguments as any);
         case "GetObjectNodeFromCache":
           return await (await import("./handlers/handleGetObjectNodeFromCache.js")).handleGetObjectNodeFromCache(request.params.arguments as any);
-        case "GetRelatedObjectTypes":
-          return await handleGetRelatedObjectTypes(request.params.arguments);
         case "GetDescription":
           return await (await import("./handlers/handleGetDescription.js")).handleGetDescription(request.params.arguments as any);
         // case "DetectObjectType":
