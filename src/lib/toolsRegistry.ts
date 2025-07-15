@@ -20,6 +20,13 @@ import { TOOL_DEFINITION as GetSqlQuery_Tool } from '../handlers/handleGetSqlQue
 import { TOOL_DEFINITION as GetRelatedObjectTypes_Tool } from '../handlers/handleGetRelatedObjectTypes';
 import { TOOL_DEFINITION as GetWhereUsed_Tool } from '../handlers/handleGetWhereUsed';
 import { TOOL_DEFINITION as GetObjectInfo_Tool } from '../handlers/handleGetObjectInfo';
+import { TOOL_DEFINITION as DetectObjectTypeListArray_Tool } from '../handlers/handleDescribeByListArray';
+import { TOOL_DEFINITION as DetectObjectTypeListJson_Tool } from '../handlers/handleDescribeByListJSON';
+import { TOOL_DEFINITION as GetObjectsByType_Tool } from '../handlers/handleGetObjectsByType';
+import { TOOL_DEFINITION as GetObjectsList_Tool } from '../handlers/handleGetObjectsList';
+import { TOOL_DEFINITION as GetProgFullCode_Tool } from '../handlers/handleGetProgFullCode';
+import { TOOL_DEFINITION as GetObjectNodeFromCache_Tool } from '../handlers/handleGetObjectNodeFromCache';
+import { TOOL_DEFINITION as GetDescription_Tool } from '../handlers/handleGetDescription';
 
 // Тип для опису інструмента
 export interface ToolDefinition {
@@ -34,129 +41,13 @@ export interface ToolDefinition {
 
 // Статичні описи для інструментів з динамічним імпортом
 const DYNAMIC_IMPORT_TOOLS: ToolDefinition[] = [
-  {
-    name: "GetObjectsByType",
-    description: "Retrieves all ABAP objects of a specific type under a given node.",
-    inputSchema: {
-      type: "object",
-      properties: {
-        parent_name: { type: "string" },
-        parent_tech_name: { type: "string" },
-        parent_type: { type: "string" },
-        node_id: { type: "string" },
-        format: { type: "string", description: "Output format: 'raw' or 'parsed'" },
-        with_short_descriptions: { type: "boolean" }
-      },
-      required: ["parent_name", "parent_tech_name", "parent_type", "node_id"]
-    }
-  },
-  {
-    name: "GetObjectsList",
-    description: "Recursively retrieves all valid ABAP repository objects for a given parent (program, function group, etc.) including nested includes.",
-    inputSchema: {
-      type: "object",
-      properties: {
-        parent_name: { type: "string", description: "Parent object name" },
-        parent_tech_name: { type: "string", description: "Parent technical name" },
-        parent_type: { type: "string", description: "Parent object type (e.g. PROG/P, FUGR)" },
-        with_short_descriptions: { type: "boolean", description: "Include short descriptions (default: true)" }
-      },
-      required: ["parent_name", "parent_tech_name", "parent_type"]
-    }
-  },
-  {
-    name: "GetProgFullCode",
-    description: "Returns the full code for a program or function group, including all includes, in tree traversal order.",
-    inputSchema: {
-      type: "object",
-      properties: {
-        name: { type: "string", description: "Technical name of the program or function group" },
-        type: { type: "string", enum: ["PROG/P", "FUGR"], description: "Object type: 'PROG/P' for program, 'FUGR' for function group" }
-      },
-      required: ["name", "type"]
-    }
-  },
-  {
-    name: "GetObjectNodeFromCache",
-    description: "Returns a node from the in-memory objects list cache by OBJECT_TYPE, OBJECT_NAME, TECH_NAME, and expands OBJECT_URI if present.",
-    inputSchema: {
-      type: "object",
-      properties: {
-        object_type: { type: "string" },
-        object_name: { type: "string" },
-        tech_name: { type: "string" }
-      },
-      required: ["object_type", "object_name", "tech_name"]
-    }
-  },
-  {
-    name: "GetDescription",
-    description: "Strict match ABAP object search by name. Returns metadata and description for an object with the exact name and type.",
-    inputSchema: {
-      type: "object",
-      properties: {
-        object_name: { type: "string", description: "Exact name of the ABAP object to search for" },
-        object_type: { type: "string", description: "ABAP object type" }
-      },
-      required: ["object_name", "object_type"]
-    }
-  },
-  {
-    name: "DetectObjectType",
-    description: "Detects the ABAP object type by exact object name (no mask, no fuzzy). Returns the same structure as SearchObject, but only for exact matches. Use to determine the type of an object by its name.",
-    inputSchema: {
-      type: "object",
-      properties: {
-        name: { type: "string", description: "Exact object name to detect type for" },
-        maxResults: { type: "number", description: "Maximum number of results to return", default: 1 }
-      },
-      required: ["name"]
-    }
-  },
-  {
-    name: "DetectObjectTypeListArray",
-    description: "Batch detection of ABAP object types. Input: direct array of objects [{ name: string, type?: string }]. Each object must have at least the 'name' property.",
-    inputSchema: {
-      type: "object",
-      properties: {
-        objects: {
-          type: "array",
-          description: "Array of objects with name and optional type. Each item: { name: string, type?: string }",
-          items: {
-            type: "object",
-            properties: {
-              name: { type: "string", description: "Object name (required)" },
-              type: { type: "string", description: "Optional type" }
-            },
-            required: ["name"]
-          }
-        }
-      },
-      required: ["objects"]
-    }
-  },
-  {
-    name: "DetectObjectTypeListJson",
-    description: "Batch detection of ABAP object types. Input: object with 'objects' property: { objects: [{ name: string, type?: string }] }. Each item in 'objects' must have at least the 'name' property.",
-    inputSchema: {
-      type: "object",
-      properties: {
-        objects: {
-          type: "array",
-          description: "Array of objects with name and optional type. Each item: { name: string, type?: string }",
-          items: {
-            type: "object",
-            properties: {
-              name: { type: "string", description: "Object name (required)" },
-              type: { type: "string", description: "Optional type" }
-            },
-            required: ["name"]
-          }
-        }
-      },
-      required: ["objects"]
-    }
-  }
+  GetObjectsByType_Tool,
+  GetObjectsList_Tool,
+  GetProgFullCode_Tool,
+  GetObjectNodeFromCache_Tool,
+  GetDescription_Tool,
+  DetectObjectTypeListArray_Tool,
+  DetectObjectTypeListJson_Tool
 ];
 
 // Збираємо всі описи інструментів в одному масиві

@@ -1,3 +1,17 @@
+export const TOOL_DEFINITION = {
+  name: "GetObjectNodeFromCache",
+  description: "Returns a node from the in-memory objects list cache by OBJECT_TYPE, OBJECT_NAME, TECH_NAME, and expands OBJECT_URI if present.",
+  inputSchema: {
+    type: "object",
+    properties: {
+      object_type: { type: "string", description: "Object type" },
+      object_name: { type: "string", description: "Object name" },
+      tech_name: { type: "string", description: "Technical name" }
+    },
+    required: ["object_type", "object_name", "tech_name"]
+  }
+} as const;
+
 // handleGetObjectNodeFromCache: повертає вузол з кешу за OBJECT_TYPE, OBJECT_NAME, TECH_NAME, розгортає OBJECT_URI
 
 import { objectsListCache } from '../lib/getObjectsListCache';

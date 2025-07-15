@@ -1,3 +1,18 @@
+export const TOOL_DEFINITION = {
+  name: "GetObjectsList",
+  description: "Recursively retrieves all valid ABAP repository objects for a given parent (program, function group, etc.) including nested includes.",
+  inputSchema: {
+    type: "object",
+    properties: {
+      parent_name: { type: "string", description: "Parent object name" },
+      parent_tech_name: { type: "string", description: "Parent technical name" },
+      parent_type: { type: "string", description: "Parent object type (e.g. PROG/P, FUGR)" },
+      with_short_descriptions: { type: "boolean", description: "Include short descriptions (default: true)" }
+    },
+    required: ["parent_name", "parent_tech_name", "parent_type"]
+  }
+} as const;
+
 // handleGetObjectsListStrict: рекурсивний обхід ADT node structure, стартує з node_id = '000000' як у прикладі користувача
 
 import { McpError, ErrorCode } from '../lib/utils';

@@ -34,39 +34,16 @@
 
 export const TOOL_DEFINITION = {
   name: "GetProgFullCode",
-  description: "Returns the full code for a given ABAP program (report) or function group, including all includes. The main object (report or function group) always comes first in the response, followed by all child includes in tree traversal order.",
-  parameters: [
-    {
-      name: "name",
-      type: "string",
-      description: "Technical name of the program or function group (e.g., '/CBY/MM_INVENTORY')",
-      required: true
-    },
-    {
-      name: "type",
-      type: "string",
-      description: "'PROG/P' for program or 'FUGR' for function group",
-      required: true
-    }
-  ],
-  returns: {
+  description: "Returns the full code for a program or function group, including all includes, in tree traversal order.",
+  inputSchema: {
     type: "object",
-    description: "Full code export result",
-    properties: [
-      { name: "name", type: "string", description: "Technical name of the main object" },
-      { name: "type", type: "string", description: "'PROG/P' or 'FUGR'" },
-      { name: "total_code_objects", type: "number", description: "Total number of code objects (main + all includes)" },
-      { name: "code_objects", type: "array", description: "List of code objects", items: {
-        type: "object",
-        properties: [
-          { name: "OBJECT_TYPE", type: "string", description: "'PROG/P', 'FUGR', or 'PROG/I'" },
-          { name: "OBJECT_NAME", type: "string", description: "Technical name of the object" },
-          { name: "code", type: "string", description: "Full ABAP source code of the object" }
-        ]
-      }}
-    ]
+    properties: {
+      name: { type: "string", description: "Technical name of the program or function group (e.g., '/CBY/MM_INVENTORY')" },
+      type: { type: "string", enum: ["PROG/P", "FUGR"], description: "'PROG/P' for program or 'FUGR' for function group" }
+    },
+    required: ["name", "type"]
   }
-};
+} as const;
 
 import { handleGetProgram } from './handleGetProgram';
 import { handleGetFunctionGroup } from './handleGetFunctionGroup';

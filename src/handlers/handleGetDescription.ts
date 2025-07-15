@@ -1,3 +1,16 @@
+export const TOOL_DEFINITION = {
+  name: "GetDescription",
+  description: "Strict match ABAP object search by name. Returns metadata and description for an object with the exact name and type.",
+  inputSchema: {
+    type: "object",
+    properties: {
+      object_name: { type: "string", description: "Exact name of the ABAP object to search for" },
+      object_type: { type: "string", description: "ABAP object type" }
+    },
+    required: ["object_name", "object_type"]
+  }
+} as const;
+
 import { McpError, ErrorCode, AxiosResponse } from '../lib/utils';
 import { makeAdtRequestWithTimeout, return_error, return_response, getBaseUrl, encodeSapObjectName } from '../lib/utils';
 import { objectsListCache } from '../lib/getObjectsListCache';

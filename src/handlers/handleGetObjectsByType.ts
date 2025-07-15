@@ -1,3 +1,20 @@
+export const TOOL_DEFINITION = {
+  name: "GetObjectsByType",
+  description: "Retrieves all ABAP objects of a specific type under a given node.",
+  inputSchema: {
+    type: "object",
+    properties: {
+      parent_name: { type: "string", description: "Parent object name" },
+      parent_tech_name: { type: "string", description: "Parent technical name" },
+      parent_type: { type: "string", description: "Parent object type" },
+      node_id: { type: "string", description: "Node ID" },
+      format: { type: "string", description: "Output format: 'raw' or 'parsed'" },
+      with_short_descriptions: { type: "boolean", description: "Include short descriptions" }
+    },
+    required: ["parent_name", "parent_tech_name", "parent_type", "node_id"]
+  }
+} as const;
+
 import { McpError, ErrorCode } from '../lib/utils';
 import { fetchNodeStructure, return_error, return_response } from '../lib/utils';
 import { objectsListCache } from '../lib/getObjectsListCache';

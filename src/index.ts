@@ -315,12 +315,12 @@ export class mcp_abap_adt_server {
           return await handleGetRelatedObjectTypes(request.params.arguments);
         case "GetDescription":
           return await (await import("./handlers/handleGetDescription.js")).handleGetDescription(request.params.arguments as any);
-        case "DetectObjectType":
-          return await (await import("./handlers/handleDetectObjectType.js")).handleSearchObject(request.params.arguments as any);
+        // case "DetectObjectType":
+        //   return await (await import("./handlers/handleDetectObjectType.js")).handleSearchObject(request.params.arguments as any);
         case "DetectObjectTypeListArray":
-          return await (await import("./handlers/handleDetectObjectTypeListArray.js")).handleDetectObjectTypeListArray(request.params.arguments as any);
+          return await (await import("./handlers/handleDescribeByListArray.js")).handleDescribeByListArray(request.params.arguments as any);
         case "DetectObjectTypeListJson":
-          return await (await import("./handlers/handleDetectObjectTypeListJson.js")).handleDetectObjectTypeListJson(request.params.arguments as any);
+          return await (await import("./handlers/handleDescribeByListJSON.js")).handleDescribeByListJSON(request.params.arguments as any);
         default:
           throw new McpError(
             ErrorCode.MethodNotFound,
