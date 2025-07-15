@@ -19,8 +19,7 @@ import { TOOL_DEFINITION as GetBdef_Tool } from '../handlers/handleGetBdef';
 import { TOOL_DEFINITION as GetSqlQuery_Tool } from '../handlers/handleGetSqlQuery';
 import { TOOL_DEFINITION as GetWhereUsed_Tool } from '../handlers/handleGetWhereUsed';
 import { TOOL_DEFINITION as GetObjectInfo_Tool } from '../handlers/handleGetObjectInfo';
-import { TOOL_DEFINITION as DetectObjectTypeListArray_Tool } from '../handlers/handleDescribeByListArray';
-import { TOOL_DEFINITION as DetectObjectTypeListJson_Tool } from '../handlers/handleDescribeByListJSON';
+import { TOOL_DEFINITION as DescribeByList_Tool } from '../handlers/handleDescribeByList';
 import { TOOL_DEFINITION as GetObjectsByType_Tool } from '../handlers/handleGetObjectsByType';
 import { TOOL_DEFINITION as GetObjectsList_Tool } from '../handlers/handleGetObjectsList';
 import { TOOL_DEFINITION as GetProgFullCode_Tool } from '../handlers/handleGetProgFullCode';
@@ -45,8 +44,7 @@ const DYNAMIC_IMPORT_TOOLS: ToolDefinition[] = [
   GetProgFullCode_Tool,
   GetObjectNodeFromCache_Tool,
   GetDescription_Tool,
-  DetectObjectTypeListArray_Tool,
-  DetectObjectTypeListJson_Tool
+  DescribeByList_Tool
 ];
 
 // Збираємо всі описи інструментів в одному масиві

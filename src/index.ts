@@ -33,6 +33,7 @@ import { handleGetSqlQuery } from "./handlers/handleGetSqlQuery";
 import { handleGetObjectsByType } from "./handlers/handleGetObjectsByType";
 import { handleGetWhereUsed } from "./handlers/handleGetWhereUsed";
 import { handleGetObjectInfo } from "./handlers/handleGetObjectInfo";
+import { handleDescribeByList } from "./handlers/handleDescribeByList";
 
 // Import shared utility functions and types
 import {
@@ -314,10 +315,8 @@ export class mcp_abap_adt_server {
           return await (await import("./handlers/handleGetDescription.js")).handleGetDescription(request.params.arguments as any);
         // case "DetectObjectType":
         //   return await (await import("./handlers/handleDetectObjectType.js")).handleSearchObject(request.params.arguments as any);
-        case "DescribeByListArray":
-          return await (await import("./handlers/handleDescribeByListArray.js")).handleDescribeByListArray(request.params.arguments as any);
-        case "DescribeByListJSON":
-          return await (await import("./handlers/handleDescribeByListJSON.js")).handleDescribeByListJSON(request.params.arguments as any);
+        case "DescribeByList":
+          return await (await import("./handlers/handleDescribeByList.js")).handleDescribeByList(request.params.arguments as any);
         default:
           throw new McpError(
             ErrorCode.MethodNotFound,

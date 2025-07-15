@@ -24,19 +24,13 @@ export async function handleSearchObject(args: any) {
       throw new McpError(ErrorCode.InvalidParams, 'object_name is required');
     }
     const query = object_name;
-    const url = `${await getBaseUrl()}/sap/bc/adt/repository/informationsystem/search?operation=quickSearch&query=${encodeSapObjectName(query)}&maxResults=${maxResults || 100}`;
+    let url = `${await getBaseUrl()}/sap/bc/adt/repository/informationsystem/search?operation=quickSearch&query=${encodeSapObjectName(query)}&maxResults=${maxResults || 100}`;
+    // Додаємо object_type як маску, якщо задано
+    if (object_type) {
+      url += `&objectType=${encodeSapObjectName(object_type)}`;
+    }
     const response = await makeAdtRequestWithTimeout(url, 'GET', 'default');
     let result = return_response(response);
-
-    // Фільтрація по object_type, якщо задано
-    if (object_type && Array.isArray(result?.content)) {
-      result.content = result.content.filter(
-        (obj: any) =>
-          obj.object_type === object_type ||
-          obj.type === object_type ||
-          obj.OBJECT_TYPE === object_type
-      );
-    }
 
     objectsListCache.setCache(result);
     return result;
