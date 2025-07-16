@@ -55,7 +55,6 @@ const { isError, ...rest } = result;
 
   // Перевірка на порожню XML (<adtcore:objectReferences/>)
   const xmlText = rest.content?.[0]?.text || "";
-  console.error("SearchObject xmlText:", xmlText);
   if (!xmlText.includes("<adtcore:objectReference ")) {
     // Якщо ADT не знайшов об'єкт, повертаємо порожній результат (це не помилка)
     return {
@@ -64,24 +63,36 @@ const { isError, ...rest } = result;
     };
   }
 
-  // Парсинг <adtcore:objectReference .../> з xmlText
-  const match = xmlText.match(/<adtcore:objectReference\s+([^>]*)\/>/);
-  if (!match) {
+  // Парсинг усіх <adtcore:objectReference .../> з xmlText
+  const matches = Array.from(xmlText.matchAll(/<adtcore:objectReference\s+([^>]*)\/>/g));
+  if (!matches || matches.length === 0) {
     // Якщо ADT не знайшов об'єкт, повертаємо порожній результат (це не помилка)
     return {
       isError: false,
       content: []
     };
   }
-  const attrs = match[1];
-  function extract(attr, def = "") {
-    const m = attrs.match(new RegExp(attr + '="([^"]*)"'));
-    return m ? m[1] : def;
+
+  const resultsArr: Array<{ name: string; type: string; description: string; packageName: string }> = [];
+  for (const m of matches as Array<RegExpMatchArray>) {
+    const attrs = m[1];
+    function extract(attr: string, def = ""): string {
+      const mm = attrs.match(new RegExp(attr + '="([^"]*)"'));
+      return mm ? mm[1] : def;
+    }
+    const name = extract("adtcore:name");
+    const type = extract("adtcore:type");
+    const description = extract("adtcore:description");
+    let pkgName = extract("adtcore:packageName");
+    // Якщо packageName порожній, пробуємо витягти з rawXML тег <adtcore:packageName>
+    if (!pkgName) {
+      const pkgMatch = xmlText.match(/<adtcore:packageName>([^<]*)<\/adtcore:packageName>/);
+      if (pkgMatch) {
+        pkgName = pkgMatch[1];
+      }
+    }
+    resultsArr.push({ name, type, description, packageName: pkgName });
   }
-  const name = extract("adtcore:name");
-  const type = extract("adtcore:type");
-  const description = extract("adtcore:description");
-  const packageName = extract("adtcore:packageName");
 
   objectsListCache.setCache(result);
   return {
@@ -89,7 +100,7 @@ const { isError, ...rest } = result;
     content: [
       {
         type: "text",
-        text: JSON.stringify({ name, type, description, packageName })
+        text: JSON.stringify({ results: resultsArr, rawXML: xmlText })
       }
     ]
   };

@@ -30,8 +30,6 @@ import { handleSearchObject } from "./handleSearchObject";
  */
 export async function handleDescribeByList(args: any) {
   const objects = args?.objects;
-  console.error("DescribeByList args:", args);
-  console.error("DescribeByList objects:", objects);
   if (!args || !Array.isArray(objects) || objects.length === 0) {
     const err = new Error("Missing or invalid parameters: objects (array) is required and must not be empty.");
     // @ts-ignore
@@ -50,50 +48,77 @@ export async function handleDescribeByList(args: any) {
     for (const obj of objects) {
       let type = obj.type;
       let res = await handleSearchObject({ object_name: obj.name, object_type: type });
-      console.error("DescribeByList single SearchObject result:", res);
       let parsed;
       try {
         parsed = typeof res === "string" ? JSON.parse(res) : res;
-        // Якщо isError === true, пробуємо ще раз без типу
-        if (parsed.isError === true) {
-          res = await handleSearchObject({ object_name: obj.name });
-          console.error("DescribeByList повторний SearchObject без типу:", res);
-          parsed = typeof res === "string" ? JSON.parse(res) : res;
-          if (parsed.isError === true) continue;
+
+        // Якщо відповідь пуста або isError === true, пробуємо ще раз без типу
+        let tryWithoutType = false;
+        if (
+          (parsed == null) ||
+          (parsed.isError === true) ||
+          (parsed.content && Array.isArray(parsed.content) && parsed.content.length === 0)
+        ) {
+          tryWithoutType = true;
         }
-        // Універсальний обгортальник: завжди повертаємо масив { type: "text", text: ... }
-        let added = false;
-        if (parsed.content && Array.isArray(parsed.content) && parsed.content.length > 0) {
-          for (const contentItem of parsed.content) {
-            if (contentItem?.type === "json" && contentItem?.json) {
-              results.push({ type: "text", text: typeof contentItem.json === "string" ? contentItem.json : JSON.stringify(contentItem.json) });
-              added = true;
-              continue;
-            }
-            if (contentItem?.type === "text" && typeof contentItem.text === "string") {
-              results.push({ type: "text", text: contentItem.text });
-              added = true;
-              continue;
-            }
-            // Якщо тип не json/text — пропускаємо!
+
+        if (tryWithoutType) {
+          res = await handleSearchObject({ object_name: obj.name });
+          parsed = typeof res === "string" ? JSON.parse(res) : res;
+          // Якщо знову помилка або порожньо — пропускаємо цей об'єкт
+          if (
+            (parsed == null) ||
+            (parsed.isError === true) ||
+            (parsed.content && Array.isArray(parsed.content) && parsed.content.length === 0)
+          ) {
+            continue;
           }
         }
-        // Якщо нічого не додано, але parsed — це валідний об'єкт (наприклад, DTEL)
-        if (!added && typeof parsed === "object" && parsed !== null) {
+
+        // Якщо є content і це масив
+        if (parsed.content && Array.isArray(parsed.content)) {
+          const contentArr = parsed.content;
+          if (contentArr.length === 0) {
+            continue;
+          }
+          // Якщо це SearchObject-style результат з масивом results
+          let allResults: any[] = [];
+          for (const item of contentArr) {
+            try {
+              let parsedItem = typeof item.text === "string" ? JSON.parse(item.text) : item.text;
+              if (parsedItem && parsedItem.results && Array.isArray(parsedItem.results)) {
+                allResults = allResults.concat(parsedItem.results);
+              } else {
+                allResults.push(parsedItem);
+              }
+            } catch {
+              allResults.push(item);
+            }
+          }
+          results.push({
+            type: "text",
+            text: JSON.stringify({
+              name: obj.name,
+              results: allResults
+            })
+          });
+          continue;
+        }
+
+        // Якщо це просто валідний об'єкт (наприклад, DTEL)
+        if (typeof parsed === "object" && parsed !== null) {
           results.push({ type: "text", text: JSON.stringify(parsed) });
         }
       } catch {
         continue;
       }
     }
-    console.error("DescribeByList results:", results);
     // Якщо жоден об'єкт не знайдено, повертаємо isError: false
     return {
       isError: false,
       content: results
     };
   } catch (e) {
-    console.error("DescribeByList error:", e);
     return { isError: true, content: [] };
   }
 }
