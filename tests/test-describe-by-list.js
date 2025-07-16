@@ -1,24 +1,23 @@
-// Test script for handleDescribeByList
+// Jest test suite for handleDescribeByList
 
-const { handleDescribeByList } = require('../dist/handlers/handleDescribeByList');
+const {
+  handleDescribeByList,
+} = require("../dist/handlers/handleDescribeByList");
 
-async function runTest() {
-  const testInput = {
-    objects: [
-      { name: 'MARA', type: 'TABLE' },
-      { name: 'SFLIGHT', type: 'TABLE' },
-      { name: 'ZCL_MY_CLASS', type: 'CLAS/OC' }
-    ]
-  };
+describe("handleDescribeByList", () => {
+  it("should return results for valid objects array", async () => {
+    const testInput = {
+      objects: [
+        { name: "EBELN", type: "DTEL" },
+        { name: "XSTBW", type: "DTEL" },
+        { name: "/CBY/ALGORITHM", type: "DTEL" },
+        { name: "SPRAS", type: "DTEL" },
+      ],
+    };
 
-  try {
     const result = await handleDescribeByList(testInput);
-    console.log('DescribeByList  result:', JSON.stringify(result, null, 2));
-    process.exit(0);
-  } catch (error) {
-    console.error('Error:', error);
-    process.exit(1);
-  }
-}
-
-runTest();
+    console.log("DescribeByList MCP raw result:", result);
+    expect(result).toBeDefined();
+    // Optionally, add more assertions based on expected result structure
+  });
+});

@@ -49,27 +49,51 @@ export async function handleDescribeByList(args: any) {
   try {
     for (const obj of objects) {
       let type = obj.type;
-      const res = await handleSearchObject({ object_name: obj.name, object_type: type });
-      // Parse response and filter errors
+      let res = await handleSearchObject({ object_name: obj.name, object_type: type });
+      console.error("DescribeByList single SearchObject result:", res);
       let parsed;
       try {
         parsed = typeof res === "string" ? JSON.parse(res) : res;
-        if (parsed.isError === true) continue;
-        // Додаткова перевірка: якщо content порожній або XML не містить objectReference — пропускати
-        const xmlText = parsed.content?.[0]?.text || "";
-        if (!xmlText.includes("<adtcore:objectReference")) continue;
-        // Додаємо тільки якщо знайдено objectReference
-        results.push(parsed);
+        // Якщо isError === true, пробуємо ще раз без типу
+        if (parsed.isError === true) {
+          res = await handleSearchObject({ object_name: obj.name });
+          console.error("DescribeByList повторний SearchObject без типу:", res);
+          parsed = typeof res === "string" ? JSON.parse(res) : res;
+          if (parsed.isError === true) continue;
+        }
+        // Універсальний обгортальник: завжди повертаємо масив { type: "text", text: ... }
+        let added = false;
+        if (parsed.content && Array.isArray(parsed.content) && parsed.content.length > 0) {
+          for (const contentItem of parsed.content) {
+            if (contentItem?.type === "json" && contentItem?.json) {
+              results.push({ type: "text", text: typeof contentItem.json === "string" ? contentItem.json : JSON.stringify(contentItem.json) });
+              added = true;
+              continue;
+            }
+            if (contentItem?.type === "text" && typeof contentItem.text === "string") {
+              results.push({ type: "text", text: contentItem.text });
+              added = true;
+              continue;
+            }
+            // Якщо тип не json/text — пропускаємо!
+          }
+        }
+        // Якщо нічого не додано, але parsed — це валідний об'єкт (наприклад, DTEL)
+        if (!added && typeof parsed === "object" && parsed !== null) {
+          results.push({ type: "text", text: JSON.stringify(parsed) });
+        }
       } catch {
-        // If cannot parse, skip
         continue;
       }
     }
     console.error("DescribeByList results:", results);
-    // Якщо жоден об'єкт не знайдено, повертаємо порожній масив (це не помилка)
-    return { content: results };
+    // Якщо жоден об'єкт не знайдено, повертаємо isError: false
+    return {
+      isError: false,
+      content: results
+    };
   } catch (e) {
     console.error("DescribeByList error:", e);
-    return { content: [] };
+    return { isError: true, content: [] };
   }
 }
