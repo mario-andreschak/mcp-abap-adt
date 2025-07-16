@@ -74,7 +74,16 @@ export async function handleGetTypeInfo(args: any) {
             throw new McpError(ErrorCode.InvalidParams, 'Type name is required');
         }
     } catch (error) {
-        return return_error(error);
+        // MCP-compliant error response: always return content[] with type "text"
+        return {
+            isError: true,
+            content: [
+                {
+                    type: "text",
+                    text: `ADT error: ${String(error)}`
+                }
+            ]
+        };
     }
 
     try {
@@ -142,7 +151,16 @@ export async function handleGetTypeInfo(args: any) {
                         objectsListCache.setCache(result);
                         return result;
                 } catch (error) {
-                    return return_error(error);
+                    // MCP-compliant error response: always return content[] with type "text"
+                    return {
+                        isError: true,
+                        content: [
+                            {
+                                type: "text",
+                                text: `ADT error: ${String(error)}`
+                            }
+                        ]
+                    };
                 }
             }
         }

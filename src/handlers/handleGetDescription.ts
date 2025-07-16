@@ -46,6 +46,15 @@ export async function handleGetDescription(args: any) {
         objectsListCache.setCache(result);
         return result;
     } catch (error) {
-        return return_error(error);
+        // MCP-compliant error response: always return content[] with type "text"
+        return {
+            isError: true,
+            content: [
+                {
+                    type: "text",
+                    text: `ADT error: ${String(error)}`
+                }
+            ]
+        };
     }
 }

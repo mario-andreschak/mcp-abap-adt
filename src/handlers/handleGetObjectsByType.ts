@@ -182,6 +182,15 @@ export async function handleGetObjectsByType(args: any) {
         return finalResult;
 
     } catch (error) {
-        return return_error(error);
+        // MCP-compliant error response: always return content[] with type "text"
+        return {
+            isError: true,
+            content: [
+                {
+                    type: "text",
+                    text: `ADT error: ${String(error)}`
+                }
+            ]
+        };
     }
 }
