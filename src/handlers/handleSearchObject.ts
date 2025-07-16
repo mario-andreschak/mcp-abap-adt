@@ -88,23 +88,21 @@ const { isError, ...rest } = result;
     isError: false,
     content: [
       {
-        type: "json",
-        json: { name, type, description, packageName }
+        type: "text",
+        text: JSON.stringify({ name, type, description, packageName })
       }
     ]
   };
   } catch (error) {
-    // Якщо помилка — наприклад, некоректний object_type — кидаємо 422
-    const err = new Error("ADT error: " + String(error));
-    // @ts-ignore
-    err.status = 422;
-    // @ts-ignore
-    err.body = {
-      error: {
-        message: "ADT error: " + String(error),
-        code: "ADT_ERROR"
-      }
+    // MCP-compliant error response: always return content[] with type "text"
+    return {
+      isError: true,
+      content: [
+        {
+          type: "text",
+          text: `ADT error: ${String(error)}`
+        }
+      ]
     };
-    throw err;
   }
 }
