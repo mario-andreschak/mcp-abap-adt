@@ -33,17 +33,22 @@ export async function handleDescribeByList(args: any) {
   console.error("DescribeByList args:", args);
   console.error("DescribeByList objects:", objects);
   if (!args || !Array.isArray(objects) || objects.length === 0) {
-    return { content: [] };
+    const err = new Error("Missing or invalid parameters: objects (array) is required and must not be empty.");
+    // @ts-ignore
+    err.status = 400;
+    // @ts-ignore
+    err.body = {
+      error: {
+        message: "Missing or invalid parameters: objects (array) is required and must not be empty.",
+        code: "INVALID_PARAMS"
+      }
+    };
+    throw err;
   }
   const results: any[] = [];
   try {
     for (const obj of objects) {
       let type = obj.type;
-      if (type === "TABLE") {
-        type = "TABL";
-      } else if (type && typeof type === "string" && !type.includes("/")) {
-        type = `${type}/*`;
-      }
       const res = await handleSearchObject({ object_name: obj.name, object_type: type });
       // Parse response and filter errors
       let parsed;
@@ -54,13 +59,14 @@ export async function handleDescribeByList(args: any) {
         const xmlText = parsed.content?.[0]?.text || "";
         if (!xmlText.includes("<adtcore:objectReference")) continue;
         // Додаємо тільки якщо знайдено objectReference
-        results.push({ type: "text", text: JSON.stringify(res) });
+        results.push(parsed);
       } catch {
         // If cannot parse, skip
         continue;
       }
     }
     console.error("DescribeByList results:", results);
+    // Якщо жоден об'єкт не знайдено, повертаємо порожній масив (це не помилка)
     return { content: results };
   } catch (e) {
     console.error("DescribeByList error:", e);

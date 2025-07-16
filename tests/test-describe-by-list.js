@@ -13,7 +13,7 @@ async function runTest() {
 
   try {
     const result = await handleDescribeByList(testInput);
-    console.log('DescribeByList result:', JSON.stringify(result, null, 2));
+    console.log('DescribeByList  result:', JSON.stringify(result, null, 2));
     process.exit(0);
   } catch (error) {
     console.error('Error:', error);

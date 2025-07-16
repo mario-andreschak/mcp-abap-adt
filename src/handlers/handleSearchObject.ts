@@ -26,7 +26,7 @@ function detectAdtSearchError(response: any): { isError: boolean, content: any[]
     if (status === 400) msg = "Bad request (400)";
     return {
       isError: true,
-      content: [{ type: "error", text: msg }]
+      content: [{ type: "text", text: msg }]
     };
   }
   return null;
@@ -50,12 +50,61 @@ export async function handleSearchObject(args: any) {
     const adtError = detectAdtSearchError(response);
     if (adtError) return adtError;
 
-    let result = return_response(response);
+let result = return_response(response);
+const { isError, ...rest } = result;
 
-    objectsListCache.setCache(result);
-    return result;
+  // Перевірка на порожню XML (<adtcore:objectReferences/>)
+  const xmlText = rest.content?.[0]?.text || "";
+  console.error("SearchObject xmlText:", xmlText);
+  if (!xmlText.includes("<adtcore:objectReference ")) {
+    // Якщо ADT не знайшов об'єкт, повертаємо порожній результат (це не помилка)
+    return {
+      isError: false,
+      content: []
+    };
+  }
+
+  // Парсинг <adtcore:objectReference .../> з xmlText
+  const match = xmlText.match(/<adtcore:objectReference\s+([^>]*)\/>/);
+  if (!match) {
+    // Якщо ADT не знайшов об'єкт, повертаємо порожній результат (це не помилка)
+    return {
+      isError: false,
+      content: []
+    };
+  }
+  const attrs = match[1];
+  function extract(attr, def = "") {
+    const m = attrs.match(new RegExp(attr + '="([^"]*)"'));
+    return m ? m[1] : def;
+  }
+  const name = extract("adtcore:name");
+  const type = extract("adtcore:type");
+  const description = extract("adtcore:description");
+  const packageName = extract("adtcore:packageName");
+
+  objectsListCache.setCache(result);
+  return {
+    isError: false,
+    content: [
+      {
+        type: "json",
+        json: { name, type, description, packageName }
+      }
+    ]
+  };
   } catch (error) {
-    // Стандартна поведінка: будь-яка помилка повертається як isError: true
-    return { isError: true, content: [{ type: "error", text: String(error) }] };
+    // Якщо помилка — наприклад, некоректний object_type — кидаємо 422
+    const err = new Error("ADT error: " + String(error));
+    // @ts-ignore
+    err.status = 422;
+    // @ts-ignore
+    err.body = {
+      error: {
+        message: "ADT error: " + String(error),
+        code: "ADT_ERROR"
+      }
+    };
+    throw err;
   }
 }
