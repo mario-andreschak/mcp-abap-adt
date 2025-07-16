@@ -24,7 +24,6 @@ import { TOOL_DEFINITION as GetObjectsByType_Tool } from '../handlers/handleGetO
 import { TOOL_DEFINITION as GetObjectsList_Tool } from '../handlers/handleGetObjectsList';
 import { TOOL_DEFINITION as GetProgFullCode_Tool } from '../handlers/handleGetProgFullCode';
 import { TOOL_DEFINITION as GetObjectNodeFromCache_Tool } from '../handlers/handleGetObjectNodeFromCache';
-import { TOOL_DEFINITION as GetDescription_Tool } from '../handlers/handleGetDescription';
 
 // Тип для опису інструмента
 export interface ToolDefinition {
@@ -43,7 +42,6 @@ const DYNAMIC_IMPORT_TOOLS: ToolDefinition[] = [
   GetObjectsList_Tool,
   GetProgFullCode_Tool,
   GetObjectNodeFromCache_Tool,
-  GetDescription_Tool,
   DescribeByList_Tool
 ];
 

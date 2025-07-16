@@ -311,8 +311,8 @@ export class mcp_abap_adt_server {
           return await (await import("./handlers/handleGetProgFullCode.js")).handleGetProgFullCode(request.params.arguments as any);
         case "GetObjectNodeFromCache":
           return await (await import("./handlers/handleGetObjectNodeFromCache.js")).handleGetObjectNodeFromCache(request.params.arguments as any);
-        case "GetDescription":
-          return await (await import("./handlers/handleGetDescription.js")).handleGetDescription(request.params.arguments as any);
+        // case "GetDescription":
+          // return await (await import("./handlers/handleGetDescription.js")).handleGetDescription(request.params.arguments as any);
         // case "DetectObjectType":
         //   return await (await import("./handlers/handleDetectObjectType.js")).handleSearchObject(request.params.arguments as any);
         case "DescribeByList":
