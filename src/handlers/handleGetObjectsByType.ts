@@ -59,7 +59,7 @@ function parseObjectNamesFromXml(xmlData: string): Array<{
             }
         }
     } catch (error) {
-        console.warn('Error parsing XML for object names:', error);
+        // console.warn('Error parsing XML for object names:', error);
     }
     
     return objects;

@@ -129,15 +129,12 @@ async function buildTree(
       // Якщо наступний рівень буде максимальним — додаємо тільки термінальні листи
       if (depth + 1 === maxDepth) {
         if (isTerminalLeaf(node)) {
-          children.push({
-            OBJECT_TYPE: getText(node, 'OBJECT_TYPE'),
-            OBJECT_NAME: getText(node, 'OBJECT_NAME'),
-            OBJECT_URI: getText(node, 'OBJECT_URI'),
-            NODE_ID: getText(node, 'NODE_ID'),
-            PARENT_NODE_ID: getText(node, 'PARENT_NODE_ID'),
-            node_type: getNodeType(node, depth + 1),
-            CHILDREN: []
-          });
+const terminalNode: any = {
+  OBJECT_TYPE: getText(node, 'OBJECT_TYPE'),
+  OBJECT_NAME: getText(node, 'OBJECT_NAME'),
+  PARENT_NODE_ID: getText(node, 'PARENT_NODE_ID'),
+};
+children.push(terminalNode);
         }
         // вузли-групи не додаємо на максимальному рівні
       } else {
@@ -151,39 +148,38 @@ async function buildTree(
             enrich,
             String(getText(node, 'NODE_ID') ?? '')
           );
-          children.push({
-            OBJECT_TYPE: getText(node, 'OBJECT_TYPE'),
-            OBJECT_NAME: getText(node, 'OBJECT_NAME'),
-            NODE_ID: getText(node, 'NODE_ID'),
-            PARENT_NODE_ID: getText(node, 'PARENT_NODE_ID'),
-            node_type: getNodeType(node, depth + 1),
-            CHILDREN: groupChildren.CHILDREN
-          });
+const groupNode: any = {
+  OBJECT_TYPE: getText(node, 'OBJECT_TYPE'),
+  OBJECT_NAME: getText(node, 'OBJECT_NAME'),
+  PARENT_NODE_ID: getText(node, 'PARENT_NODE_ID'),
+};
+if (Array.isArray(groupChildren.CHILDREN) && groupChildren.CHILDREN.length > 0) {
+  groupNode.CHILDREN = groupChildren.CHILDREN;
+}
+children.push(groupNode);
         } else if (isTerminalLeaf(node)) {
           // Terminal leaf: add as is
-          children.push({
-            OBJECT_TYPE: getText(node, 'OBJECT_TYPE'),
-            OBJECT_NAME: getText(node, 'OBJECT_NAME'),
-            OBJECT_URI: getText(node, 'OBJECT_URI'),
-            NODE_ID: getText(node, 'NODE_ID'),
-            PARENT_NODE_ID: getText(node, 'PARENT_NODE_ID'),
-            node_type: getNodeType(node, depth + 1),
-            CHILDREN: []
-          });
+const terminalNode: any = {
+  OBJECT_TYPE: getText(node, 'OBJECT_TYPE'),
+  OBJECT_NAME: getText(node, 'OBJECT_NAME'),
+  PARENT_NODE_ID: getText(node, 'PARENT_NODE_ID'),
+};
+children.push(terminalNode);
         }
         // else: skip nodes that are neither group nor terminal leaf
       }
     }
   }
-  return {
-    OBJECT_TYPE: enrichment.type || objectType,
-    OBJECT_NAME: objectName,
-    OBJECT_DESCRIPTION: enrichment.description,
-    OBJECT_PACKAGE: enrichment.packageName,
-    NODE_ID: depth === 0 ? "ROOT" : node_id,
-    node_type: getNodeType({ OBJECT_TYPE: objectType, OBJECT_NAME: objectName }, depth),
-    CHILDREN: children
-  };
+const resultNode: any = {
+  OBJECT_TYPE: enrichment.type || objectType,
+  OBJECT_NAME: objectName,
+  OBJECT_DESCRIPTION: enrichment.description,
+  OBJECT_PACKAGE: enrichment.packageName,
+};
+if (children.length > 0) {
+  resultNode.CHILDREN = children;
+}
+return resultNode;
 }
 
 export async function handleGetObjectInfo(args: { parent_type: string; parent_name: string; maxDepth?: number; enrich?: boolean }) {

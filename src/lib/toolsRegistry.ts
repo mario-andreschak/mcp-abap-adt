@@ -24,6 +24,8 @@ import { TOOL_DEFINITION as GetObjectsByType_Tool } from '../handlers/handleGetO
 import { TOOL_DEFINITION as GetObjectsList_Tool } from '../handlers/handleGetObjectsList';
 import { TOOL_DEFINITION as GetProgFullCode_Tool } from '../handlers/handleGetProgFullCode';
 import { TOOL_DEFINITION as GetObjectNodeFromCache_Tool } from '../handlers/handleGetObjectNodeFromCache';
+import { TOOL_DEFINITION as GetAdtTypes_Tool } from '../handlers/handleGetAllTypes';
+import { TOOL_DEFINITION as GetObjectStructure_Tool } from '../handlers/handleGetObjectStructure';
 
 // Тип для опису інструмента
 export interface ToolDefinition {
@@ -47,28 +49,45 @@ const DYNAMIC_IMPORT_TOOLS: ToolDefinition[] = [
 
 // Збираємо всі описи інструментів в одному масиві
 export const ALL_TOOLS: ToolDefinition[] = [
-  GetProgram_Tool,
+  // Програми, класи, функції
   GetClass_Tool,
   GetFunction_Tool,
   GetFunctionGroup_Tool,
-  GetTable_Tool,
+  GetProgram_Tool,
+
+  // Таблиці, структури
   GetStructure_Tool,
+  GetTable_Tool,
   GetTableContents_Tool,
+
+  // Пакети, інтерфейси
+  GetInterface_Tool,
   GetPackage_Tool,
+
+  // Інклуди, ієрархії
   GetInclude_Tool,
   GetIncludesList_Tool,
+  GetObjectStructure_Tool,
+
+  // Типи, опис, інформація
+  GetAdtTypes_Tool,
   GetTypeInfo_Tool,
-  GetInterface_Tool,
+  GetObjectInfo_Tool,
+
+  // Пошук, SQL, транзакції
+  GetSqlQuery_Tool,
   GetTransaction_Tool,
   SearchObject_Tool,
-  GetEnhancements_Tool,
-  GetEnhancementImpl_Tool,
-  GetEnhancementSpot_Tool,
-  GetBdef_Tool,
-  GetSqlQuery_Tool,
   GetWhereUsed_Tool,
-  ...DYNAMIC_IMPORT_TOOLS,
-  GetObjectInfo_Tool
+
+  // Enhancement
+  GetBdef_Tool,
+  GetEnhancementImpl_Tool,
+  GetEnhancements_Tool,
+  GetEnhancementSpot_Tool,
+
+  // Динамічні інструменти
+  ...DYNAMIC_IMPORT_TOOLS
 ];
 
 // Функція для отримання всіх інструментів

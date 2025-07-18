@@ -303,6 +303,10 @@ export class mcp_abap_adt_server {
             throw new McpError(ErrorCode.InvalidParams, "Missing or invalid arguments for GetObjectInfo");
           }
           return await handleGetObjectInfo(request.params.arguments as { parent_type: string; parent_name: string });
+        case "GetAdtTypes":
+          return await (await import("./handlers/handleGetAllTypes.js")).handleGetAdtTypes(request.params.arguments as any);
+        case "GetObjectStructure":
+          return await (await import("./handlers/handleGetObjectStructure.js")).handleGetObjectStructure(request.params.arguments as any);
         case "GetObjectsList":
           return await (await import("./handlers/handleGetObjectsList.js")).handleGetObjectsList(request.params.arguments as any);
         case "GetObjectsByType":

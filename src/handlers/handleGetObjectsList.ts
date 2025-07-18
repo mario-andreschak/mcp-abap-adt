@@ -44,7 +44,7 @@ function parseValidObjects(xmlData: string): Array<Record<string, string>> {
             }
         }
     } catch (error) {
-        console.warn('Error parsing XML for valid objects:', error);
+        // console.warn('Error parsing XML for valid objects:', error);
     }
     return nodes;
 }
@@ -65,7 +65,7 @@ function parseNodeIds(xmlData: string): string[] {
             }
         }
     } catch (error) {
-        console.warn('Error parsing XML for node ids:', error);
+        // console.warn('Error parsing XML for node ids:', error);
     }
     return nodeIds;
 }

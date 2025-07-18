@@ -70,7 +70,7 @@ function parseIncludesFromXml(xmlData: string): Array<{name: string, node_id: st
             }
         }
     } catch (error) {
-        console.warn('Error parsing XML for includes:', error);
+        // console.warn('Error parsing XML for includes:', error);
     }
     
     return includes;
@@ -118,7 +118,7 @@ function parseIncludeNamesFromXml(xmlData: string): string[] {
             }
         }
     } catch (error) {
-        console.warn('Error parsing XML for include names:', error);
+        // console.warn('Error parsing XML for include names:', error);
     }
     
     return [...new Set(includeNames)]; // Remove duplicates
@@ -148,7 +148,7 @@ export async function handleGetIncludesList(args: any) {
             // For includes, we assume they belong to a program with similar name
             // This is a simplification - in real scenarios, you might need additional logic
             // to determine the actual parent program
-            console.warn(`Include processing: assuming parent program for include ${object_name}`);
+            // console.warn(`Include processing: assuming parent program for include ${object_name}`);
         }
 
         // Step 1: Get root node structure to find includes node (with timeout)
