@@ -28,17 +28,17 @@
   },
   "devDependencies": {
     "@types/jest": "^30.0.0",
-    "@types/node": "^24.0.10",
+    "@types/node": "^24.0.15",
     "commander": "^14.0.0",
-    "dotenv": "^17.0.1",
+    "dotenv": "^17.2.0",
     "express": "^5.1.0",
     "jest": "^30.0.4",
-    "open": "^10.1.2",
+    "open": "^10.2.0",
     "ts-jest": "^29.4.0",
     "typescript": "^5.8.3"
   },
   "dependencies": {
-    "@modelcontextprotocol/sdk": "^1.13.3",
+    "@modelcontextprotocol/sdk": "^1.16.0",
     "axios": "^1.10.0",
     "fast-xml-parser": "^5.2.5",
     "xml-js": "^1.6.11"
