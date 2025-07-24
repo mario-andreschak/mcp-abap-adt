@@ -34,6 +34,9 @@ import { handleGetObjectsByType } from "./handlers/handleGetObjectsByType";
 import { handleGetWhereUsed } from "./handlers/handleGetWhereUsed";
 import { handleGetObjectInfo } from "./handlers/handleGetObjectInfo";
 import { handleDescribeByList } from "./handlers/handleDescribeByList";
+import { handleGetAbapAST } from "./handlers/handleGetAbapAST";
+import { handleGetAbapSemanticAnalysis } from "./handlers/handleGetAbapSemanticAnalysis";
+import { handleGetAbapSystemSymbols } from "./handlers/handleGetAbapSystemSymbols";
 
 // Import shared utility functions and types
 import {
@@ -321,6 +324,12 @@ export class mcp_abap_adt_server {
         //   return await (await import("./handlers/handleDetectObjectType.js")).handleSearchObject(request.params.arguments as any);
         case "DescribeByList":
           return await (await import("./handlers/handleDescribeByList.js")).handleDescribeByList(request.params.arguments as any);
+        case "GetAbapAST":
+          return await handleGetAbapAST(request.params.arguments);
+        case "GetAbapSemanticAnalysis":
+          return await handleGetAbapSemanticAnalysis(request.params.arguments);
+        case "GetAbapSystemSymbols":
+          return await handleGetAbapSystemSymbols(request.params.arguments);
         default:
           throw new McpError(
             ErrorCode.MethodNotFound,

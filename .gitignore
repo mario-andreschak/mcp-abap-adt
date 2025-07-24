@@ -44,4 +44,8 @@ Thumbs.db
 # Backup files
 *.bak
 
+# ANTLR4 generated files
+src/generated/
+tools/antlr/
+
 sk.json

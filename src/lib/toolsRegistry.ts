@@ -26,6 +26,9 @@ import { TOOL_DEFINITION as GetProgFullCode_Tool } from '../handlers/handleGetPr
 import { TOOL_DEFINITION as GetObjectNodeFromCache_Tool } from '../handlers/handleGetObjectNodeFromCache';
 import { TOOL_DEFINITION as GetAdtTypes_Tool } from '../handlers/handleGetAllTypes';
 import { TOOL_DEFINITION as GetObjectStructure_Tool } from '../handlers/handleGetObjectStructure';
+import { TOOL_DEFINITION as GetAbapAST_Tool } from '../handlers/handleGetAbapAST';
+import { TOOL_DEFINITION as GetAbapSemanticAnalysis_Tool } from '../handlers/handleGetAbapSemanticAnalysis';
+import { TOOL_DEFINITION as GetAbapSystemSymbols_Tool } from '../handlers/handleGetAbapSystemSymbols';
 
 // Тип для опису інструмента
 export interface ToolDefinition {
@@ -85,6 +88,11 @@ export const ALL_TOOLS: ToolDefinition[] = [
   GetEnhancementImpl_Tool,
   GetEnhancements_Tool,
   GetEnhancementSpot_Tool,
+
+  // ABAP Parser & Semantic Analysis
+  GetAbapAST_Tool,
+  GetAbapSemanticAnalysis_Tool,
+  GetAbapSystemSymbols_Tool,
 
   // Динамічні інструменти
   ...DYNAMIC_IMPORT_TOOLS

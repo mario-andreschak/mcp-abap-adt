@@ -4,10 +4,13 @@
   "main": "index.js",
   "scripts": {
     "test": "jest",
-    "build": "tsc -p tsconfig.json",
+    "build": "make generate && tsc -p tsconfig.json",
     "start": "node ./dist/index.js",
     "dev": "npx @modelcontextprotocol/inspector node ./dist/index.js",
-    "auth": "node ./tools/sap-abap-auth.js auth"
+    "auth": "node ./tools/sap-abap-auth.js auth",
+    "generate": "make generate",
+    "clean": "make clean",
+    "setup": "make setup"
   },
   "keywords": [
     "abap",
@@ -41,6 +44,8 @@
     "@modelcontextprotocol/sdk": "^1.16.0",
     "axios": "^1.10.0",
     "fast-xml-parser": "^5.2.5",
-    "xml-js": "^1.6.11"
+    "xml-js": "^1.6.11",
+    "antlr4ts": "^0.5.0-alpha.4",
+    "antlr4ts-cli": "^0.5.0-alpha.4"
   }
 }
