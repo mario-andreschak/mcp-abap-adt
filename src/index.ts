@@ -258,7 +258,7 @@ export class mcp_abap_adt_server {
               properties: {
                 query: {
                   type: 'string',
-                  description: 'Search query string'
+                  description: 'Search query string (use * wildcard for partial match)'
                 },
                 maxResults: {
                   type: 'number',
