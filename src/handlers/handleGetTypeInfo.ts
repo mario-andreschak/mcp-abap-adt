@@ -10,17 +10,19 @@ export async function handleGetTypeInfo(args: any) {
         return return_error(error);
     }
 
+    const encodedTypeName = encodeURIComponent(args.type_name);
+
 
     try {
 
-        const url = `${await getBaseUrl()}/sap/bc/adt/ddic/domains/${args.type_name}/source/main`;
+        const url = `${await getBaseUrl()}/sap/bc/adt/ddic/domains/${encodedTypeName}/source/main`;
         const response = await makeAdtRequest(url, 'GET', 30000);
         return return_response(response);
     } catch (error) {
 
         // no domain found, try data element
         try {
-            const url = `${await getBaseUrl()}/sap/bc/adt/ddic/dataelements/${args.type_name}`;
+            const url = `${await getBaseUrl()}/sap/bc/adt/ddic/dataelements/${encodedTypeName}`;
             const response = await makeAdtRequest(url, 'GET', 30000);
             return return_response(response);
         } catch (error) {

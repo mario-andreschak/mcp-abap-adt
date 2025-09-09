@@ -7,8 +7,9 @@ export async function handleGetTableContents(args: any) {
             throw new McpError(ErrorCode.InvalidParams, 'Table name is required');
         }
         const maxRows = args.max_rows || 100;
+        const encodedTableName = encodeURIComponent(args.table_name);
         //NOTE: This service requires a custom service implementation
-        const url = `${await getBaseUrl()}/z_mcp_abap_adt/z_tablecontent/${args.table_name}?maxRows=${maxRows}`;
+        const url = `${await getBaseUrl()}/z_mcp_abap_adt/z_tablecontent/${encodedTableName}?maxRows=${maxRows}`;
         const response = await makeAdtRequest(url, 'GET', 30000);
         return return_response(response);
     } catch (error) {

@@ -6,7 +6,9 @@ export async function handleGetFunction(args: any) {
         if (!args?.function_name || !args?.function_group) {
             throw new McpError(ErrorCode.InvalidParams, 'Function name and group are required');
         }
-        const url = `${await getBaseUrl()}/sap/bc/adt/functions/groups/${args.function_group}/fmodules/${args.function_name}/source/main`;
+        const encodedFunctionName = encodeURIComponent(args.function_name);
+        const encodedFunctionGroup = encodeURIComponent(args.function_group);
+        const url = `${await getBaseUrl()}/sap/bc/adt/functions/groups/${encodedFunctionGroup}/fmodules/${encodedFunctionName}/source/main`;
         const response = await makeAdtRequest(url, 'GET', 30000);
         return return_response(response);
     } catch (error) {

@@ -9,9 +9,10 @@ export async function handleGetPackage(args: any) {
         }
 
         const nodeContentsUrl = `${await getBaseUrl()}/sap/bc/adt/repository/nodestructure`;
+        const encodedPackageName = encodeURIComponent(args.package_name);
         const nodeContentsParams = {
             parent_type: "DEVC/K",
-            parent_name: args.package_name,
+            parent_name: encodedPackageName,
             withShortDescriptions: true
         };
 

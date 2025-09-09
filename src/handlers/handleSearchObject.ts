@@ -7,7 +7,8 @@ export async function handleSearchObject(args: any) {
             throw new McpError(ErrorCode.InvalidParams, 'Search query is required');
         }
         const maxResults = args.maxResults || 100;
-        const url = `${await getBaseUrl()}/sap/bc/adt/repository/informationsystem/search?operation=quickSearch&query=${args.query}*&maxResults=${maxResults}`;
+        const encodedQuery = encodeURIComponent(args.query);
+        const url = `${await getBaseUrl()}/sap/bc/adt/repository/informationsystem/search?operation=quickSearch&query=${encodedQuery}&maxResults=${maxResults}`;
         const response = await makeAdtRequest(url, 'GET', 30000);
         return return_response(response);
     } catch (error) {

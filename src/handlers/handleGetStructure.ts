@@ -6,7 +6,8 @@ export async function handleGetStructure(args: any) {
         if (!args?.structure_name) {
             throw new McpError(ErrorCode.InvalidParams, 'Structure name is required');
         }
-        const url = `${await getBaseUrl()}/sap/bc/adt/ddic/structures/${args.structure_name}/source/main`;
+        const encodedStructureName = encodeURIComponent(args.structure_name);
+        const url = `${await getBaseUrl()}/sap/bc/adt/ddic/structures/${encodedStructureName}/source/main`;
         const response = await makeAdtRequest(url, 'GET', 30000);
         return return_response(response);
     } catch (error) {
