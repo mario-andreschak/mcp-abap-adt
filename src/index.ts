@@ -349,9 +349,8 @@ export class mcp_abap_adt_server {
           return await handleGetInterface(request.params.arguments);
         case 'GetTransaction':
           return await handleGetTransaction(request.params.arguments);
-      case 'CreateStructure':
-        result = await handleCreateStructure(request.params.arguments);
-
+        case 'CreateStructure':
+          return await handleCreateStructure(request.params.arguments);
         default:
           throw new McpError(
             ErrorCode.MethodNotFound,
