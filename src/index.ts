@@ -24,6 +24,7 @@ import { handleGetTypeInfo } from './handlers/handleGetTypeInfo';
 import { handleGetInterface } from './handlers/handleGetInterface';
 import { handleGetTransaction } from './handlers/handleGetTransaction';
 import { handleSearchObject } from './handlers/handleSearchObject';
+import { handleCreateStructure } from './handlers/handleCreateStructure';
 
 // Import shared utility functions and types
 import { getBaseUrl, getAuthHeaders, createAxiosInstance, makeAdtRequest, return_error, return_response } from './lib/utils';
@@ -296,7 +297,25 @@ export class mcp_abap_adt_server {
               },
               required: ['interface_name']
             }
-          }
+          },
+{
+  name: 'CreateStructure',
+  description: 'Create or update a DDIC structure via ADT (requires correct ADT payload).',
+  inputSchema: {
+    type: 'object',
+    properties: {
+      name: { type: 'string', description: 'DDIC structure name, e.g. ZMY_STRUC' },
+      package: { type: 'string', description: 'Package (devclass), e.g. ZPKG' },
+      transport: { type: 'string', description: 'Transport request (optional)' },
+      source: { type: 'string', description: 'Exact ADT structure source payload (often XML) to PUT to /source/main' },
+      contentType: { type: 'string', description: 'Optional override for Content-Type' },
+      accept: { type: 'string', description: 'Optional override for Accept' },
+      createDescriptorXml: { type: 'string', description: 'Optional override: exact ADT create descriptor XML for POST' }
+    },
+    required: ['name', 'package', 'source']
+  }
+}
+
         ]
       };
     });
@@ -330,6 +349,9 @@ export class mcp_abap_adt_server {
           return await handleGetInterface(request.params.arguments);
         case 'GetTransaction':
           return await handleGetTransaction(request.params.arguments);
+      case 'CreateStructure':
+        result = await handleCreateStructure(request.params.arguments);
+
         default:
           throw new McpError(
             ErrorCode.MethodNotFound,
