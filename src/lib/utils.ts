@@ -124,7 +124,7 @@ async function fetchCsrfToken(url: string): Promise<string> {
     }
 }
 
-export async function makeAdtRequest(url: string, method: string, timeout: number, data?: any, params?: any) {
+export async function makeAdtRequest(url: string, method: string, timeout: number, data?: any, params?: any,extraHeaders?: Record<string, string>) {
     // For POST/PUT requests, ensure we have a CSRF token
     if ((method === 'POST' || method === 'PUT') && !csrfToken) {
         try {
@@ -135,7 +135,8 @@ export async function makeAdtRequest(url: string, method: string, timeout: numbe
     }
 
     const requestHeaders = {
-        ...(await getAuthHeaders())
+        ...(await getAuthHeaders()),
+        ...(extraHeaders ?? {})
     };
 
     // Add CSRF token for POST/PUT requests
