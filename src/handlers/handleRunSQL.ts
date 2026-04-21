@@ -1,16 +1,14 @@
 import { McpError, ErrorCode } from '../lib/utils';
 import { createAxiosInstance, getAuthHeaders, return_error, getBaseUrl } from '../lib/utils';
 
-export async function handleGetTableContents(args: any) {
+export async function handleRunSQL(args: any) {
     try {
-        if (!args?.table_name) {
-            throw new McpError(ErrorCode.InvalidParams, 'Table name is required');
+        if (!args?.sql_query) {
+            throw new McpError(ErrorCode.InvalidParams, 'sql_query is required');
         }
         const maxRows = args.max_rows || 100;
-        const tableName = args.table_name.toUpperCase();
         const baseUrl = await getBaseUrl();
         const url = `${baseUrl}/sap/bc/adt/datapreview/freestyle?rowNumber=${maxRows}&sap-client=100`;
-        const sql = `SELECT * FROM ${tableName}`;
 
         const response = await createAxiosInstance()({
             method: 'POST',
@@ -20,7 +18,7 @@ export async function handleGetTableContents(args: any) {
                 'Content-Type': 'text/plain',
                 'Accept': 'application/xml, text/plain, */*'
             },
-            data: sql,
+            data: args.sql_query,
             timeout: 30000
         });
 
