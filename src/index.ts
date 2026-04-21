@@ -24,6 +24,10 @@ import { handleGetTypeInfo } from './handlers/handleGetTypeInfo';
 import { handleGetInterface } from './handlers/handleGetInterface';
 import { handleGetTransaction } from './handlers/handleGetTransaction';
 import { handleSearchObject } from './handlers/handleSearchObject';
+import { handleGetCDSView } from './handlers/handleGetCDSView';
+import { handleGetBehaviorDefinition } from './handlers/handleGetBehaviorDefinition';
+import { handleGetServiceDefinition } from './handlers/handleGetServiceDefinition';
+import { handleRunSQL } from './handlers/handleRunSQL';
 
 // Import shared utility functions and types
 import { getBaseUrl, getAuthHeaders, createAxiosInstance, makeAdtRequest, return_error, return_response } from './lib/utils';
@@ -284,6 +288,48 @@ export class mcp_abap_adt_server {
             }
           },
           {
+            name: 'GetCDSView',
+            description: 'Retrieve CDS View (DDL source) source code',
+            inputSchema: {
+              type: 'object',
+              properties: {
+                view_name: {
+                  type: 'string',
+                  description: 'Name of the CDS View (e.g. ZI_MY_VIEW)'
+                }
+              },
+              required: ['view_name']
+            }
+          },
+          {
+            name: 'GetBehaviorDefinition',
+            description: 'Retrieve RAP Behavior Definition (BDEF) source code',
+            inputSchema: {
+              type: 'object',
+              properties: {
+                bdef_name: {
+                  type: 'string',
+                  description: 'Name of the Behavior Definition (e.g. ZI_MY_BDEF)'
+                }
+              },
+              required: ['bdef_name']
+            }
+          },
+          {
+            name: 'GetServiceDefinition',
+            description: 'Retrieve RAP Service Definition (SRVD) source code',
+            inputSchema: {
+              type: 'object',
+              properties: {
+                srvd_name: {
+                  type: 'string',
+                  description: 'Name of the Service Definition (e.g. ZUI_MY_SERVICE)'
+                }
+              },
+              required: ['srvd_name']
+            }
+          },
+          {
             name: 'GetInterface',
             description: 'Retrieve ABAP interface source code',
             inputSchema: {
@@ -295,6 +341,25 @@ export class mcp_abap_adt_server {
                 }
               },
               required: ['interface_name']
+            }
+          },
+          {
+            name: 'RunSQL',
+            description: 'Execute an Open SQL SELECT query against the SAP system via ADT data preview (read-only). Use standard Open SQL syntax, e.g. SELECT * FROM T007L WHERE LAND1 = \'BE\'',
+            inputSchema: {
+              type: 'object',
+              properties: {
+                sql_query: {
+                  type: 'string',
+                  description: 'Open SQL SELECT statement'
+                },
+                max_rows: {
+                  type: 'number',
+                  description: 'Maximum number of rows to return (default 100)',
+                  default: 100
+                }
+              },
+              required: ['sql_query']
             }
           }
         ]
@@ -330,6 +395,14 @@ export class mcp_abap_adt_server {
           return await handleGetInterface(request.params.arguments);
         case 'GetTransaction':
           return await handleGetTransaction(request.params.arguments);
+        case 'GetCDSView':
+          return await handleGetCDSView(request.params.arguments);
+        case 'GetBehaviorDefinition':
+          return await handleGetBehaviorDefinition(request.params.arguments);
+        case 'GetServiceDefinition':
+          return await handleGetServiceDefinition(request.params.arguments);
+        case 'RunSQL':
+          return await handleRunSQL(request.params.arguments);
         default:
           throw new McpError(
             ErrorCode.MethodNotFound,
