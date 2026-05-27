@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 import { Server } from '@modelcontextprotocol/sdk/server/index.js';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
+import { StreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/streamableHttp.js';
 import {
   CallToolRequestSchema,
   ErrorCode,
@@ -9,6 +10,7 @@ import {
 } from '@modelcontextprotocol/sdk/types.js';
 import path from 'path';
 import dotenv from 'dotenv';
+import { createServer } from 'http';
 
 // Import handler functions
 import { handleGetProgram } from './handlers/handleGetProgram';
@@ -37,6 +39,13 @@ export interface SapConfig {
   username: string;
   password: string;
   client: string;
+}
+
+type TransportMode = 'stdio' | 'http';
+
+function getTransportMode(): TransportMode {
+  const mode = (process.env.MCP_TRANSPORT || process.env.TRANSPORT || 'stdio').toLowerCase();
+  return mode === 'http' || mode === 'streamable-http' ? 'http' : 'stdio';
 }
 
 /**
@@ -349,8 +358,63 @@ export class mcp_abap_adt_server {
    * Starts the MCP server and connects it to the transport.
    */
   async run() {
+    const mode = getTransportMode();
+
+    if (mode === 'http') {
+      await this.runHttp();
+      return;
+    }
+
+    await this.runStdio();
+  }
+
+  private async runStdio() {
     const transport = new StdioServerTransport();
     await this.server.connect(transport);
+  }
+
+  private async runHttp() {
+    const port = Number.parseInt(process.env.PORT || '8080', 10);
+
+    if (Number.isNaN(port) || port <= 0) {
+      throw new Error('PORT must be a valid positive integer when MCP_TRANSPORT=http');
+    }
+
+    const transport = new StreamableHTTPServerTransport({
+      sessionIdGenerator: undefined,
+    });
+
+    await this.server.connect(transport);
+
+    const httpServer = createServer((req, res) => {
+      const pathname = req.url
+        ? new URL(req.url, `http://${req.headers.host || 'localhost'}`).pathname
+        : '/';
+
+      if (pathname === '/healthz') {
+        res.writeHead(200, { 'content-type': 'application/json' });
+        res.end(JSON.stringify({ status: 'ok' }));
+        return;
+      }
+
+      if (pathname === '/mcp') {
+        transport.handleRequest(req, res).catch(() => {
+          if (!res.headersSent) {
+            res.writeHead(500, { 'content-type': 'application/json' });
+            res.end(JSON.stringify({ error: 'Internal Server Error' }));
+          }
+        });
+        return;
+      }
+
+      res.writeHead(404, { 'content-type': 'application/json' });
+      res.end(JSON.stringify({ error: 'Not Found' }));
+    });
+
+    await new Promise<void>((resolve, reject) => {
+      httpServer.once('error', reject);
+      httpServer.listen(port, () => resolve());
+    });
   }
 }
 
