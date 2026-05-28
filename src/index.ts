@@ -93,6 +93,7 @@ export class mcp_abap_adt_server {
       {
         capabilities: {
           tools: {}, // Initially, no tools are registered
+          logging: {}, // Advertise MCP logging support
         },
       }
     );
@@ -388,9 +389,39 @@ export class mcp_abap_adt_server {
     await this.server.connect(transport);
 
     const httpServer = createServer((req, res) => {
+      const startedAt = Date.now();
+      const method = req.method || 'UNKNOWN';
+      const sessionIdHeader = req.headers['mcp-session-id'];
+      const sessionId = Array.isArray(sessionIdHeader) ? sessionIdHeader[0] : sessionIdHeader;
       const pathname = req.url
         ? new URL(req.url, `http://${req.headers.host || 'localhost'}`).pathname
         : '/';
+
+      res.on('finish', () => {
+        const durationMs = Date.now() - startedAt;
+        console.log(`[HTTP] ${method} ${pathname} -> ${res.statusCode} (${durationMs}ms)`);
+
+        if (pathname !== '/mcp') {
+          return;
+        }
+
+        const level = res.statusCode >= 500 ? 'error' : res.statusCode >= 400 ? 'warning' : 'info';
+        this.server.sendLoggingMessage(
+          {
+            level,
+            logger: 'http',
+            data: {
+              method,
+              path: pathname,
+              statusCode: res.statusCode,
+              durationMs,
+            },
+          },
+          sessionId,
+        ).catch((error) => {
+          console.error('Error sending MCP logging message:', error);
+        });
+      });
 
       if (pathname === '/healthz') {
         res.writeHead(200, { 'content-type': 'application/json' });
