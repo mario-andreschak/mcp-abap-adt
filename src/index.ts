@@ -318,7 +318,29 @@ export class mcp_abap_adt_server {
     });
 
     // Handler for CallToolRequest
-    server.server.setRequestHandler(CallToolRequestSchema, async (request) => {
+    server.server.setRequestHandler(CallToolRequestSchema, async (request, extra) => {
+      const toolName = request.params.name;
+      const toolArgs = request.params.arguments ?? {};
+      const headerSessionId = extra.requestInfo?.headers['mcp-session-id'];
+      const normalizedSessionId = Array.isArray(headerSessionId) ? headerSessionId[0] : headerSessionId;
+      const sessionId = extra.sessionId || normalizedSessionId;
+
+      console.info(`[TOOL] Invoking ${toolName}`, toolArgs);
+      server.sendLoggingMessage(
+        {
+          level: 'info',
+          logger: 'tool',
+          data: {
+            event: 'tool_invocation',
+            toolName,
+            arguments: toolArgs,
+          },
+        },
+        sessionId,
+      ).catch((error) => {
+        console.error('Error sending tool invocation log:', error);
+      });
+
       switch (request.params.name) {
         case 'GetProgram':
           return await handleGetProgram(request.params.arguments);
