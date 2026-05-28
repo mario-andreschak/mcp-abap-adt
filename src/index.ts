@@ -552,7 +552,17 @@ export class mcp_abap_adt_server {
 }
 
 // Create and run the server
-const server = new mcp_abap_adt_server();
-server.run().catch((error) => {
-  process.exit(1);
-});
+export async function startServer() {
+  const server = new mcp_abap_adt_server();
+  await server.run();
+}
+
+const isMainModule = process.argv[1]
+  ? require.main === module
+  : false;
+
+if (isMainModule) {
+  startServer().catch(() => {
+    process.exit(1);
+  });
+}
