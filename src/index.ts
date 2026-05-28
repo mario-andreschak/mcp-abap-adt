@@ -501,10 +501,20 @@ export class mcp_abap_adt_server {
             return;
           }
 
+          // New sessions must start with POST. Rejecting early avoids creating
+          // orphaned transports on probes or malformed requests.
+          if (method !== 'POST') {
+            res.writeHead(400, { 'content-type': 'application/json' });
+            res.end(JSON.stringify({ error: 'Bad Request: Initial MCP session request must use POST' }));
+            return;
+          }
+
           const sessionServer = this.createServer();
+          let sessionInitialized = false;
           const sessionTransport = new StreamableHTTPServerTransport({
             sessionIdGenerator: () => randomUUID(),
             onsessioninitialized: (newSessionId) => {
+              sessionInitialized = true;
               requestSessionId = newSessionId;
               sessions.set(newSessionId, { server: sessionServer, transport: sessionTransport });
             },
@@ -526,8 +536,17 @@ export class mcp_abap_adt_server {
           };
 
           requestServer = sessionServer;
-          await sessionServer.connect(sessionTransport);
-          await sessionTransport.handleRequest(req, res);
+          try {
+            await sessionServer.connect(sessionTransport);
+            await sessionTransport.handleRequest(req, res);
+          } finally {
+            // If initialization failed (for example, protocol validation errors),
+            // aggressively close transient resources to prevent request-path leaks.
+            if (!sessionInitialized) {
+              await sessionTransport.close().catch(() => undefined);
+              await sessionServer.close().catch(() => undefined);
+            }
+          }
         };
 
         handleMcpRequest().catch((error) => {
