@@ -49,6 +49,10 @@ function getTransportMode(): TransportMode {
   return mode === 'http' || mode === 'streamable-http' ? 'http' : 'stdio';
 }
 
+function isNotConnectedError(error: unknown): boolean {
+  return error instanceof Error && error.message.includes('Not connected');
+}
+
 /**
  * Retrieves SAP configuration from environment variables.
  *
@@ -326,20 +330,25 @@ export class mcp_abap_adt_server {
       const sessionId = extra.sessionId || normalizedSessionId;
 
       console.info(`[TOOL] Invoking ${toolName}`, toolArgs);
-      server.sendLoggingMessage(
-        {
-          level: 'info',
-          logger: 'tool',
-          data: {
-            event: 'tool_invocation',
-            toolName,
-            arguments: toolArgs,
+      if (server.isConnected()) {
+        server.sendLoggingMessage(
+          {
+            level: 'info',
+            logger: 'tool',
+            data: {
+              event: 'tool_invocation',
+              toolName,
+              arguments: toolArgs,
+            },
           },
-        },
-        sessionId,
-      ).catch((error) => {
-        console.error('Error sending tool invocation log:', error);
-      });
+          sessionId,
+        ).catch((error) => {
+          if (isNotConnectedError(error)) {
+            return;
+          }
+          console.error('Error sending tool invocation log:', error);
+        });
+      }
 
       switch (request.params.name) {
         case 'GetProgram':
@@ -410,6 +419,7 @@ export class mcp_abap_adt_server {
     }
 
     const sessions = new Map<string, { server: McpServer; transport: StreamableHTTPServerTransport }>();
+    const closingTransports = new WeakSet<StreamableHTTPServerTransport>();
 
     process.on('SIGINT', async () => {
       const uniqueServers = new Set<McpServer>();
@@ -445,7 +455,7 @@ export class mcp_abap_adt_server {
         }
 
         const level = res.statusCode >= 500 ? 'error' : res.statusCode >= 400 ? 'warning' : 'info';
-        if (!requestServer) {
+        if (!requestServer || !requestServer.isConnected()) {
           return;
         }
 
@@ -462,6 +472,9 @@ export class mcp_abap_adt_server {
           },
           requestSessionId,
         ).catch((error) => {
+          if (isNotConnectedError(error)) {
+            return;
+          }
           console.error('Error sending MCP logging message:', error);
         });
       });
@@ -498,11 +511,18 @@ export class mcp_abap_adt_server {
           });
 
           sessionTransport.onclose = () => {
+            if (closingTransports.has(sessionTransport)) {
+              return;
+            }
+
+            closingTransports.add(sessionTransport);
             const currentSessionId = sessionTransport.sessionId;
             if (currentSessionId) {
               sessions.delete(currentSessionId);
             }
-            sessionServer.close().catch(() => undefined);
+
+            // Avoid calling sessionServer.close() here: transport.close() triggers onclose,
+            // and calling close again can recurse through the same path.
           };
 
           requestServer = sessionServer;
