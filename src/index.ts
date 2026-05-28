@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import { Server } from '@modelcontextprotocol/sdk/server/index.js';
+import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
 import { StreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/streamableHttp.js';
 import {
@@ -77,7 +77,7 @@ export function getConfig(): SapConfig {
  * Server class for interacting with ABAP systems via ADT.
  */
 export class mcp_abap_adt_server {
-  private server: Server;  // Instance of the MCP server
+  private server: McpServer;  // Instance of the MCP server
   private sapConfig: SapConfig; // SAP configuration
 
   /**
@@ -85,7 +85,11 @@ export class mcp_abap_adt_server {
    */
   constructor() {
     this.sapConfig = getConfig(); // Load SAP configuration
-    this.server = new Server(  // Initialize the MCP server
+    this.server = this.createServer();
+  }
+
+  private createServer(): McpServer {
+    const server = new McpServer(  // Initialize the MCP server
       {
         name: 'mcp-abap-adt', // Server name
         version: '0.1.0',       // Server version
@@ -98,18 +102,19 @@ export class mcp_abap_adt_server {
       }
     );
 
-    this.setupHandlers(); // Setup request handlers
+    this.setupHandlers(server); // Setup request handlers
+    return server;
   }
 
   /**
    * Sets up request handlers for listing and calling tools.
    * @private
    */
-  private setupHandlers() {
+  private setupHandlers(server: McpServer) {
     // Setup tool handlers
 
     // Handler for ListToolsRequest
-    this.server.setRequestHandler(ListToolsRequestSchema, async () => {
+    server.server.setRequestHandler(ListToolsRequestSchema, async () => {
       return {
         tools: [ // Define available tools
           {
@@ -313,7 +318,7 @@ export class mcp_abap_adt_server {
     });
 
     // Handler for CallToolRequest
-    this.server.setRequestHandler(CallToolRequestSchema, async (request) => {
+    server.server.setRequestHandler(CallToolRequestSchema, async (request) => {
       switch (request.params.name) {
         case 'GetProgram':
           return await handleGetProgram(request.params.arguments);
@@ -349,11 +354,6 @@ export class mcp_abap_adt_server {
       }
     });
 
-    // Handle server shutdown on SIGINT (Ctrl+C)
-    process.on('SIGINT', async () => {
-      await this.server.close();
-      process.exit(0);
-    });
   }
 
   /**
@@ -371,6 +371,11 @@ export class mcp_abap_adt_server {
   }
 
   private async runStdio() {
+    process.on('SIGINT', async () => {
+      await this.server.close();
+      process.exit(0);
+    });
+
     const transport = new StdioServerTransport();
     await this.server.connect(transport);
   }
@@ -382,17 +387,29 @@ export class mcp_abap_adt_server {
       throw new Error('PORT must be a valid positive integer when MCP_TRANSPORT=http');
     }
 
-    const transport = new StreamableHTTPServerTransport({
-      sessionIdGenerator: () => randomUUID(),
-    });
+    const sessions = new Map<string, { server: McpServer; transport: StreamableHTTPServerTransport }>();
 
-    await this.server.connect(transport);
+    process.on('SIGINT', async () => {
+      const uniqueServers = new Set<McpServer>();
+      for (const session of sessions.values()) {
+        uniqueServers.add(session.server);
+        await session.transport.close().catch(() => undefined);
+      }
+
+      for (const sessionServer of uniqueServers) {
+        await sessionServer.close().catch(() => undefined);
+      }
+
+      process.exit(0);
+    });
 
     const httpServer = createServer((req, res) => {
       const startedAt = Date.now();
       const method = req.method || 'UNKNOWN';
       const sessionIdHeader = req.headers['mcp-session-id'];
       const sessionId = Array.isArray(sessionIdHeader) ? sessionIdHeader[0] : sessionIdHeader;
+      let requestServer: McpServer | undefined;
+      let requestSessionId: string | undefined = sessionId;
       const pathname = req.url
         ? new URL(req.url, `http://${req.headers.host || 'localhost'}`).pathname
         : '/';
@@ -406,7 +423,11 @@ export class mcp_abap_adt_server {
         }
 
         const level = res.statusCode >= 500 ? 'error' : res.statusCode >= 400 ? 'warning' : 'info';
-        this.server.sendLoggingMessage(
+        if (!requestServer) {
+          return;
+        }
+
+        requestServer.sendLoggingMessage(
           {
             level,
             logger: 'http',
@@ -417,7 +438,7 @@ export class mcp_abap_adt_server {
               durationMs,
             },
           },
-          sessionId,
+          requestSessionId,
         ).catch((error) => {
           console.error('Error sending MCP logging message:', error);
         });
@@ -430,7 +451,44 @@ export class mcp_abap_adt_server {
       }
 
       if (pathname === '/mcp') {
-        transport.handleRequest(req, res).catch((error) => {
+        const handleMcpRequest = async () => {
+          if (sessionId) {
+            const existingSession = sessions.get(sessionId);
+
+            if (!existingSession) {
+              res.writeHead(400, { 'content-type': 'application/json' });
+              res.end(JSON.stringify({ error: 'Bad Request: Invalid or expired MCP session ID' }));
+              return;
+            }
+
+            requestServer = existingSession.server;
+            await existingSession.transport.handleRequest(req, res);
+            return;
+          }
+
+          const sessionServer = this.createServer();
+          const sessionTransport = new StreamableHTTPServerTransport({
+            sessionIdGenerator: () => randomUUID(),
+            onsessioninitialized: (newSessionId) => {
+              requestSessionId = newSessionId;
+              sessions.set(newSessionId, { server: sessionServer, transport: sessionTransport });
+            },
+          });
+
+          sessionTransport.onclose = () => {
+            const currentSessionId = sessionTransport.sessionId;
+            if (currentSessionId) {
+              sessions.delete(currentSessionId);
+            }
+            sessionServer.close().catch(() => undefined);
+          };
+
+          requestServer = sessionServer;
+          await sessionServer.connect(sessionTransport);
+          await sessionTransport.handleRequest(req, res);
+        };
+
+        handleMcpRequest().catch((error) => {
           console.error('Error handling /mcp request:', error);
           if (!res.headersSent) {
             res.writeHead(500, { 'content-type': 'application/json' });
