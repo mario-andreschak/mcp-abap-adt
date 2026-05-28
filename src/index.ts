@@ -11,6 +11,7 @@ import {
 import path from 'path';
 import dotenv from 'dotenv';
 import { createServer } from 'http';
+import { randomUUID } from 'crypto';
 
 // Import handler functions
 import { handleGetProgram } from './handlers/handleGetProgram';
@@ -381,7 +382,7 @@ export class mcp_abap_adt_server {
     }
 
     const transport = new StreamableHTTPServerTransport({
-      sessionIdGenerator: undefined,
+      sessionIdGenerator: () => randomUUID(),
     });
 
     await this.server.connect(transport);
@@ -398,7 +399,8 @@ export class mcp_abap_adt_server {
       }
 
       if (pathname === '/mcp') {
-        transport.handleRequest(req, res).catch(() => {
+        transport.handleRequest(req, res).catch((error) => {
+          console.error('Error handling /mcp request:', error);
           if (!res.headersSent) {
             res.writeHead(500, { 'content-type': 'application/json' });
             res.end(JSON.stringify({ error: 'Internal Server Error' }));
