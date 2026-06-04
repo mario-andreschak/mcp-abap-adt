@@ -1,3 +1,5 @@
+Please find the maintained repository at https://github.com/mandreschak/mcp-abap-adt
+
 # mcp-abap-adt: Your Gateway to ABAP Development Tools (ADT)
 
 [![smithery badge](https://smithery.ai/badge/@mario-andreschak/mcp-abap-adt)](https://smithery.ai/server/@mario-andreschak/mcp-abap-adt)
