@@ -5,6 +5,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+- Optional HTTP transport mode for MCP using `StreamableHTTPServerTransport`.
+- New HTTP endpoints:
+  - `/mcp` for MCP requests (GET/POST/DELETE)
+  - `/healthz` for container and Kubernetes health probes
+
+### Changed
+- Docker defaults now use HTTP transport with `MCP_TRANSPORT=http` and `PORT=8080`.
+- Docker health check now probes `/healthz` instead of checking process state.
+- Docker image now exposes port `8080`.
+- Replaced `npm install -r` with `npm install` in Docker build.
+
 ## [1.1.0] - 2025-02-19
 
 ### Added

@@ -107,6 +107,7 @@ To be fair, you usually dont usually "run" this server on it's own. It is suppos
 
 *   **Standalone Mode:**  This runs the server directly, and it will output messages to the terminal. The server will start and wait for client connections, so potentially rendering it useless except to see if it starts.
 *   **Development/Debug Mode:** This runs the server with the MCP Inspector. You can open the URL that it outputs in your browser and start playing around.
+*   **HTTP Mode (for Docker/Kubernetes):** This runs the MCP server over HTTP using the `/mcp` endpoint and exposes `/healthz` for probes.
 
 ### 3.1 Standalone Mode
 
@@ -128,6 +129,57 @@ This mode is useful for debugging.
     ```
     This will start the server and output a message like:  `🔍 MCP Inspector is up and running at http://localhost:5173 🚀`.
     This is the URL you'll use to open the MCP inspector in your Browser.
+
+### 3.3 HTTP Transport Mode (Streamable HTTP)
+
+This project now supports MCP over HTTP in addition to stdio.
+
+Set the following environment variables:
+
+```bash
+MCP_TRANSPORT=http
+PORT=8080
+```
+
+Then run:
+
+```bash
+npm run build
+npm run start
+```
+
+Available HTTP endpoints:
+
+*   `GET|POST|DELETE /mcp` - MCP transport endpoint.
+*   `GET /healthz` - Health endpoint for liveness/readiness checks.
+
+Example health check:
+
+```bash
+curl -i http://localhost:8080/healthz
+```
+
+### 3.4 Docker Run (HTTP + Healthcheck)
+
+The Docker image is configured to run in HTTP mode by default:
+
+*   `MCP_TRANSPORT=http`
+*   `PORT=8080`
+*   `EXPOSE 8080`
+*   Healthcheck probes `http://127.0.0.1:8080/healthz`
+
+Run the container with your existing `.env` file:
+
+```bash
+docker build -t mcp-abap-adt .
+docker run -d --name mcp-abap-adt --env-file .env -p 8080:8080 mcp-abap-adt
+```
+
+Check health status:
+
+```bash
+docker inspect --format='{{.State.Health.Status}}' mcp-abap-adt
+```
 
 ## 4. Integrating with Cline
 
