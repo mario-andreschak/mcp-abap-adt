@@ -16,13 +16,21 @@ export function return_response(response: AxiosResponse) {
     };
 }
 export function return_error(error: any) {
+    let message: string;
+    if (error instanceof AxiosError) {
+        message = error.response?.data
+            ? String(error.response.data)
+            : `${error.message} (${error.code ?? 'no code'})`;
+    } else if (error instanceof Error) {
+        message = error.message;
+    } else {
+        message = String(error);
+    }
     return {
         isError: true,
         content: [{
             type: 'text',
-            text: `Error: ${error instanceof AxiosError ? String(error.response?.data)
-                : error instanceof Error ? error.message
-                    : String(error)}`
+            text: `Error: ${message}`
         }]
     };
 }
@@ -65,8 +73,7 @@ export async function getBaseUrl() {
     const { url } = config;
     try {
         const urlObj = new URL(url);
-        const baseUrl = Buffer.from(`${urlObj.origin}`);
-        return baseUrl;
+        return urlObj.origin;
     } catch (error) {
         const errorMessage = `Invalid URL in configuration: ${error instanceof Error ? error.message : error}`;
         throw new Error(errorMessage);
@@ -135,7 +142,8 @@ export async function makeAdtRequest(url: string, method: string, timeout: numbe
     }
 
     const requestHeaders = {
-        ...(await getAuthHeaders())
+        ...(await getAuthHeaders()),
+        'Accept': 'text/plain, */*'
     };
 
     // Add CSRF token for POST/PUT requests
