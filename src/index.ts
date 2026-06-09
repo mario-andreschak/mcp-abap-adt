@@ -45,19 +45,19 @@ export interface SapConfig {
  * @returns {SapConfig} The SAP configuration object.
  * @throws {Error} If any required environment variable is missing.
  */
-export function getConfig(): SapConfig {
-  const url = process.env.SAP_URL;
-  const username = process.env.SAP_USERNAME;
-  const password = process.env.SAP_PASSWORD;
-  const client = process.env.SAP_CLIENT;
+export function getConfig(system: string = 'S4H'): SapConfig {
+  const prefix = system.toUpperCase();
+  const url = process.env[`${prefix}_SAP_URL`];
+  const username = process.env[`${prefix}_SAP_USERNAME`];
+  const password = process.env[`${prefix}_SAP_PASSWORD`];
+  const client = process.env[`${prefix}_SAP_CLIENT`];
 
-  // Check if all required environment variables are set
   if (!url || !username || !password || !client) {
-    throw new Error(`Missing required environment variables. Required variables:
-- SAP_URL
-- SAP_USERNAME
-- SAP_PASSWORD
-- SAP_CLIENT`);
+    throw new Error(`Missing required environment variables for system "${system}". Expected:
+- ${prefix}_SAP_URL
+- ${prefix}_SAP_USERNAME
+- ${prefix}_SAP_PASSWORD
+- ${prefix}_SAP_CLIENT`);
   }
 
   return { url, username, password, client };
@@ -107,10 +107,8 @@ export class mcp_abap_adt_server {
             inputSchema: {
               type: 'object',
               properties: {
-                program_name: {
-                  type: 'string',
-                  description: 'Name of the ABAP program'
-                }
+                program_name: { type: 'string', description: 'Name of the ABAP program' },
+                sap_system: { type: 'string', description: 'SAP system (e.g. S4H, DHB). Default: S4H', default: 'S4H' }
               },
               required: ['program_name']
             }
@@ -121,10 +119,8 @@ export class mcp_abap_adt_server {
             inputSchema: {
               type: 'object',
               properties: {
-                class_name: {
-                  type: 'string',
-                  description: 'Name of the ABAP class'
-                }
+                class_name: { type: 'string', description: 'Name of the ABAP class' },
+                sap_system: { type: 'string', description: 'SAP system (e.g. S4H, DHB). Default: S4H', default: 'S4H' }
               },
               required: ['class_name']
             }
@@ -135,10 +131,8 @@ export class mcp_abap_adt_server {
             inputSchema: {
               type: 'object',
               properties: {
-                function_group: {
-                  type: 'string',
-                  description: 'Name of the function module'
-                }
+                function_group: { type: 'string', description: 'Name of the function group' },
+                sap_system: { type: 'string', description: 'SAP system (e.g. S4H, DHB). Default: S4H', default: 'S4H' }
               },
               required: ['function_group']
             }
@@ -149,14 +143,9 @@ export class mcp_abap_adt_server {
             inputSchema: {
               type: 'object',
               properties: {
-                function_name: {
-                  type: 'string',
-                  description: 'Name of the function module'
-                },
-                function_group: {
-                  type: 'string',
-                  description: 'Name of the function group'
-                }
+                function_name: { type: 'string', description: 'Name of the function module' },
+                function_group: { type: 'string', description: 'Name of the function group' },
+                sap_system: { type: 'string', description: 'SAP system (e.g. S4H, DHB). Default: S4H', default: 'S4H' }
               },
               required: ['function_name', 'function_group']
             }
@@ -167,10 +156,8 @@ export class mcp_abap_adt_server {
             inputSchema: {
               type: 'object',
               properties: {
-                structure_name: {
-                  type: 'string',
-                  description: 'Name of the ABAP Structure'
-                }
+                structure_name: { type: 'string', description: 'Name of the ABAP Structure' },
+                sap_system: { type: 'string', description: 'SAP system (e.g. S4H, DHB). Default: S4H', default: 'S4H' }
               },
               required: ['structure_name']
             }
@@ -181,10 +168,8 @@ export class mcp_abap_adt_server {
             inputSchema: {
               type: 'object',
               properties: {
-                table_name: {
-                  type: 'string',
-                  description: 'Name of the ABAP table'
-                }
+                table_name: { type: 'string', description: 'Name of the ABAP table' },
+                sap_system: { type: 'string', description: 'SAP system (e.g. S4H, DHB). Default: S4H', default: 'S4H' }
               },
               required: ['table_name']
             }
@@ -195,15 +180,9 @@ export class mcp_abap_adt_server {
             inputSchema: {
               type: 'object',
               properties: {
-                table_name: {
-                  type: 'string',
-                  description: 'Name of the ABAP table'
-                },
-                max_rows: {
-                  type: 'number',
-                  description: 'Maximum number of rows to retrieve',
-                  default: 100
-                }
+                table_name: { type: 'string', description: 'Name of the ABAP table' },
+                max_rows: { type: 'number', description: 'Maximum number of rows to retrieve', default: 100 },
+                sap_system: { type: 'string', description: 'SAP system (e.g. S4H, DHB). Default: S4H', default: 'S4H' }
               },
               required: ['table_name']
             }
@@ -214,10 +193,8 @@ export class mcp_abap_adt_server {
             inputSchema: {
               type: 'object',
               properties: {
-                package_name: {
-                  type: 'string',
-                  description: 'Name of the ABAP package'
-                }
+                package_name: { type: 'string', description: 'Name of the ABAP package' },
+                sap_system: { type: 'string', description: 'SAP system (e.g. S4H, DHB). Default: S4H', default: 'S4H' }
               },
               required: ['package_name']
             }
@@ -228,10 +205,8 @@ export class mcp_abap_adt_server {
             inputSchema: {
               type: 'object',
               properties: {
-                type_name: {
-                  type: 'string',
-                  description: 'Name of the ABAP type'
-                }
+                type_name: { type: 'string', description: 'Name of the ABAP type' },
+                sap_system: { type: 'string', description: 'SAP system (e.g. S4H, DHB). Default: S4H', default: 'S4H' }
               },
               required: ['type_name']
             }
@@ -242,10 +217,8 @@ export class mcp_abap_adt_server {
             inputSchema: {
               type: 'object',
               properties: {
-                include_name: {
-                  type: 'string',
-                  description: 'Name of the ABAP Include'
-                }
+                include_name: { type: 'string', description: 'Name of the ABAP Include' },
+                sap_system: { type: 'string', description: 'SAP system (e.g. S4H, DHB). Default: S4H', default: 'S4H' }
               },
               required: ['include_name']
             }
@@ -256,15 +229,9 @@ export class mcp_abap_adt_server {
             inputSchema: {
               type: 'object',
               properties: {
-                query: {
-                  type: 'string',
-                  description: 'Search query string (use * wildcard for partial match)'
-                },
-                maxResults: {
-                  type: 'number',
-                  description: 'Maximum number of results to return',
-                  default: 100
-                }
+                query: { type: 'string', description: 'Search query string (use * wildcard for partial match)' },
+                maxResults: { type: 'number', description: 'Maximum number of results to return', default: 100 },
+                sap_system: { type: 'string', description: 'SAP system (e.g. S4H, DHB). Default: S4H', default: 'S4H' }
               },
               required: ['query']
             }
@@ -275,10 +242,8 @@ export class mcp_abap_adt_server {
             inputSchema: {
               type: 'object',
               properties: {
-                transaction_name: {
-                  type: 'string',
-                  description: 'Name of the ABAP transaction'
-                }
+                transaction_name: { type: 'string', description: 'Name of the ABAP transaction' },
+                sap_system: { type: 'string', description: 'SAP system (e.g. S4H, DHB). Default: S4H', default: 'S4H' }
               },
               required: ['transaction_name']
             }
@@ -289,10 +254,8 @@ export class mcp_abap_adt_server {
             inputSchema: {
               type: 'object',
               properties: {
-                interface_name: {
-                  type: 'string',
-                  description: 'Name of the ABAP interface'
-                }
+                interface_name: { type: 'string', description: 'Name of the ABAP interface' },
+                sap_system: { type: 'string', description: 'SAP system (e.g. S4H, DHB). Default: S4H', default: 'S4H' }
               },
               required: ['interface_name']
             }

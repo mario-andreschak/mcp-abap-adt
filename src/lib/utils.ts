@@ -2,7 +2,7 @@ import { McpError, ErrorCode } from '@modelcontextprotocol/sdk/types.js';
 import axios, { AxiosError, AxiosInstance } from 'axios';
 import { Agent } from 'https';
 import { AxiosResponse } from 'axios';
-import { getConfig, SapConfig } from '../index'; // getConfig needs to be exported from index.ts
+import { getConfig, SapConfig } from '../index';
 
 export { McpError, ErrorCode, AxiosResponse };
 
@@ -15,6 +15,7 @@ export function return_response(response: AxiosResponse) {
         }]
     };
 }
+
 export function return_error(error: any) {
     let message: string;
     if (error instanceof AxiosError) {
@@ -40,65 +41,65 @@ export function createAxiosInstance() {
     if (!axiosInstance) {
         axiosInstance = axios.create({
             httpsAgent: new Agent({
-                rejectUnauthorized: false // Allow self-signed certificates
+                rejectUnauthorized: false
             })
         });
     }
     return axiosInstance;
 }
 
-// Cleanup function for tests
+// Per-system caches
+const configCache = new Map<string, SapConfig>();
+const csrfTokenCache = new Map<string, string>();
+const cookiesCache = new Map<string, string>();
+
 export function cleanup() {
     if (axiosInstance) {
-        // Clear any interceptors
         const reqInterceptor = axiosInstance.interceptors.request.use((config) => config);
         const resInterceptor = axiosInstance.interceptors.response.use((response) => response);
         axiosInstance.interceptors.request.eject(reqInterceptor);
         axiosInstance.interceptors.response.eject(resInterceptor);
     }
     axiosInstance = null;
-    config = undefined;
-    csrfToken = null;
-    cookies = null;
+    configCache.clear();
+    csrfTokenCache.clear();
+    cookiesCache.clear();
 }
 
-let config: SapConfig | undefined;
-let csrfToken: string | null = null;
-let cookies: string | null = null; // Variable to store cookies
-
-export async function getBaseUrl() {
-    if (!config) {
-        config = getConfig();
+function getSystemConfig(system: string = 'S4H'): SapConfig {
+    const key = system.toUpperCase();
+    if (!configCache.has(key)) {
+        configCache.set(key, getConfig(key));
     }
-    const { url } = config;
+    return configCache.get(key)!;
+}
+
+export async function getBaseUrl(system: string = 'S4H') {
+    const { url } = getSystemConfig(system);
     try {
         const urlObj = new URL(url);
         return urlObj.origin;
     } catch (error) {
-        const errorMessage = `Invalid URL in configuration: ${error instanceof Error ? error.message : error}`;
-        throw new Error(errorMessage);
+        throw new Error(`Invalid URL in configuration: ${error instanceof Error ? error.message : error}`);
     }
 }
 
-export async function getAuthHeaders() {
-    if (!config) {
-        config = getConfig();
-    }
-    const { username, password, client } = config;
-    const auth = Buffer.from(`${username}:${password}`).toString('base64'); // Create Basic Auth string
+export async function getAuthHeaders(system: string = 'S4H') {
+    const { username, password, client } = getSystemConfig(system);
+    const auth = Buffer.from(`${username}:${password}`).toString('base64');
     return {
-        'Authorization': `Basic ${auth}`, // Basic Authentication header
-        'X-SAP-Client': client            // SAP client header
+        'Authorization': `Basic ${auth}`,
+        'X-SAP-Client': client
     };
 }
 
-async function fetchCsrfToken(url: string): Promise<string> {
+async function fetchCsrfToken(url: string, system: string): Promise<string> {
     try {
         const response = await createAxiosInstance()({
             method: 'GET',
             url,
             headers: {
-                ...(await getAuthHeaders()),
+                ...(await getAuthHeaders(system)),
                 'x-csrf-token': 'fetch'
             }
         });
@@ -108,55 +109,50 @@ async function fetchCsrfToken(url: string): Promise<string> {
             throw new Error('No CSRF token in response headers');
         }
 
-        // Extract and store cookies
         if (response.headers['set-cookie']) {
-            cookies = response.headers['set-cookie'].join('; ');
+            cookiesCache.set(system.toUpperCase(), response.headers['set-cookie'].join('; '));
         }
 
         return token;
     } catch (error) {
-        // Even if the request fails, try to get token from error response
         if (error instanceof AxiosError && error.response?.headers['x-csrf-token']) {
             const token = error.response.headers['x-csrf-token'];
             if (token) {
-                 // Extract and store cookies from the error response as well
                 if (error.response.headers['set-cookie']) {
-                    cookies = error.response.headers['set-cookie'].join('; ');
+                    cookiesCache.set(system.toUpperCase(), error.response.headers['set-cookie'].join('; '));
                 }
                 return token;
             }
         }
-        // If we couldn't get token from error response either, throw the original error
         throw new Error(`Failed to fetch CSRF token: ${error instanceof Error ? error.message : String(error)}`);
     }
 }
 
-export async function makeAdtRequest(url: string, method: string, timeout: number, data?: any, params?: any) {
-    // For POST/PUT requests, ensure we have a CSRF token
-    if ((method === 'POST' || method === 'PUT') && !csrfToken) {
+export async function makeAdtRequest(url: string, method: string, timeout: number, data?: any, params?: any, system: string = 'S4H') {
+    const sysKey = system.toUpperCase();
+
+    if ((method === 'POST' || method === 'PUT') && !csrfTokenCache.has(sysKey)) {
         try {
-            csrfToken = await fetchCsrfToken(url);
+            csrfTokenCache.set(sysKey, await fetchCsrfToken(url, system));
         } catch (error) {
             throw new Error('CSRF token is required for POST/PUT requests but could not be fetched');
         }
     }
 
-    const requestHeaders = {
-        ...(await getAuthHeaders()),
+    const requestHeaders: any = {
+        ...(await getAuthHeaders(system)),
         'Accept': 'text/plain, */*'
     };
 
-    // Add CSRF token for POST/PUT requests
-    if ((method === 'POST' || method === 'PUT') && csrfToken) {
-        requestHeaders['x-csrf-token'] = csrfToken;
+    if ((method === 'POST' || method === 'PUT') && csrfTokenCache.has(sysKey)) {
+        requestHeaders['x-csrf-token'] = csrfTokenCache.get(sysKey);
     }
 
-    // Add cookies if available
-    if (cookies) {
-        requestHeaders['Cookie'] = cookies;
+    if (cookiesCache.has(sysKey)) {
+        requestHeaders['Cookie'] = cookiesCache.get(sysKey);
     }
 
-    const config: any = {
+    const reqConfig: any = {
         method,
         url,
         headers: requestHeaders,
@@ -164,21 +160,20 @@ export async function makeAdtRequest(url: string, method: string, timeout: numbe
         params: params
     };
 
-    // Include data in the request configuration if provided
     if (data) {
-        config.data = data;
+        reqConfig.data = data;
     }
 
     try {
-        const response = await createAxiosInstance()(config);
+        const response = await createAxiosInstance()(reqConfig);
         return response;
     } catch (error) {
-        // If we get a 403 with "CSRF token validation failed", try to fetch a new token and retry
         if (error instanceof AxiosError && error.response?.status === 403 &&
             error.response.data?.includes('CSRF')) {
-            csrfToken = await fetchCsrfToken(url);
-            config.headers['x-csrf-token'] = csrfToken;
-            return await createAxiosInstance()(config);
+            const newToken = await fetchCsrfToken(url, system);
+            csrfTokenCache.set(sysKey, newToken);
+            reqConfig.headers['x-csrf-token'] = newToken;
+            return await createAxiosInstance()(reqConfig);
         }
         throw error;
     }

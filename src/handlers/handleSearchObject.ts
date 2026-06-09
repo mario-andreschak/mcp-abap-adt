@@ -1,4 +1,4 @@
-import { McpError, ErrorCode, AxiosResponse } from '../lib/utils';
+import { McpError, ErrorCode } from '../lib/utils';
 import { makeAdtRequest, return_error, return_response, getBaseUrl } from '../lib/utils';
 
 export async function handleSearchObject(args: any) {
@@ -6,10 +6,11 @@ export async function handleSearchObject(args: any) {
         if (!args?.query) {
             throw new McpError(ErrorCode.InvalidParams, 'Search query is required');
         }
+        const system = args?.sap_system || 'S4H';
         const maxResults = args.maxResults || 100;
         const encodedQuery = encodeURIComponent(args.query);
-        const url = `${await getBaseUrl()}/sap/bc/adt/repository/informationsystem/search?operation=quickSearch&query=${encodedQuery}&maxResults=${maxResults}`;
-        const response = await makeAdtRequest(url, 'GET', 30000);
+        const url = `${await getBaseUrl(system)}/sap/bc/adt/repository/informationsystem/search?operation=quickSearch&query=${encodedQuery}&maxResults=${maxResults}`;
+        const response = await makeAdtRequest(url, 'GET', 30000, undefined, undefined, system);
         return return_response(response);
     } catch (error) {
         return return_error(error);
