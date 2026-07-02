@@ -24,6 +24,7 @@ import { handleGetTypeInfo } from './handlers/handleGetTypeInfo';
 import { handleGetInterface } from './handlers/handleGetInterface';
 import { handleGetTransaction } from './handlers/handleGetTransaction';
 import { handleSearchObject } from './handlers/handleSearchObject';
+import { handleGetCDSView } from './handlers/handleGetCDSView';
 
 // Import shared utility functions and types
 import { getBaseUrl, getAuthHeaders, createAxiosInstance, makeAdtRequest, return_error, return_response } from './lib/utils';
@@ -284,6 +285,20 @@ export class mcp_abap_adt_server {
             }
           },
           {
+            name: 'GetCDSView',
+            description: 'Retrieve CDS view (DDL source) source code',
+            inputSchema: {
+              type: 'object',
+              properties: {
+                cds_view_name: {
+                  type: 'string',
+                  description: 'Name of the CDS view (DDL source name, e.g. I_CURRENCY)'
+                }
+              },
+              required: ['cds_view_name']
+            }
+          },
+          {
             name: 'GetInterface',
             description: 'Retrieve ABAP interface source code',
             inputSchema: {
@@ -330,6 +345,8 @@ export class mcp_abap_adt_server {
           return await handleGetInterface(request.params.arguments);
         case 'GetTransaction':
           return await handleGetTransaction(request.params.arguments);
+        case 'GetCDSView':
+          return await handleGetCDSView(request.params.arguments);
         default:
           throw new McpError(
             ErrorCode.MethodNotFound,
