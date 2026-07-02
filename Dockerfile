@@ -9,7 +9,7 @@ WORKDIR /app
 COPY package.json ./
 
 # Install dependencies
-RUN npm install -r
+RUN npm install
 
 
 # Copy the rest of the application code
@@ -18,8 +18,14 @@ COPY . .
 # Build the TypeScript application
 RUN npm run build
 
-# Expose the port the app runs on
-EXPOSE 5173
+# Use HTTP transport by default for containers
+ENV MCP_TRANSPORT=http
+ENV PORT=8080
+
+# Expose the HTTP port
+EXPOSE 8080
+
+HEALTHCHECK --interval=30s --timeout=5s --start-period=20s --retries=3 CMD node -e "fetch('http://127.0.0.1:' + (process.env.PORT || 8080) + '/healthz').then((r) => process.exit(r.ok ? 0 : 1)).catch(() => process.exit(1))"
 
 # Start the application
 CMD ["node", "./dist/index.js"]

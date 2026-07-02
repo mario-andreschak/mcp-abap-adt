@@ -5,6 +5,30 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+- Optional HTTP transport mode for MCP using `StreamableHTTPServerTransport`.
+- New HTTP endpoints:
+  - `/mcp` for MCP requests (GET/POST/DELETE)
+  - `/healthz` for container and Kubernetes health probes
+- New `GetCDSView` tool to retrieve CDS view (DDL source) source code.
+
+### Changed
+- `GetTableContents` now uses the standard ADT data preview endpoint
+  (`/sap/bc/adt/datapreview/freestyle`) instead of a custom Z-service, so it
+  works on any system without extra development. The table name is validated
+  before use.
+- `sap-client` is now sent as a query parameter on every ADT request; the
+  `X-SAP-Client` header alone is ignored by ICF, which caused requests to run
+  in the system default client.
+- Docker defaults now use HTTP transport with `MCP_TRANSPORT=http` and `PORT=8080`.
+- Docker health check now probes `/healthz` instead of checking process state.
+- Docker image now exposes port `8080`.
+- Replaced `npm install -r` with `npm install` in Docker build.
+- Raised dependency floors (`@modelcontextprotocol/sdk` `^1.29.0`, `axios`
+  `^1.18.1`) and committed `package-lock.json` for reproducible installs.
+
 ## [1.1.0] - 2025-02-19
 
 ### Added
