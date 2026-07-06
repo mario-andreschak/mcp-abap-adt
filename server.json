@@ -1,0 +1,54 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "io.github.mario-andreschak/mcp-abap-adt",
+  "description": "ABAP ADT MCP server for reading SAP objects (programs, classes, tables, CDS) via ADT",
+  "version": "1.1.0",
+  "repository": {
+    "url": "https://github.com/mario-andreschak/mcp-abap-adt",
+    "source": "github"
+  },
+  "packages": [
+    {
+      "registryType": "npm",
+      "registryBaseUrl": "https://registry.npmjs.org",
+      "identifier": "mcp-abap-adt",
+      "version": "1.1.0",
+      "transport": {
+        "type": "stdio"
+      },
+      "environmentVariables": [
+        {
+          "name": "SAP_URL",
+          "description": "Base URL of the SAP system, e.g. https://host:443",
+          "isRequired": true
+        },
+        {
+          "name": "SAP_USERNAME",
+          "description": "SAP username",
+          "isRequired": true
+        },
+        {
+          "name": "SAP_PASSWORD",
+          "description": "SAP password",
+          "isRequired": true,
+          "isSecret": true
+        },
+        {
+          "name": "SAP_CLIENT",
+          "description": "SAP client number",
+          "isRequired": true
+        },
+        {
+          "name": "SAP_LANGUAGE",
+          "description": "Logon language, e.g. en",
+          "isRequired": false
+        },
+        {
+          "name": "TLS_REJECT_UNAUTHORIZED",
+          "description": "Set to 0 to allow self-signed certificates, 1 to enforce TLS verification",
+          "isRequired": false
+        }
+      ]
+    }
+  ]
+}
