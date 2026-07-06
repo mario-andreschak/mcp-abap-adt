@@ -1,7 +1,6 @@
 #!/usr/bin/env node
-import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
+import { Server } from '@modelcontextprotocol/sdk/server/index.js';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
-import { StreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/streamableHttp.js';
 import {
   CallToolRequestSchema,
   ErrorCode,
@@ -10,8 +9,6 @@ import {
 } from '@modelcontextprotocol/sdk/types.js';
 import path from 'path';
 import dotenv from 'dotenv';
-import { createServer } from 'http';
-import { randomUUID } from 'crypto';
 
 // Import handler functions
 import { handleGetProgram } from './handlers/handleGetProgram';
@@ -43,17 +40,6 @@ export interface SapConfig {
   client: string;
 }
 
-type TransportMode = 'stdio' | 'http';
-
-function getTransportMode(): TransportMode {
-  const mode = (process.env.MCP_TRANSPORT || process.env.TRANSPORT || 'stdio').toLowerCase();
-  return mode === 'http' || mode === 'streamable-http' ? 'http' : 'stdio';
-}
-
-function isNotConnectedError(error: unknown): boolean {
-  return error instanceof Error && error.message.includes('Not connected');
-}
-
 /**
  * Retrieves SAP configuration from environment variables.
  *
@@ -82,7 +68,7 @@ export function getConfig(): SapConfig {
  * Server class for interacting with ABAP systems via ADT.
  */
 export class mcp_abap_adt_server {
-  private server: McpServer;  // Instance of the MCP server
+  private server: Server;  // Instance of the MCP server
   private sapConfig: SapConfig; // SAP configuration
 
   /**
@@ -90,11 +76,7 @@ export class mcp_abap_adt_server {
    */
   constructor() {
     this.sapConfig = getConfig(); // Load SAP configuration
-    this.server = this.createServer();
-  }
-
-  private createServer(): McpServer {
-    const server = new McpServer(  // Initialize the MCP server
+    this.server = new Server(  // Initialize the MCP server
       {
         name: 'mcp-abap-adt', // Server name
         version: '0.1.0',       // Server version
@@ -102,24 +84,22 @@ export class mcp_abap_adt_server {
       {
         capabilities: {
           tools: {}, // Initially, no tools are registered
-          logging: {}, // Advertise MCP logging support
         },
       }
     );
 
-    this.setupHandlers(server); // Setup request handlers
-    return server;
+    this.setupHandlers(); // Setup request handlers
   }
 
   /**
    * Sets up request handlers for listing and calling tools.
    * @private
    */
-  private setupHandlers(server: McpServer) {
+  private setupHandlers() {
     // Setup tool handlers
 
     // Handler for ListToolsRequest
-    server.server.setRequestHandler(ListToolsRequestSchema, async () => {
+    this.server.setRequestHandler(ListToolsRequestSchema, async () => {
       return {
         tools: [ // Define available tools
           {
@@ -337,36 +317,7 @@ export class mcp_abap_adt_server {
     });
 
     // Handler for CallToolRequest
-    server.server.setRequestHandler(CallToolRequestSchema, async (request, extra) => {
-      const toolName = request.params.name;
-      const toolArgs = request.params.arguments ?? {};
-      const headerSessionId = extra.requestInfo?.headers['mcp-session-id'];
-      const normalizedSessionId = Array.isArray(headerSessionId) ? headerSessionId[0] : headerSessionId;
-      const sessionId = extra.sessionId || normalizedSessionId;
-
-      // Use stderr: in stdio transport, stdout is the JSON-RPC channel and any
-      // stray write there corrupts the protocol stream for the connected client.
-      console.error(`[TOOL] Invoking ${toolName}`, toolArgs);
-      if (server.isConnected()) {
-        server.sendLoggingMessage(
-          {
-            level: 'info',
-            logger: 'tool',
-            data: {
-              event: 'tool_invocation',
-              toolName,
-              arguments: toolArgs,
-            },
-          },
-          sessionId,
-        ).catch((error) => {
-          if (isNotConnectedError(error)) {
-            return;
-          }
-          console.error('Error sending tool invocation log:', error);
-        });
-      }
-
+    this.server.setRequestHandler(CallToolRequestSchema, async (request) => {
       switch (request.params.name) {
         case 'GetProgram':
           return await handleGetProgram(request.params.arguments);
@@ -404,203 +355,24 @@ export class mcp_abap_adt_server {
       }
     });
 
+    // Handle server shutdown on SIGINT (Ctrl+C)
+    process.on('SIGINT', async () => {
+      await this.server.close();
+      process.exit(0);
+    });
   }
 
   /**
    * Starts the MCP server and connects it to the transport.
    */
   async run() {
-    const mode = getTransportMode();
-
-    if (mode === 'http') {
-      await this.runHttp();
-      return;
-    }
-
-    await this.runStdio();
-  }
-
-  private async runStdio() {
-    process.on('SIGINT', async () => {
-      await this.server.close();
-      process.exit(0);
-    });
-
     const transport = new StdioServerTransport();
     await this.server.connect(transport);
-  }
-
-  private async runHttp() {
-    const port = Number.parseInt(process.env.PORT || '8080', 10);
-
-    if (Number.isNaN(port) || port <= 0) {
-      throw new Error('PORT must be a valid positive integer when MCP_TRANSPORT=http');
-    }
-
-    const sessions = new Map<string, { server: McpServer; transport: StreamableHTTPServerTransport }>();
-    const closingTransports = new WeakSet<StreamableHTTPServerTransport>();
-
-    process.on('SIGINT', async () => {
-      const uniqueServers = new Set<McpServer>();
-      for (const session of sessions.values()) {
-        uniqueServers.add(session.server);
-        await session.transport.close().catch(() => undefined);
-      }
-
-      for (const sessionServer of uniqueServers) {
-        await sessionServer.close().catch(() => undefined);
-      }
-
-      process.exit(0);
-    });
-
-    const httpServer = createServer((req, res) => {
-      const startedAt = Date.now();
-      const method = req.method || 'UNKNOWN';
-      const sessionIdHeader = req.headers['mcp-session-id'];
-      const sessionId = Array.isArray(sessionIdHeader) ? sessionIdHeader[0] : sessionIdHeader;
-      let requestServer: McpServer | undefined;
-      let requestSessionId: string | undefined = sessionId;
-      const pathname = req.url
-        ? new URL(req.url, `http://${req.headers.host || 'localhost'}`).pathname
-        : '/';
-
-      res.on('finish', () => {
-        const durationMs = Date.now() - startedAt;
-        console.log(`[HTTP] ${method} ${pathname} -> ${res.statusCode} (${durationMs}ms)`);
-
-        if (pathname !== '/mcp') {
-          return;
-        }
-
-        const level = res.statusCode >= 500 ? 'error' : res.statusCode >= 400 ? 'warning' : 'info';
-        if (!requestServer || !requestServer.isConnected()) {
-          return;
-        }
-
-        requestServer.sendLoggingMessage(
-          {
-            level,
-            logger: 'http',
-            data: {
-              method,
-              path: pathname,
-              statusCode: res.statusCode,
-              durationMs,
-            },
-          },
-          requestSessionId,
-        ).catch((error) => {
-          if (isNotConnectedError(error)) {
-            return;
-          }
-          console.error('Error sending MCP logging message:', error);
-        });
-      });
-
-      if (pathname === '/healthz') {
-        res.writeHead(200, { 'content-type': 'application/json' });
-        res.end(JSON.stringify({ status: 'ok' }));
-        return;
-      }
-
-      if (pathname === '/mcp') {
-        const handleMcpRequest = async () => {
-          if (sessionId) {
-            const existingSession = sessions.get(sessionId);
-
-            if (!existingSession) {
-              res.writeHead(400, { 'content-type': 'application/json' });
-              res.end(JSON.stringify({ error: 'Bad Request: Invalid or expired MCP session ID' }));
-              return;
-            }
-
-            requestServer = existingSession.server;
-            await existingSession.transport.handleRequest(req, res);
-            return;
-          }
-
-          // New sessions must start with POST. Rejecting early avoids creating
-          // orphaned transports on probes or malformed requests.
-          if (method !== 'POST') {
-            res.writeHead(400, { 'content-type': 'application/json' });
-            res.end(JSON.stringify({ error: 'Bad Request: Initial MCP session request must use POST' }));
-            return;
-          }
-
-          const sessionServer = this.createServer();
-          let sessionInitialized = false;
-          const sessionTransport = new StreamableHTTPServerTransport({
-            sessionIdGenerator: () => randomUUID(),
-            onsessioninitialized: (newSessionId) => {
-              sessionInitialized = true;
-              requestSessionId = newSessionId;
-              sessions.set(newSessionId, { server: sessionServer, transport: sessionTransport });
-            },
-          });
-
-          sessionTransport.onclose = () => {
-            if (closingTransports.has(sessionTransport)) {
-              return;
-            }
-
-            closingTransports.add(sessionTransport);
-            const currentSessionId = sessionTransport.sessionId;
-            if (currentSessionId) {
-              sessions.delete(currentSessionId);
-            }
-
-            // Avoid calling sessionServer.close() here: transport.close() triggers onclose,
-            // and calling close again can recurse through the same path.
-          };
-
-          requestServer = sessionServer;
-          try {
-            await sessionServer.connect(sessionTransport);
-            await sessionTransport.handleRequest(req, res);
-          } finally {
-            // If initialization failed (for example, protocol validation errors),
-            // aggressively close transient resources to prevent request-path leaks.
-            if (!sessionInitialized) {
-              await sessionTransport.close().catch(() => undefined);
-              await sessionServer.close().catch(() => undefined);
-            }
-          }
-        };
-
-        handleMcpRequest().catch((error) => {
-          console.error('Error handling /mcp request:', error);
-          if (!res.headersSent) {
-            res.writeHead(500, { 'content-type': 'application/json' });
-            res.end(JSON.stringify({ error: 'Internal Server Error' }));
-          }
-        });
-        return;
-      }
-
-      res.writeHead(404, { 'content-type': 'application/json' });
-      res.end(JSON.stringify({ error: 'Not Found' }));
-    });
-
-    await new Promise<void>((resolve, reject) => {
-      httpServer.once('error', reject);
-      httpServer.listen(port, () => resolve());
-    });
   }
 }
 
 // Create and run the server
-export async function startServer() {
-  const server = new mcp_abap_adt_server();
-  await server.run();
-}
-
-const isMainModule = process.argv[1]
-  ? require.main === module
-  : false;
-
-if (isMainModule) {
-  startServer().catch(() => {
-    process.exit(1);
-  });
-}
+const server = new mcp_abap_adt_server();
+server.run().catch((error) => {
+  process.exit(1);
+});
