@@ -278,7 +278,7 @@ Add `--scope project` to write it to the shared `.mcp.json`, or `--scope user` t
 ## 8. Troubleshooting
 
 *   **`node -v` or `npm -v` gives an error:**
-    *   Make sure Node.js is installed correctly.  Try reinstalling it.
+    *   Make sure Node.js is installed correctly. First try closing the Terminal/Powershell/cmd.exe in which you were executing the command. Try restarting your computer. Try reinstalling it.
     *   Ensure that the Node.js installation directory is in your system's PATH environment variable.  On Windows, you can edit environment variables through the System Properties (search for "environment variables" in the Start Menu).
 *   **`npm install` fails:**
     *   Make sure you have an internet connection.
