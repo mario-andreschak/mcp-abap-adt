@@ -15,8 +15,10 @@ This guide is designed for beginners, so we'll walk through everything step-by-s
 3.  **Running the Server:**  Starting the server in different modes.
 4.  **Integrating with FLUJO:** The easiest way — one-click install from the Spotlight/Marketplace.
 5.  **Integrating with Cline:** Connecting this server to the Cline VS Code extension.
-6.  **Troubleshooting:**  Common problems and solutions.
-7.  **Available Tools:**  A list of the commands you can use.
+6.  **Integrating with Claude Desktop:** Adding the server to the Claude Desktop app.
+7.  **Integrating with Claude Code:** Adding the server via `.mcp.json` or the CLI.
+8.  **Troubleshooting:**  Common problems and solutions.
+9.  **Available Tools:**  A list of the commands you can use.
 
 ## 1. Prerequisites
 
@@ -204,7 +206,76 @@ Cline is a VS Code extension that uses MCP servers to provide language support. 
     *   Cline should automatically connect to the server.  You will see the Server appear in the "MCP Servers" Panel (in the Cline extension, you'll find different buttons on the top.)
     *   Ask Cline to get the Sourcecode of a program and it should mention the MCP Server and should try to use the corresponding tools
 
-## 6. Troubleshooting
+## 6. Integrating with Claude Desktop
+
+[Claude Desktop](https://claude.ai/download) can run this server directly via the published npm package.
+
+1.  Open Claude Desktop → **Settings** → **Developer** → **Edit Config**. This opens `claude_desktop_config.json`. The file lives at:
+    *   **Windows:** `%APPDATA%\Claude\claude_desktop_config.json`
+    *   **macOS:** `~/Library/Application Support/Claude/claude_desktop_config.json`
+
+2.  Add an `mcp-abap-adt` entry under `mcpServers`, filling in your SAP credentials:
+
+    ```json
+    {
+      "mcpServers": {
+        "mcp-abap-adt": {
+          "command": "npx",
+          "args": ["-y", "mcp-abap-adt"],
+          "env": {
+            "SAP_URL": "https://your-sap-system.com:8000",
+            "SAP_USERNAME": "your_username",
+            "SAP_PASSWORD": "your_password",
+            "SAP_CLIENT": "100"
+          }
+        }
+      }
+    }
+    ```
+
+3.  Save the file and **restart Claude Desktop**. The ABAP tools appear under the tools (🔨) menu.
+
+> **Windows tip:** if `npx` isn't found, set `"command": "npx.cmd"`, or use the full path to `node` with the absolute path to `dist/index.js` from a source install.
+
+## 7. Integrating with Claude Code
+
+[Claude Code](https://claude.com/claude-code) reads MCP servers from a `.mcp.json` file in your project root (shared with your team) or from user/project scope via the CLI.
+
+**Option A — `.mcp.json` in your project root:**
+
+```json
+{
+  "mcpServers": {
+    "mcp-abap-adt": {
+      "command": "npx",
+      "args": ["-y", "mcp-abap-adt"],
+      "env": {
+        "SAP_URL": "https://your-sap-system.com:8000",
+        "SAP_USERNAME": "your_username",
+        "SAP_PASSWORD": "your_password",
+        "SAP_CLIENT": "100"
+      }
+    }
+  }
+}
+```
+
+Because this file is committed to your repo, avoid putting real passwords in it — either use placeholder values that each developer fills in locally, or reference environment variables (Claude Code expands `${VAR}` in `.mcp.json`), e.g. `"SAP_PASSWORD": "${SAP_PASSWORD}"`.
+
+**Option B — add it from the CLI:**
+
+```bash
+claude mcp add mcp-abap-adt \
+  --env SAP_URL=https://your-sap-system.com:8000 \
+  --env SAP_USERNAME=your_username \
+  --env SAP_PASSWORD=your_password \
+  --env SAP_CLIENT=100 \
+  -- npx -y mcp-abap-adt
+```
+
+Add `--scope project` to write it to the shared `.mcp.json`, or `--scope user` to make it available across all your projects. Verify with `claude mcp list`.
+
+## 8. Troubleshooting
 
 *   **`node -v` or `npm -v` gives an error:**
     *   Make sure Node.js is installed correctly.  Try reinstalling it.
@@ -233,9 +304,9 @@ Cline is a VS Code extension that uses MCP servers to provide language support. 
     *   Check that the required ADT services are activated in transaction `SICF`.
     *   If you're using self-signed certificates or there is an issue with your SAP systems http config, make sure to set TLS_REJECT_UNAUTHORIZED as described above!
 
-## 7. Available Tools
+## 9. Available Tools
 
-This server provides the following tools, which can be used through FLUJO, Cline, or any other MCP client:
+This server provides the following tools, which can be used through FLUJO, Cline, Claude Desktop, Claude Code, or any other MCP client:
 
 | Tool Name           | Description                                       | Input Parameters                                                   | Example Usage (in Cline)                                   |
 | ------------------- | ------------------------------------------------- | ------------------------------------------------------------------ | ---------------------------------------------------------- |
