@@ -4,10 +4,6 @@ This project provides a server that allows you to interact with SAP ABAP systems
 
 The server is published on npm as [`mcp-abap-adt`](https://www.npmjs.com/package/mcp-abap-adt) and listed in the [MCP Registry](https://registry.modelcontextprotocol.io) as `io.github.mario-andreschak/mcp-abap-adt`, so most MCP clients can install it with a single command (or a single click — see FLUJO below).
 
-<a href="https://glama.ai/mcp/servers/gwkh12xlu7">
-  <img width="380" height="200" src="https://glama.ai/mcp/servers/gwkh12xlu7/badge" alt="ABAP ADT MCP server" />
-</a>
-
 This guide is designed for beginners, so we'll walk through everything step-by-step.  We'll cover:
 
 1.  **Prerequisites:** What you need before you start.
@@ -326,3 +322,9 @@ This server provides the following tools, which can be used through FLUJO, Cline
 | `GetTransaction`    | Retrieve ABAP transaction details.                | `transaction_name` (string): Name of the ABAP transaction.         | `@tool GetTransaction transaction_name=ZMY_TRANSACTION`    |
 | `GetBehaviorDefinition` | Retrieve RAP Behavior Definition (BDEF) source. Requires ~NW 7.54 / S/4HANA. | `behavior_definition_name` (string): Name of the RAP Behavior Definition. | `@tool GetBehaviorDefinition behavior_definition_name=ZMY_ENTITY` |
 | `GetServiceDefinition`  | Retrieve RAP Service Definition (SRVD) source. Requires ~NW 7.54 / S/4HANA.  | `service_definition_name` (string): Name of the RAP Service Definition.   | `@tool GetServiceDefinition service_definition_name=ZMY_SERVICE`  |
+
+
+
+<a href="https://glama.ai/mcp/servers/gwkh12xlu7">
+  <img width="380" height="200" src="https://glama.ai/mcp/servers/gwkh12xlu7/badge" alt="ABAP ADT MCP server" />
+</a>
