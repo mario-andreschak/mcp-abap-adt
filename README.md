@@ -1,6 +1,8 @@
 # mcp-abap-adt: Your Gateway to ABAP Development Tools (ADT)
 
-This project provides a server that allows you to interact with SAP ABAP systems using the Model Context Protocol (MCP).  Think of it as a bridge that lets tools like [Cline](https://marketplace.visualstudio.com/items?itemName=saoudrizwan.claude-dev) (a VS Code extension) talk to your ABAP system and retrieve information like source code, table structures, and more.  It's like having a remote control for your ABAP development environment!
+This project provides a server that allows you to interact with SAP ABAP systems using the Model Context Protocol (MCP).  Think of it as a bridge that lets tools like [FLUJO](https://github.com/mario-andreschak/FLUJO) or [Cline](https://marketplace.visualstudio.com/items?itemName=saoudrizwan.claude-dev) (a VS Code extension) talk to your ABAP system and retrieve information like source code, table structures, and more.  It's like having a remote control for your ABAP development environment!
+
+The server is published on npm as [`mcp-abap-adt`](https://www.npmjs.com/package/mcp-abap-adt) and listed in the [MCP Registry](https://registry.modelcontextprotocol.io) as `io.github.mario-andreschak/mcp-abap-adt`, so most MCP clients can install it with a single command (or a single click — see FLUJO below).
 
 <a href="https://glama.ai/mcp/servers/gwkh12xlu7">
   <img width="380" height="200" src="https://glama.ai/mcp/servers/gwkh12xlu7/badge" alt="ABAP ADT MCP server" />
@@ -11,9 +13,10 @@ This guide is designed for beginners, so we'll walk through everything step-by-s
 1.  **Prerequisites:** What you need before you start.
 2.  **Installation and Setup:**  Getting everything up and running.
 3.  **Running the Server:**  Starting the server in different modes.
-4.  **Integrating with Cline:** Connecting this server to the Cline VS Code extension.
-5.  **Troubleshooting:**  Common problems and solutions.
-6.  **Available Tools:**  A list of the commands you can use.
+4.  **Integrating with FLUJO:** The easiest way — one-click install from the Spotlight/Marketplace.
+5.  **Integrating with Cline:** Connecting this server to the Cline VS Code extension.
+6.  **Troubleshooting:**  Common problems and solutions.
+7.  **Available Tools:**  A list of the commands you can use.
 
 ## 1. Prerequisites
 
@@ -43,15 +46,23 @@ Before you begin, you'll need a few things:
 
 Now, let's get the project code and set it up:
 
-### Installing via Smithery
+### Install from npm (recommended)
 
-To install MCP ABAP Development Tools Server for Cline automatically via [Smithery](https://smithery.ai/server/@mario-andreschak/mcp-abap-adt):
+The server is published on npm, so you don't need to clone or build anything. Most MCP clients can run it directly with `npx`:
 
 ```bash
-npx -y @smithery/cli install @mario-andreschak/mcp-abap-adt --client cline
+npx -y mcp-abap-adt
 ```
 
-### Manual Installation
+You'll typically configure this inside your MCP client rather than run it by hand — point the client at the command `npx` with args `["-y", "mcp-abap-adt"]` and supply your SAP credentials as environment variables (`SAP_URL`, `SAP_USERNAME`, `SAP_PASSWORD`, `SAP_CLIENT`; optionally `SAP_LANGUAGE`, `TLS_REJECT_UNAUTHORIZED`). See the integration sections below for [FLUJO](#4-integrating-with-flujo) and [Cline](#5-integrating-with-cline).
+
+To install it globally instead:
+
+```bash
+npm install -g mcp-abap-adt
+```
+
+### Manual Installation (from source)
 1.  **Clone the Repository:**
     *   **Using Git (command line):**
         1.  Open a terminal (command prompt or Terminal).
@@ -126,7 +137,35 @@ This mode is useful for debugging.
     This will start the server and output a message like:  `🔍 MCP Inspector is up and running at http://localhost:5173 🚀`.
     This is the URL you'll use to open the MCP inspector in your Browser.
 
-## 4. Integrating with Cline
+## 4. Integrating with FLUJO
+
+[FLUJO](https://github.com/mario-andreschak/FLUJO) is the easiest way to use this server — no cloning, building, or editing JSON config. `mcp-abap-adt` is a curated Spotlight server, so it installs with a single click:
+
+1.  In FLUJO, navigate to **MCP**.
+2.  Click **Add Server**.
+3.  On the **Spotlight** tab, click **mcp-abap-adt** (or switch to the **Marketplace** tab and find it there).
+4.  FLUJO fetches the package automatically and opens the **Local Server** tab. Enter your SAP **URL**, **Username**, and **Password** (and client), then click **Save**.
+
+That's it — FLUJO downloads and runs the npm package for you.
+
+### Streamable HTTP transport (via FLUJO)
+
+`mcp-abap-adt` runs over stdio. If you need to reach it over **streamable HTTP** — for example from another app on your machine or a client that only speaks HTTP — let FLUJO re-host it: install the server in FLUJO as above, then toggle **"Expose to external apps"** on the server. FLUJO's built-in mcp-proxy then serves it over HTTP at `http://localhost:4200/mcp-proxy/mcp-abap-adt`, and any HTTP-capable MCP client can connect with a config like:
+
+```json
+{
+  "mcpServers": {
+    "mcp-abap-adt": {
+      "type": "http",
+      "url": "http://localhost:4200/mcp-proxy/mcp-abap-adt"
+    }
+  }
+}
+```
+
+FLUJO keeps your SAP credentials with the installed server, so the HTTP config itself carries none.
+
+## 5. Integrating with Cline
 
 Cline is a VS Code extension that uses MCP servers to provide language support. Here's how to connect this ABAP server to Cline:
 
@@ -137,30 +176,35 @@ Cline is a VS Code extension that uses MCP servers to provide language support. 
     *   Search for "Cline MCP Settings".
     *   Click "Edit in settings.json". This will open the `cline_mcp_settings.json` file.  The full path is usually something like: `C:\Users\username\AppData\Roaming\Code\User\globalStorage\saoudrizwan.claude-dev\settings\cline_mcp_settings.json` (replace `username` with your Windows username).
 
-3.  **Add the Server Configuration:**  You'll need to add an entry to the `servers` array in the `cline_mcp_settings.json` file.  Here's an example:
+3.  **Add the Server Configuration:**  You'll need to add an entry to the `mcpServers` object in the `cline_mcp_settings.json` file.  The recommended way is to run the published npm package via `npx` and pass your SAP credentials as environment variables — no local build required:
 
     ```json
     {
-      "mcpServers": 
-        {
-          "mcp-abap-adt": {
-            "command": "node",
-            "args": [
-              "C:/PATH_TO/mcp-abap-adt/dist/index.js"
-            ],
-            "disabled": true,
-            "autoApprove": []
-          }
-        // ... other server configurations ...
+      "mcpServers": {
+        "mcp-abap-adt": {
+          "command": "npx",
+          "args": ["-y", "mcp-abap-adt"],
+          "env": {
+            "SAP_URL": "https://your-sap-system.com:8000",
+            "SAP_USERNAME": "your_username",
+            "SAP_PASSWORD": "your_password",
+            "SAP_CLIENT": "100"
+          },
+          "disabled": false,
+          "autoApprove": []
         }
+        // ... other server configurations ...
+      }
     }
     ```
+
+    If you installed from source instead (see Manual Installation), point `command` at `node` with an absolute path to the build output, e.g. `"args": ["C:/PATH_TO/mcp-abap-adt/dist/index.js"]`, and configure credentials via the `.env` file.
 
 4.  **Test the Connection:**
     *   Cline should automatically connect to the server.  You will see the Server appear in the "MCP Servers" Panel (in the Cline extension, you'll find different buttons on the top.)
     *   Ask Cline to get the Sourcecode of a program and it should mention the MCP Server and should try to use the corresponding tools
 
-## 5. Troubleshooting
+## 6. Troubleshooting
 
 *   **`node -v` or `npm -v` gives an error:**
     *   Make sure Node.js is installed correctly.  Try reinstalling it.
@@ -189,9 +233,9 @@ Cline is a VS Code extension that uses MCP servers to provide language support. 
     *   Check that the required ADT services are activated in transaction `SICF`.
     *   If you're using self-signed certificates or there is an issue with your SAP systems http config, make sure to set TLS_REJECT_UNAUTHORIZED as described above!
 
-## 6. Available Tools
+## 7. Available Tools
 
-This server provides the following tools, which can be used through Cline (or any other MCP client):
+This server provides the following tools, which can be used through FLUJO, Cline, or any other MCP client:
 
 | Tool Name           | Description                                       | Input Parameters                                                   | Example Usage (in Cline)                                   |
 | ------------------- | ------------------------------------------------- | ------------------------------------------------------------------ | ---------------------------------------------------------- |
