@@ -27,10 +27,6 @@ Before you begin, you'll need a few things:
     *   Ensure that your SAP system allows connections via ADT (ABAP Development Tools). This usually involves making sure the necessary services are activated in transaction `SICF`.  Your basis administrator can help with this. Specifically, you will need the following services to be active:
         * `/sap/bc/adt`
 
-*   **Git (or GitHub Desktop):**  We'll use Git to download the project code.  You have two options:
-    *   **Git:**  The command-line tool.  [Download Git](https://git-scm.com/downloads).  Choose the version for your operating system (Windows, macOS, Linux). Follow the installation instructions.
-    *   **GitHub Desktop:**  A graphical user interface for Git.  Easier for beginners!  [Download GitHub Desktop](https://desktop.github.com/).  Follow the installation instructions.
-
 *   **Node.js and npm:** Node.js is a JavaScript runtime that lets you run JavaScript code outside of a web browser.  npm (Node Package Manager) is included with Node.js and is used to install packages (libraries of code).
     *   [Download Node.js](https://nodejs.org/en/download/).  **Choose the LTS (Long Term Support) version.**  This is the most stable version. Follow the installation instructions for your operating system.  Make sure to include npm in the installation (it's usually included by default).
     *   **Verify Installation:** After installing Node.js, open a new terminal (command prompt on Windows, Terminal on macOS/Linux) and type:
@@ -40,11 +36,19 @@ Before you begin, you'll need a few things:
         ```
         You should see version numbers for both Node.js and npm.  If you see an error, Node.js might not be installed correctly, or it might not be in your system's PATH.  (See Troubleshooting below).
 
+*   **Git (or GitHub Desktop) (optional in most cases):**  We'll use Git to download the project code.  You have two options:
+    *   **Git:**  The command-line tool.  [Download Git](https://git-scm.com/downloads).  Choose the version for your operating system (Windows, macOS, Linux). Follow the installation instructions.
+    *   **GitHub Desktop:**  A graphical user interface for Git.  Easier for beginners!  [Download GitHub Desktop](https://desktop.github.com/).  Follow the installation instructions.
+
 ## 2. Installation and Setup
 
 Now, let's get the project code and set it up:
 
-### Install from npm (recommended)
+### Install with FLUJO (recommended)
+
+See [Integrating with FLUJO](https://github.com/mario-andreschak/mcp-abap-adt#4-integrating-with-flujo)
+
+### Install from npm
 
 The server is published on npm, so you don't need to clone or build anything. Most MCP clients can run it directly with `npx`:
 
@@ -52,7 +56,7 @@ The server is published on npm, so you don't need to clone or build anything. Mo
 npx -y mcp-abap-adt
 ```
 
-You'll typically configure this inside your MCP client rather than run it by hand — point the client at the command `npx` with args `["-y", "mcp-abap-adt"]` and supply your SAP credentials as environment variables (`SAP_URL`, `SAP_USERNAME`, `SAP_PASSWORD`, `SAP_CLIENT`; optionally `SAP_LANGUAGE`, `TLS_REJECT_UNAUTHORIZED`). See the integration sections below for [FLUJO](#4-integrating-with-flujo) and [Cline](#5-integrating-with-cline).
+You'll typically configure this inside your MCP client rather than run it by hand — point the client at the command `npx` with args `["-y", "mcp-abap-adt"]` and supply your SAP credentials as environment variables (`SAP_URL`, `SAP_USERNAME`, `SAP_PASSWORD`, `SAP_CLIENT`; optionally `SAP_LANGUAGE`, `TLS_REJECT_UNAUTHORIZED`). See the integration sections below for [](#4-integrating-with-) and [Cline](#5-integrating-with-cline).
 
 To install it globally instead:
 
@@ -135,7 +139,7 @@ This mode is useful for debugging.
     This will start the server and output a message like:  `🔍 MCP Inspector is up and running at http://localhost:5173 🚀`.
     This is the URL you'll use to open the MCP inspector in your Browser.
 
-## 4. Integrating with FLUJO
+## 4. Integrating with 
 
 [FLUJO](https://github.com/mario-andreschak/FLUJO) is the easiest way to use this server — no cloning, building, or editing JSON config. `mcp-abap-adt` is a curated Spotlight server, so it installs with a single click:
 
