@@ -1,6 +1,6 @@
 {
   "name": "mcp-abap-adt",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "mcpName": "io.github.mario-andreschak/mcp-abap-adt",
   "main": "dist/index.js",
   "bin": {
@@ -15,7 +15,13 @@
     "start": "node ./dist/index.js",
     "dev": "npx @modelcontextprotocol/inspector node ./dist/index.js"
   },
-  "keywords":  ["abap", "sap", "adt", "mcp", "model-context-protocol"],
+  "keywords": [
+    "abap",
+    "sap",
+    "adt",
+    "mcp",
+    "model-context-protocol"
+  ],
   "author": "mario-andreschak",
   "description": "ABAP ADT (ABAP Development Tools) MCP Server for interacting with SAP systems",
   "license": "MIT",
@@ -25,7 +31,7 @@
   "repository": {
     "type": "git",
     "url": "git+https://github.com/mario-andreschak/mcp-abap-adt.git"
-  },  
+  },
   "devDependencies": {
     "@types/jest": "^29.5.14",
     "@types/node": "^22.10.10",
