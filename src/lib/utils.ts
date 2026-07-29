@@ -86,10 +86,16 @@ export async function getAuthHeaders() {
 }
 
 async function fetchCsrfToken(url: string): Promise<string> {
+    if (!config) {
+        config = getConfig();
+    }
     try {
         const response = await createAxiosInstance()({
             method: 'GET',
             url,
+            // sap-client must be a query parameter; ICF ignores the X-SAP-Client header,
+            // so without it the session would be opened in the system default client
+            params: { 'sap-client': config.client },
             headers: {
                 ...(await getAuthHeaders()),
                 'x-csrf-token': 'fetch'
@@ -124,7 +130,11 @@ async function fetchCsrfToken(url: string): Promise<string> {
     }
 }
 
-export async function makeAdtRequest(url: string, method: string, timeout: number, data?: any, params?: any) {
+export async function makeAdtRequest(url: string, method: string, timeout: number, data?: any, params?: any, headers?: any) {
+    if (!config) {
+        config = getConfig();
+    }
+
     // For POST/PUT requests, ensure we have a CSRF token
     if ((method === 'POST' || method === 'PUT') && !csrfToken) {
         try {
@@ -135,7 +145,8 @@ export async function makeAdtRequest(url: string, method: string, timeout: numbe
     }
 
     const requestHeaders = {
-        ...(await getAuthHeaders())
+        ...(await getAuthHeaders()),
+        ...(headers || {})
     };
 
     // Add CSRF token for POST/PUT requests
@@ -148,29 +159,31 @@ export async function makeAdtRequest(url: string, method: string, timeout: numbe
         requestHeaders['Cookie'] = cookies;
     }
 
-    const config: any = {
+    const requestConfig: any = {
         method,
         url,
         headers: requestHeaders,
         timeout,
-        params: params
+        // sap-client must be a query parameter on every request; ICF ignores the
+        // X-SAP-Client header and would otherwise log on to the system default client
+        params: { 'sap-client': config.client, ...(params || {}) }
     };
 
     // Include data in the request configuration if provided
     if (data) {
-        config.data = data;
+        requestConfig.data = data;
     }
 
     try {
-        const response = await createAxiosInstance()(config);
+        const response = await createAxiosInstance()(requestConfig);
         return response;
     } catch (error) {
         // If we get a 403 with "CSRF token validation failed", try to fetch a new token and retry
         if (error instanceof AxiosError && error.response?.status === 403 &&
             error.response.data?.includes('CSRF')) {
             csrfToken = await fetchCsrfToken(url);
-            config.headers['x-csrf-token'] = csrfToken;
-            return await createAxiosInstance()(config);
+            requestConfig.headers['x-csrf-token'] = csrfToken;
+            return await createAxiosInstance()(requestConfig);
         }
         throw error;
     }

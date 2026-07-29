@@ -24,6 +24,9 @@ import { handleGetTypeInfo } from './handlers/handleGetTypeInfo';
 import { handleGetInterface } from './handlers/handleGetInterface';
 import { handleGetTransaction } from './handlers/handleGetTransaction';
 import { handleSearchObject } from './handlers/handleSearchObject';
+import { handleGetCDSView } from './handlers/handleGetCDSView';
+import { handleGetBehaviorDefinition } from './handlers/handleGetBehaviorDefinition';
+import { handleGetServiceDefinition } from './handlers/handleGetServiceDefinition';
 
 // Import shared utility functions and types
 import { getBaseUrl, getAuthHeaders, createAxiosInstance, makeAdtRequest, return_error, return_response } from './lib/utils';
@@ -284,6 +287,20 @@ export class mcp_abap_adt_server {
             }
           },
           {
+            name: 'GetCDSView',
+            description: 'Retrieve CDS view (DDL source) source code',
+            inputSchema: {
+              type: 'object',
+              properties: {
+                cds_view_name: {
+                  type: 'string',
+                  description: 'Name of the CDS view (DDL source name, e.g. I_CURRENCY)'
+                }
+              },
+              required: ['cds_view_name']
+            }
+          },
+          {
             name: 'GetInterface',
             description: 'Retrieve ABAP interface source code',
             inputSchema: {
@@ -295,6 +312,34 @@ export class mcp_abap_adt_server {
                 }
               },
               required: ['interface_name']
+            }
+          },
+          {
+            name: 'GetBehaviorDefinition',
+            description: 'Retrieve RAP Behavior Definition (BDEF) source code (requires ~NW 7.54 / S/4HANA)',
+            inputSchema: {
+              type: 'object',
+              properties: {
+                behavior_definition_name: {
+                  type: 'string',
+                  description: 'Name of the RAP Behavior Definition (e.g. I_MY_ENTITY)'
+                }
+              },
+              required: ['behavior_definition_name']
+            }
+          },
+          {
+            name: 'GetServiceDefinition',
+            description: 'Retrieve RAP Service Definition (SRVD) source code (requires ~NW 7.54 / S/4HANA)',
+            inputSchema: {
+              type: 'object',
+              properties: {
+                service_definition_name: {
+                  type: 'string',
+                  description: 'Name of the RAP Service Definition (e.g. Z_MY_SERVICE)'
+                }
+              },
+              required: ['service_definition_name']
             }
           }
         ]
@@ -330,6 +375,12 @@ export class mcp_abap_adt_server {
           return await handleGetInterface(request.params.arguments);
         case 'GetTransaction':
           return await handleGetTransaction(request.params.arguments);
+        case 'GetCDSView':
+          return await handleGetCDSView(request.params.arguments);
+        case 'GetBehaviorDefinition':
+          return await handleGetBehaviorDefinition(request.params.arguments);
+        case 'GetServiceDefinition':
+          return await handleGetServiceDefinition(request.params.arguments);
         default:
           throw new McpError(
             ErrorCode.MethodNotFound,

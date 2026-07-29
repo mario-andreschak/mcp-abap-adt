@@ -1,35 +1,46 @@
 {
-  "name": "@orchestraight.co/mcp-abap-adt",
-  "version": "1.1.0",
-  "main": "index.js",
+  "name": "mcp-abap-adt",
+  "version": "1.2.0",
+  "mcpName": "io.github.mario-andreschak/mcp-abap-adt",
+  "main": "dist/index.js",
+  "bin": {
+    "mcp-abap-adt": "dist/index.js"
+  },
+  "files": [
+    "dist"
+  ],
   "scripts": {
     "test": "jest",
     "build": "tsc -p tsconfig.json",
     "start": "node ./dist/index.js",
     "dev": "npx @modelcontextprotocol/inspector node ./dist/index.js"
   },
-  "keywords":  ["abap", "sap", "adt", "mcp", "model-context-protocol"],
-  "author": "orchestraight.co",
+  "keywords": [
+    "abap",
+    "sap",
+    "adt",
+    "mcp",
+    "model-context-protocol"
+  ],
+  "author": "mario-andreschak",
   "description": "ABAP ADT (ABAP Development Tools) MCP Server for interacting with SAP systems",
   "license": "MIT",
   "publishConfig": {
     "access": "public"
-  },  
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/mario-andreschak/mcp-abap-adt.git"
-  },  
-  "devDependencies": {
-    "@types/jest": "^29.5.14",
-    "@types/node": "^22.10.10",
-    "jest": "^29.7.0",
-    "ts-jest": "^29.2.5",
-    "typescript": "^5.7.3"
   },
   "dependencies": {
-    "@modelcontextprotocol/sdk": "^1.4.1",
-    "axios": "^1.7.9",
+    "@modelcontextprotocol/sdk": "^1.29.0",
+    "axios": "^1.18.1",
     "dotenv": "^16.4.7",
-    "xml-js": "^1.6.11"
+    "xml-js": "^1.6.11",
+    "typescript": "^5.7.3",
+    "@types/node": "^22.10.10",
+    "@types/jest": "^29.5.14",
+    "jest": "^29.7.0",
+    "ts-jest": "^29.2.5"    
   }
 }
