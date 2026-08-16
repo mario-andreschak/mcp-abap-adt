@@ -139,7 +139,7 @@ This mode is useful for debugging.
     This will start the server and output a message like:  `🔍 MCP Inspector is up and running at http://localhost:5173 🚀`.
     This is the URL you'll use to open the MCP inspector in your Browser.
 
-## 4. Integrating with 
+## 4. Integrating with FLUJO
 
 [FLUJO](https://github.com/mario-andreschak/FLUJO) is the easiest way to use this server — no cloning, building, or editing JSON config. `mcp-abap-adt` is a curated Spotlight server, so it installs with a single click:
 
