@@ -21,7 +21,7 @@ export async function handleGetTableContents(args: any) {
             { rowNumber: maxRows },
             { 'Content-Type': 'text/plain', 'Accept': 'application/xml, text/plain, */*' }
         );
-        return return_response(response);
+        return return_response(response, args);
     } catch (error) {
         return return_error(error);
     }

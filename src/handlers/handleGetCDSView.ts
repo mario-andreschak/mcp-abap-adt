@@ -9,7 +9,7 @@ export async function handleGetCDSView(args: any) {
         const encodedCdsViewName = encodeURIComponent(String(args.cds_view_name).toUpperCase());
         const url = `${await getBaseUrl()}/sap/bc/adt/ddic/ddl/sources/${encodedCdsViewName}/source/main`;
         const response = await makeAdtRequest(url, 'GET', 30000);
-        return return_response(response);
+        return return_response(response, args);
     } catch (error) {
         return return_error(error);
     }
