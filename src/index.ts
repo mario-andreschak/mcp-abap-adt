@@ -45,6 +45,17 @@ const PAGING_MAX_LINES = {
   description: 'Maximum number of lines to return from startLine. Omit to return the rest of the result.'
 };
 
+// Same idea as PAGING_START_LINE/PAGING_MAX_LINES, but for results that are
+// a list of items (e.g. GetPackage's member list) rather than multi-line text.
+const PAGING_START_INDEX = {
+  type: 'number',
+  description: '0-based item index to start from (default 0). Use with maxItems to page through a large list.'
+};
+const PAGING_MAX_ITEMS = {
+  type: 'number',
+  description: 'Maximum number of items to return from startIndex. Omit to return the rest of the list.'
+};
+
 // Interface for SAP configuration
 export interface SapConfig {
   url: string;
@@ -236,14 +247,16 @@ export class mcp_abap_adt_server {
           },
           {
             name: 'GetPackage',
-            description: 'Retrieve ABAP package details',
+            description: 'Retrieve ABAP package details. For packages with many members, use startIndex/maxItems to page through the member list instead of retrieving it all at once.',
             inputSchema: {
               type: 'object',
               properties: {
                 package_name: {
                   type: 'string',
                   description: 'Name of the ABAP package'
-                }
+                },
+                startIndex: PAGING_START_INDEX,
+                maxItems: PAGING_MAX_ITEMS
               },
               required: ['package_name']
             }

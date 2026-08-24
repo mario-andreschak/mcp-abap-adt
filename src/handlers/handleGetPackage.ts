@@ -2,6 +2,17 @@ import { McpError, ErrorCode, AxiosResponse } from '../lib/utils';
 import { makeAdtRequest, return_error, return_response, getBaseUrl } from '../lib/utils';
 import convert from 'xml-js';
 
+// GetPackage builds its own JSON array (extractedData) from a parsed XML
+// response rather than a plain string, so it can't hand the raw axios
+// response straight to return_response() the way other handlers do. Wrap it
+// in a minimal AxiosResponse-shaped object instead so it still goes through
+// the same shared size cap/pagination as everything else - for a package
+// with a large number of members, this array can exceed the safe response
+// size just as easily as a large source file can.
+function asAxiosResponse(data: any): AxiosResponse {
+    return { data } as AxiosResponse;
+}
+
 export async function handleGetPackage(args: any) {
     try {
         if (!args?.package_name) {
@@ -29,13 +40,7 @@ export async function handleGetPackage(args: any) {
             OBJECT_URI: node.OBJECT_URI._text
         }));
 
-        return {
-            isError: false,
-            content: [{
-                type: 'text',
-                text: JSON.stringify(extractedData)
-            }]
-        };
+        return return_response(asAxiosResponse(extractedData), args);
 
     } catch (error) {
         return return_error(error);

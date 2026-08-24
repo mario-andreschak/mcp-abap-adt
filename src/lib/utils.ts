@@ -6,19 +6,79 @@ import { getConfig, SapConfig } from '../index'; // getConfig needs to be export
 
 export { McpError, ErrorCode, AxiosResponse };
 
-// Hard cap (chars) on the JSON text actually handed back to the MCP host.
-// The host's own limit is token-based and code tokenizes less efficiently
-// than prose (short keywords/punctuation); JSON.stringify also turns every
-// real newline into an escaped two-char "\n" sequence, inflating the
-// serialized size beyond the raw source length. Real-world failures have
-// been observed even around 60-100k raw chars, so this is kept deliberately
-// small with a wide safety margin rather than tuned to a measured cutoff
-// (the host never reports the actual limit). This target is enforced
-// UNCONDITIONALLY against the FINAL serialized payload — including when the
-// caller passes an explicit startLine/maxLines that would itself produce a
-// too-large response, since honouring an oversized explicit request is just
-// as broken as not paging an oversized default.
-const SAFE_OUTPUT_CHARS = 40_000;
+// Hard cap, in UTF-8 BYTES (not JS string/UTF-16 length), on the JSON text
+// actually handed back to the MCP host. The host's own limit is token-based
+// and code tokenizes less efficiently than prose (short keywords/
+// punctuation); JSON.stringify also turns every real newline into an
+// escaped two-char "\n" sequence, inflating the serialized size beyond the
+// raw source length. Real-world failures have been observed even around
+// 60-100k raw chars, so this is kept deliberately small with a wide safety
+// margin rather than tuned to a measured cutoff (the host never reports the
+// actual limit). Bytes rather than `.length` (UTF-16 code units) because
+// ABAP source routinely contains multi-byte UTF-8 characters (accented
+// Portuguese/German text in comments and literals is common in this
+// codebase's actual usage) - `.length` undercounts those and can let a
+// response through that is meaningfully larger, in the bytes the host
+// actually measures, than SAFE_OUTPUT_BYTES suggests.
+//
+// BREAKING CHANGE for consumers: when paging engages - automatically for a
+// result that would otherwise exceed this budget, or explicitly via
+// startLine/maxLines (or startIndex/maxItems for array results) - the
+// response text is no longer the raw source/array. It becomes a JSON object
+// `{content, totalLines|totalItems, startLine|startIndex, returnedLines|
+// returnedItems, hasMore, ...}` (see buildPagedPayload/buildPagedArrayPayload
+// below for the exact shape, including the capped/autoPaged/note/
+// truncatedMidLine/truncatedMidItem flags). Callers that previously assumed
+// every response is always the raw text/array verbatim must check for this
+// shape. Small results (already under SAFE_OUTPUT_BYTES, no paging
+// requested) are unaffected and keep returning the original raw shape.
+const SAFE_OUTPUT_BYTES = 40_000;
+
+function byteLength(text: string): number {
+    return Buffer.byteLength(text, 'utf8');
+}
+
+// Trims `text` to at most `maxBytes` UTF-8 bytes without splitting a
+// multi-byte character (a plain Buffer byte-slice can cut a UTF-8 sequence
+// in half and produce invalid/corrupted text; this cuts on JS string
+// character boundaries instead, via binary search on byteLength).
+function truncateToByteBudget(text: string, maxBytes: number): string {
+    if (byteLength(text) <= maxBytes) {
+        return text;
+    }
+    let lo = 0;
+    let hi = text.length;
+    while (lo < hi) {
+        const mid = Math.ceil((lo + hi) / 2);
+        if (byteLength(text.slice(0, mid)) <= maxBytes) {
+            lo = mid;
+        } else {
+            hi = mid - 1;
+        }
+    }
+    return text.slice(0, lo);
+}
+
+// Validates an optional paging argument (startLine/maxLines/startIndex/
+// maxItems): if provided at all, it must be a finite integer >= min.
+// undefined/null means "not specified" and is allowed through as such -
+// silently coercing garbage input (non-numeric strings, NaN, negative
+// numbers, floats) to a default was the previous behaviour and could mask a
+// caller bug (e.g. a typo'd param name landing in the wrong field) instead
+// of surfacing it.
+function validatePagingArg(value: any, name: string, min: number): number | undefined {
+    if (value === undefined || value === null) {
+        return undefined;
+    }
+    const num = Number(value);
+    if (!Number.isFinite(num) || !Number.isInteger(num) || num < min) {
+        throw new McpError(
+            ErrorCode.InvalidParams,
+            `${name} must be an integer >= ${min}, got ${JSON.stringify(value)}`
+        );
+    }
+    return num;
+}
 
 function buildPagedPayload(lines: string[], totalLines: number, startLine: number, initialMaxLines: number, requestedPaging: boolean): string {
     const startIndex = startLine - 1;
@@ -46,24 +106,26 @@ function buildPagedPayload(lines: string[], totalLines: number, startLine: numbe
         }
         text = JSON.stringify(payload);
 
-        // Always self-correct against the actual serialized size, whether the
-        // caller asked for paging or not - an explicit maxLines is a request,
-        // not a guarantee we can honour without exceeding the host's limit.
-        if (text.length <= SAFE_OUTPUT_CHARS || maxLines <= 1) {
+        // Always self-correct against the actual serialized byte size,
+        // whether the caller asked for paging or not - an explicit maxLines
+        // is a request, not a guarantee we can honour without exceeding the
+        // host's limit.
+        const size = byteLength(text);
+        if (size <= SAFE_OUTPUT_BYTES || maxLines <= 1) {
             break;
         }
         capped = true;
-        maxLines = Math.max(1, Math.floor(maxLines * (SAFE_OUTPUT_CHARS / text.length) * 0.9));
+        maxLines = Math.max(1, Math.floor(maxLines * (SAFE_OUTPUT_BYTES / size) * 0.9));
     }
 
     // Line-based shrinking bottoms out at 1 line: if that single line is
     // itself larger than the safe budget (e.g. minified/no-newline content),
-    // fall back to a hard character cut so the response always fits.
-    if (text.length > SAFE_OUTPUT_CHARS) {
+    // fall back to a hard byte-safe cut so the response always fits.
+    if (byteLength(text) > SAFE_OUTPUT_BYTES) {
         const singleLine = lines.slice(startIndex, Math.min(startIndex + 1, totalLines)).join('\n');
         const envelopeOverhead = 400; // room for JSON keys/quotes + note text
-        const budget = Math.max(1000, SAFE_OUTPUT_CHARS - envelopeOverhead);
-        const truncatedLine = singleLine.length > budget ? singleLine.slice(0, budget) : singleLine;
+        const budget = Math.max(1000, SAFE_OUTPUT_BYTES - envelopeOverhead);
+        const truncatedLine = truncateToByteBudget(singleLine, budget);
         text = JSON.stringify({
             content: truncatedLine,
             totalLines,
@@ -80,8 +142,93 @@ function buildPagedPayload(lines: string[], totalLines: number, startLine: numbe
     return text;
 }
 
-export function return_response(response: AxiosResponse, args?: { startLine?: any; maxLines?: any }) {
+// Array counterpart of buildPagedPayload, for handlers whose response is a
+// list of items (e.g. GetPackage's flattened member list) rather than
+// multi-line text. Same unconditional-shrink + single-item-too-big fallback
+// discipline, indexed by item count instead of line count.
+function buildPagedArrayPayload(items: any[], totalItems: number, startIndex: number, initialMaxItems: number, requestedPaging: boolean): string {
+    let maxItems = initialMaxItems;
+    let text = '';
+    let endIndex = startIndex;
+    let capped = false;
+
+    for (let attempt = 0; attempt < 8; attempt++) {
+        endIndex = Math.min(startIndex + maxItems, totalItems);
+        const payload: any = {
+            content: items.slice(startIndex, endIndex),
+            totalItems,
+            startIndex,
+            returnedItems: Math.max(0, endIndex - startIndex),
+            hasMore: endIndex < totalItems
+        };
+        if (!requestedPaging) {
+            payload.autoPaged = true;
+        }
+        if (capped) {
+            payload.capped = true;
+            payload.note = 'Requested/default range exceeded the safe response size and was shrunk to fit. Pass a smaller maxItems (or a later startIndex) to continue.';
+        }
+        text = JSON.stringify(payload);
+
+        const size = byteLength(text);
+        if (size <= SAFE_OUTPUT_BYTES || maxItems <= 1) {
+            break;
+        }
+        capped = true;
+        maxItems = Math.max(1, Math.floor(maxItems * (SAFE_OUTPUT_BYTES / size) * 0.9));
+    }
+
+    // Bottomed out at 1 item and it's still too big (e.g. one member with an
+    // unusually long description) - hard-truncate that single item's JSON
+    // text as a last resort so the response always fits.
+    if (byteLength(text) > SAFE_OUTPUT_BYTES) {
+        const singleItemEndIndex = Math.min(startIndex + 1, totalItems);
+        const singleItemText = JSON.stringify(items.slice(startIndex, singleItemEndIndex));
+        const envelopeOverhead = 400;
+        const budget = Math.max(1000, SAFE_OUTPUT_BYTES - envelopeOverhead);
+        const truncated = truncateToByteBudget(singleItemText, budget);
+        text = JSON.stringify({
+            content: truncated,
+            totalItems,
+            startIndex,
+            returnedItems: singleItemEndIndex - startIndex,
+            hasMore: true,
+            ...(!requestedPaging ? { autoPaged: true } : {}),
+            capped: true,
+            truncatedMidItem: true,
+            note: 'Result exceeded the safe response size even for a single item and was cut mid-item (content is a raw JSON-text prefix, not parseable as JSON on its own). Pass startIndex/maxItems to continue.'
+        });
+    }
+
+    return text;
+}
+
+export function return_response(response: AxiosResponse, args?: { startLine?: any; maxLines?: any; startIndex?: any; maxItems?: any }) {
     const data = response.data;
+
+    if (Array.isArray(data)) {
+        const startIndex = validatePagingArg(args?.startIndex, 'startIndex', 0) ?? 0;
+        const maxItemsArg = validatePagingArg(args?.maxItems, 'maxItems', 0);
+        const requestedPaging = !!args && (args.startIndex !== undefined || args.maxItems !== undefined);
+        const totalItems = data.length;
+
+        if (!requestedPaging) {
+            const text = JSON.stringify(data);
+            if (byteLength(text) <= SAFE_OUTPUT_BYTES) {
+                return {
+                    isError: false,
+                    content: [{ type: 'text', text }]
+                };
+            }
+        }
+
+        const initialMaxItems = maxItemsArg !== undefined ? maxItemsArg : totalItems - startIndex;
+        const text = buildPagedArrayPayload(data, totalItems, startIndex, initialMaxItems, requestedPaging);
+        return {
+            isError: false,
+            content: [{ type: 'text', text }]
+        };
+    }
 
     if (typeof data !== 'string') {
         // e.g. GetTableContents already returns structured data.
@@ -94,11 +241,13 @@ export function return_response(response: AxiosResponse, args?: { startLine?: an
         };
     }
 
+    const startLineArg = validatePagingArg(args?.startLine, 'startLine', 1);
+    const maxLinesArg = validatePagingArg(args?.maxLines, 'maxLines', 0);
     const requestedPaging = !!args && (args.startLine !== undefined || args.maxLines !== undefined);
 
     // Only the very cheapest path (no paging requested, content already
     // small) skips the payload builder entirely.
-    if (!requestedPaging && data.length <= SAFE_OUTPUT_CHARS) {
+    if (!requestedPaging && byteLength(data) <= SAFE_OUTPUT_BYTES) {
         return {
             isError: false,
             content: [{
@@ -110,10 +259,10 @@ export function return_response(response: AxiosResponse, args?: { startLine?: an
 
     const lines = data.split('\n');
     const totalLines = lines.length;
-    const startLine = Math.max(1, Number(args?.startLine) || 1);
+    const startLine = startLineArg ?? 1;
     const startIndex = startLine - 1;
-    const initialMaxLines = args?.maxLines !== undefined
-        ? Math.max(0, Number(args.maxLines))
+    const initialMaxLines = maxLinesArg !== undefined
+        ? maxLinesArg
         : totalLines - startIndex;
 
     const text = buildPagedPayload(lines, totalLines, startLine, initialMaxLines, requestedPaging);

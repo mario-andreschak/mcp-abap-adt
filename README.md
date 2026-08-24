@@ -327,7 +327,44 @@ This server provides the following tools, which can be used through FLUJO, Cline
 | `GetBehaviorDefinition` | Retrieve RAP Behavior Definition (BDEF) source. Requires ~NW 7.54 / S/4HANA. | `behavior_definition_name` (string): Name of the RAP Behavior Definition. | `@tool GetBehaviorDefinition behavior_definition_name=ZMY_ENTITY` |
 | `GetServiceDefinition`  | Retrieve RAP Service Definition (SRVD) source. Requires ~NW 7.54 / S/4HANA.  | `service_definition_name` (string): Name of the RAP Service Definition.   | `@tool GetServiceDefinition service_definition_name=ZMY_SERVICE`  |
 
+### 9.1 Response Paging & Size Limits
 
+Most MCP hosts cap how large a single tool response can be. A large ABAP object (a big class/program source) or a package/search with many entries can easily exceed that cap, so most tools support optional paging parameters and will page automatically when needed:
+
+- Text/source results (`GetProgram`, `GetClass`, `GetCDSView`, etc.): optional `startLine` (1-based) and `maxLines`.
+- List results (`GetPackage`, and any other tool whose result is an array of items): optional `startIndex` (0-based) and `maxItems`.
+
+**Response shape changes when paging is in effect.** If a result is small and no paging was requested, the tool returns exactly what it always has (raw source text, or the raw JSON array) - no change in behavior. But if the result is large enough to risk exceeding the host's limit (even without you asking for paging), or if you explicitly pass a paging parameter, the response instead becomes a JSON object:
+
+```jsonc
+// text/source results
+{
+  "content": "...",          // the (possibly partial) text
+  "totalLines": 7745,
+  "startLine": 1,
+  "returnedLines": 1755,
+  "hasMore": true,
+  "autoPaged": true,          // present only when paging happened without an explicit request
+  "capped": true,              // present only when the requested/default range had to be shrunk to fit
+  "note": "..."                 // present alongside capped: explains what happened and how to continue
+}
+
+// list results (e.g. GetPackage)
+{
+  "content": [ /* items */ ],
+  "totalItems": 3000,
+  "startIndex": 0,
+  "returnedItems": 442,
+  "hasMore": true,
+  "autoPaged": true,
+  "capped": true,
+  "note": "..."
+}
+```
+
+If a caller/consumer assumes every response is always the raw text/array verbatim, it needs to check for this shape (e.g. `typeof result === 'string'` vs. an object with a `content`/`hasMore` field) rather than assuming one or the other.
+
+Paging arguments are validated strictly: `startLine`/`startIndex` must be integers `>= 1`/`>= 0` respectively, and `maxLines`/`maxItems` must be non-negative integers. Passing a non-numeric or out-of-range value raises an explicit error rather than being silently coerced to a default.
 
 <a href="https://glama.ai/mcp/servers/gwkh12xlu7">
   <img width="380" height="200" src="https://glama.ai/mcp/servers/gwkh12xlu7/badge" alt="ABAP ADT MCP server" />
