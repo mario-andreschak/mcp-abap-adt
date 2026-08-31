@@ -1,5 +1,4 @@
-import { McpError, ErrorCode, AxiosResponse } from '../lib/utils';
-import { makeAdtRequest, return_error, return_response, getBaseUrl } from '../lib/utils';
+import { McpError, ErrorCode, makeAdtRequest, return_error, return_text_response, getBaseUrl } from '../lib/utils';
 import convert from 'xml-js';
 
 export async function handleGetPackage(args: any) {
@@ -29,13 +28,9 @@ export async function handleGetPackage(args: any) {
             OBJECT_URI: node.OBJECT_URI._text
         }));
 
-        return {
-            isError: false,
-            content: [{
-                type: 'text',
-                text: JSON.stringify(extractedData)
-            }]
-        };
+        // Keep the legacy compact JSON for small results, but route it through
+        // the same validation and UTF-8 byte cap as every other textual tool.
+        return return_text_response(extractedData, args);
 
     } catch (error) {
         return return_error(error);
