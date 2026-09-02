@@ -1,4 +1,3 @@
-import { after } from 'node:test';
 import { mcp_abap_adt_server } from './index';
 import { handleGetProgram } from './handlers/handleGetProgram';
 import { handleGetClass } from './handlers/handleGetClass';
@@ -15,7 +14,11 @@ import { handleGetTransaction } from './handlers/handleGetTransaction';
 import { handleSearchObject } from './handlers/handleSearchObject';
 import { cleanup } from './lib/utils';
 
-describe('mcp_abap_adt_server - Integration Tests', () => {
+// Live SAP integration is intentionally opt-in; the default Jest run stays
+// deterministic and credential-free.
+const describeIntegration = process.env.RUN_SAP_INTEGRATION === '1' ? describe : describe.skip;
+
+describeIntegration('mcp_abap_adt_server - Integration Tests', () => {
   let server: mcp_abap_adt_server;
 
   beforeAll(() => {

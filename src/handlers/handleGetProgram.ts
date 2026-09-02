@@ -10,7 +10,7 @@ export async function handleGetProgram(args: any) {
         const url = `${await getBaseUrl()}/sap/bc/adt/programs/programs/${encodedProgramName}/source/main`;
 
         const response = await makeAdtRequest(url, 'GET', 30000);
-        return return_response(response);
+        return return_response(response, args);
     }
     catch (error) {
         return return_error(error);

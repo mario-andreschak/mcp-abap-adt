@@ -9,7 +9,7 @@ export async function handleGetInclude(args: any) {
         const encodedIncludeName = encodeURIComponent(args.include_name);
         const url = `${await getBaseUrl()}/sap/bc/adt/programs/includes/${encodedIncludeName}/source/main`;
         const response = await makeAdtRequest(url, 'GET', 30000);
-        return return_response(response);
+        return return_response(response, args);
     } catch (error) {
         return return_error(error);
     }

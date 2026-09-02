@@ -9,7 +9,7 @@ export async function handleGetTransaction(args: any) {
         const encodedTransactionName = encodeURIComponent(args.transaction_name);
         const url = `${await getBaseUrl()}/sap/bc/adt/repository/informationsystem/objectproperties/values?uri=%2Fsap%2Fbc%2Fadt%2Fvit%2Fwb%2Fobject_type%2Ftrant%2Fobject_name%2F${encodedTransactionName}&facet=package&facet=appl`;
         const response = await makeAdtRequest(url, 'GET', 30000);
-        return return_response(response);
+        return return_response(response, args);
     } catch (error) {
         return return_error(error);
     }

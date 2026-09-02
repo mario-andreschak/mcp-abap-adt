@@ -2,19 +2,265 @@ import { McpError, ErrorCode } from '@modelcontextprotocol/sdk/types.js';
 import axios, { AxiosError, AxiosInstance } from 'axios';
 import { Agent } from 'https';
 import { AxiosResponse } from 'axios';
-import { getConfig, SapConfig } from '../index'; // getConfig needs to be exported from index.ts
+import { getConfig, SapConfig } from '../config';
 
 export { McpError, ErrorCode, AxiosResponse };
 
-export function return_response(response: AxiosResponse) {
+// MCP hosts commonly apply token-based output limits. A conservative UTF-8
+// byte budget leaves room for MCP framing while still guaranteeing that the
+// text placed in content[0].text is bounded after JSON serialization.
+export const SAFE_OUTPUT_BYTES = 40_000;
+export const MAX_PAGE_LINES = 100_000;
+
+export interface PagingArguments {
+    startLine?: unknown;
+    maxLines?: unknown;
+}
+
+interface NormalizedPaging {
+    requested: boolean;
+    startLine: number;
+    maxLines?: number;
+}
+
+interface PagedPayload {
+    content: string;
+    totalLines: number;
+    startLine: number;
+    returnedLines: number;
+    hasMore: boolean;
+    autoPaged?: true;
+    capped?: true;
+    truncatedMidLine?: true;
+    note?: string;
+}
+
+const CAPPED_NOTE = 'Requested/default range exceeded the safe UTF-8 response budget and was shrunk to fit. Continue with startLine plus returnedLines.';
+const MID_LINE_NOTE = 'A single line exceeded the safe UTF-8 response budget, so content contains only its prefix. The omitted remainder cannot be recovered by line pagination; continue at startLine + 1 only when hasMore is true.';
+
+function byteLength(value: string): number {
+    return Buffer.byteLength(value, 'utf8');
+}
+
+function serializeResponseData(data: unknown, pagingRequested: boolean): string {
+    if (typeof data === 'string') {
+        return data;
+    }
+
+    const serialized = JSON.stringify(data);
+    if (serialized === undefined) {
+        return String(data);
+    }
+
+    // Keep the legacy compact JSON for small, unpaged structured responses.
+    // Pretty-print only when paging is explicit or the compact value already
+    // exceeds the cap, giving the line pager useful continuation boundaries.
+    if (pagingRequested || byteLength(serialized) > SAFE_OUTPUT_BYTES) {
+        return JSON.stringify(data, null, 2) ?? serialized;
+    }
+    return serialized;
+}
+
+function normalizePagingArguments(args?: PagingArguments): NormalizedPaging {
+    const requested = args?.startLine !== undefined || args?.maxLines !== undefined;
+    const startLine = args?.startLine === undefined ? 1 : args.startLine;
+
+    if (typeof startLine !== 'number' || !Number.isFinite(startLine) || !Number.isSafeInteger(startLine) || startLine < 1) {
+        throw new McpError(ErrorCode.InvalidParams, 'startLine must be a finite integer greater than or equal to 1');
+    }
+
+    if (args?.maxLines === undefined) {
+        return { requested, startLine };
+    }
+
+    const maxLines = args.maxLines;
+    if (typeof maxLines !== 'number' || !Number.isFinite(maxLines) || !Number.isSafeInteger(maxLines) || maxLines < 1 || maxLines > MAX_PAGE_LINES) {
+        throw new McpError(ErrorCode.InvalidParams, `maxLines must be a finite integer between 1 and ${MAX_PAGE_LINES}`);
+    }
+
+    return { requested, startLine, maxLines };
+}
+
+function makePayload(
+    lines: string[],
+    totalLines: number,
+    startLine: number,
+    returnedLines: number,
+    requestedPaging: boolean,
+    capped: boolean
+): PagedPayload {
+    const startIndex = startLine - 1;
+    const endIndex = Math.min(startIndex + returnedLines, totalLines);
     return {
-        isError: false,
-        content: [{
-            type: 'text',
-            text: response.data
-        }]
+        content: lines.slice(startIndex, endIndex).join('\n'),
+        totalLines,
+        startLine,
+        returnedLines: Math.max(0, endIndex - startIndex),
+        hasMore: endIndex < totalLines,
+        ...(!requestedPaging ? { autoPaged: true as const } : {}),
+        ...(capped ? { capped: true as const, note: CAPPED_NOTE } : {})
     };
 }
+
+function serializePayload(payload: PagedPayload): string {
+    return JSON.stringify(payload);
+}
+
+function sliceWithoutSplittingSurrogatePair(value: string, end: number): string {
+    let safeEnd = Math.max(0, Math.min(end, value.length));
+    if (safeEnd > 0 && safeEnd < value.length) {
+        const previous = value.charCodeAt(safeEnd - 1);
+        const next = value.charCodeAt(safeEnd);
+        if (previous >= 0xD800 && previous <= 0xDBFF && next >= 0xDC00 && next <= 0xDFFF) {
+            safeEnd--;
+        }
+    }
+    return value.slice(0, safeEnd);
+}
+
+function truncateOversizedLine(
+    lines: string[],
+    totalLines: number,
+    startLine: number,
+    requestedPaging: boolean
+): string {
+    const startIndex = startLine - 1;
+    const fullLine = lines[startIndex] ?? '';
+    let low = 0;
+    let high = fullLine.length;
+    let best = '';
+
+    while (low <= high) {
+        const middle = Math.floor((low + high) / 2);
+        const content = sliceWithoutSplittingSurrogatePair(fullLine, middle);
+        const payload: PagedPayload = {
+            content,
+            totalLines,
+            startLine,
+            // The truncated source line is considered consumed. Any omitted
+            // suffix is intentionally unrecoverable through line-based paging.
+            returnedLines: 1,
+            hasMore: startIndex + 1 < totalLines,
+            ...(!requestedPaging ? { autoPaged: true as const } : {}),
+            capped: true,
+            truncatedMidLine: true,
+            note: MID_LINE_NOTE
+        };
+        const serialized = serializePayload(payload);
+
+        if (byteLength(serialized) <= SAFE_OUTPUT_BYTES) {
+            best = serialized;
+            low = middle + 1;
+        } else {
+            high = middle - 1;
+        }
+    }
+
+    if (!best || byteLength(best) > SAFE_OUTPUT_BYTES) {
+        throw new Error('The pagination metadata exceeds the configured safe output budget');
+    }
+    return best;
+}
+
+function buildPagedPayload(
+    lines: string[],
+    totalLines: number,
+    startLine: number,
+    maxLines: number,
+    requestedPaging: boolean
+): string {
+    const startIndex = startLine - 1;
+    const availableLines = Math.max(0, totalLines - startIndex);
+    const requestedLines = Math.min(maxLines, availableLines);
+    const initial = serializePayload(makePayload(
+        lines,
+        totalLines,
+        startLine,
+        requestedLines,
+        requestedPaging,
+        false
+    ));
+
+    if (byteLength(initial) <= SAFE_OUTPUT_BYTES) {
+        return initial;
+    }
+
+    let low = 0;
+    let high = requestedLines;
+    let best = '';
+    let bestLines = 0;
+
+    while (low <= high) {
+        const middle = Math.floor((low + high) / 2);
+        const serialized = serializePayload(makePayload(
+            lines,
+            totalLines,
+            startLine,
+            middle,
+            requestedPaging,
+            true
+        ));
+
+        if (byteLength(serialized) <= SAFE_OUTPUT_BYTES) {
+            best = serialized;
+            bestLines = middle;
+            low = middle + 1;
+        } else {
+            high = middle - 1;
+        }
+    }
+
+    if (bestLines > 0 || requestedLines === 0) {
+        return best;
+    }
+    return truncateOversizedLine(lines, totalLines, startLine, requestedPaging);
+}
+
+export function return_text_response(data: unknown, args?: PagingArguments) {
+    try {
+        const paging = normalizePagingArguments(args);
+        const textData = serializeResponseData(data, paging.requested);
+
+        // Preserve the legacy response exactly when no paging was requested and
+        // the raw/serialized text already fits the conservative byte budget.
+        if (!paging.requested && byteLength(textData) <= SAFE_OUTPUT_BYTES) {
+            return {
+                isError: false,
+                content: [{
+                    type: 'text',
+                    text: textData
+                }]
+            };
+        }
+
+        const lines = textData.split('\n');
+        const totalLines = lines.length;
+        const startIndex = paging.startLine - 1;
+        const maxLines = paging.maxLines ?? Math.max(0, totalLines - startIndex);
+        const text = buildPagedPayload(
+            lines,
+            totalLines,
+            paging.startLine,
+            maxLines,
+            paging.requested
+        );
+
+        return {
+            isError: false,
+            content: [{
+                type: 'text',
+                text
+            }]
+        };
+    } catch (error) {
+        return return_error(error);
+    }
+}
+
+export function return_response(response: AxiosResponse, args?: PagingArguments) {
+    return return_text_response(response.data, args);
+}
+
 export function return_error(error: any) {
     return {
         isError: true,

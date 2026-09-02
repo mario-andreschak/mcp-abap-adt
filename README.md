@@ -141,7 +141,7 @@ This mode is useful for debugging.
     This will start the server and output a message like:  `🔍 MCP Inspector is up and running at http://localhost:5173 🚀`.
     This is the URL you'll use to open the MCP inspector in your Browser.
 
-## 4. Integrating with 
+## 4. Integrating with FLUJO
 
 [FLUJO](https://github.com/mario-andreschak/FLUJO) is the easiest way to use this server — no cloning, building, or editing JSON config. `mcp-abap-adt` is a curated Spotlight server, so it installs with a single click:
 
@@ -277,7 +277,40 @@ claude mcp add mcp-abap-adt \
 
 Add `--scope project` to write it to the shared `.mcp.json`, or `--scope user` to make it available across all your projects. Verify with `claude mcp list`.
 
-## 8. Troubleshooting
+## 8. Large-response pagination
+
+All text-returning tools support the optional `startLine` and `maxLines` arguments: `GetProgram`, `GetClass`, `GetFunctionGroup`, `GetFunction`, `GetStructure`, `GetTable`, `GetTableContents`, `GetPackage`, `GetTypeInfo`, `GetInclude`, `SearchObject`, `GetTransaction`, `GetCDSView`, `GetInterface`, `GetBehaviorDefinition`, and `GetServiceDefinition`. `GetTableContents.max_rows` and `SearchObject.maxResults` still limit upstream records; paging independently protects the textual response size.
+
+- `startLine` is a 1-based integer. It defaults to 1.
+- `maxLines` is an integer from 1 through 100,000. When omitted, the tool requests all remaining lines.
+- A small response with neither paging argument keeps the existing raw `content[0].text` exactly.
+- Any explicit paging request returns a JSON envelope in `content[0].text`.
+- An unpaged result that exceeds the conservative 40,000-byte UTF-8 budget is automatically reduced and returned in the same envelope with `autoPaged: true` and `capped: true`.
+- A request beyond EOF returns `content: ""`, `returnedLines: 0`, and `hasMore: false`.
+
+The envelope has this shape:
+
+```json
+{
+  "content": "...returned source lines...",
+  "totalLines": 7745,
+  "startLine": 1,
+  "returnedLines": 1200,
+  "hasMore": true,
+  "autoPaged": true,
+  "capped": true
+}
+```
+
+`content` is the selected text, `totalLines` describes the full serialized result, and `returnedLines` counts source lines consumed. Continue ordinary paging with `startLine + returnedLines` while `hasMore` is true. `autoPaged` appears only when the caller did not request paging. `capped` means the requested/default range was reduced to meet the final `content[0].text` UTF-8 byte budget.
+
+If one source line alone exceeds the budget, the envelope also contains `truncatedMidLine: true`. The returned prefix is UTF-8 safe and does not split a Unicode surrogate pair, but the omitted suffix cannot be recovered with line-based paging. That line counts as consumed; `hasMore` only indicates whether later source lines exist.
+
+Clients that previously treated every result as raw source should parse `content[0].text` as JSON whenever they explicitly request paging or when automatic capping returns an envelope. Small unpaged responses remain backward compatible.
+
+The default `npm test` run is credential-free and skips the live SAP integration suite. Maintainers can opt in by setting `RUN_SAP_INTEGRATION=1` before running `npm test -- src/index.test.ts`.
+
+## 9. Troubleshooting
 
 *   **`node -v` or `npm -v` gives an error:**
     *   Make sure Node.js is installed correctly. First try closing the Terminal/Powershell/cmd.exe in which you were executing the command. Try restarting your computer. Try reinstalling it.
@@ -306,9 +339,9 @@ Add `--scope project` to write it to the shared `.mcp.json`, or `--scope user` t
     *   Check that the required ADT services are activated in transaction `SICF`.
     *   If you're using self-signed certificates or there is an issue with your SAP systems http config, make sure to set TLS_REJECT_UNAUTHORIZED as described above!
 
-## 9. Available Tools
+## 10. Available Tools
 
-This server provides the following tools, which can be used through FLUJO, Cline, Claude Desktop, Claude Code, or any other MCP client:
+This server provides the following tools, which can be used through FLUJO, Cline, Claude Desktop, Claude Code, or any other MCP client. Every listed tool also accepts the shared optional `startLine` and `maxLines` pagination parameters described above:
 
 | Tool Name           | Description                                       | Input Parameters                                                   | Example Usage (in Cline)                                   |
 | ------------------- | ------------------------------------------------- | ------------------------------------------------------------------ | ---------------------------------------------------------- |

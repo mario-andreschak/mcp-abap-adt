@@ -29,41 +29,65 @@ import { handleGetBehaviorDefinition } from './handlers/handleGetBehaviorDefinit
 import { handleGetServiceDefinition } from './handlers/handleGetServiceDefinition';
 
 // Import shared utility functions and types
-import { getBaseUrl, getAuthHeaders, createAxiosInstance, makeAdtRequest, return_error, return_response } from './lib/utils';
+import { getBaseUrl, getAuthHeaders, createAxiosInstance, makeAdtRequest, MAX_PAGE_LINES, return_error, return_response } from './lib/utils';
+import { getConfig, SapConfig } from './config';
+export { getConfig, SapConfig } from './config';
 
 // Load environment variables from .env file
 dotenv.config({ path: path.resolve(__dirname, '../.env') });
 
-// Interface for SAP configuration
-export interface SapConfig {
-  url: string;
-  username: string;
-  password: string;
-  client: string;
-}
+// Shared schema fragments for every tool whose textual result is protected by
+// the response byte cap. Runtime validation in lib/utils.ts matches these bounds.
+export const PAGING_START_LINE = {
+  type: 'integer',
+  minimum: 1,
+  description: '1-based line number to start from (default 1). Beyond EOF returns an empty page with hasMore=false.'
+};
+export const PAGING_MAX_LINES = {
+  type: 'integer',
+  minimum: 1,
+  maximum: MAX_PAGE_LINES,
+  description: `Maximum lines to return (1-${MAX_PAGE_LINES}). Omit to request the rest; the byte cap may return fewer lines.`
+};
 
-/**
- * Retrieves SAP configuration from environment variables.
- *
- * @returns {SapConfig} The SAP configuration object.
- * @throws {Error} If any required environment variable is missing.
- */
-export function getConfig(): SapConfig {
-  const url = process.env.SAP_URL;
-  const username = process.env.SAP_USERNAME;
-  const password = process.env.SAP_PASSWORD;
-  const client = process.env.SAP_CLIENT;
+export const PAGED_TEXT_TOOL_NAMES = [
+  'GetProgram',
+  'GetClass',
+  'GetFunctionGroup',
+  'GetFunction',
+  'GetStructure',
+  'GetTable',
+  'GetTableContents',
+  'GetPackage',
+  'GetTypeInfo',
+  'GetInclude',
+  'SearchObject',
+  'GetTransaction',
+  'GetCDSView',
+  'GetInterface',
+  'GetBehaviorDefinition',
+  'GetServiceDefinition'
+] as const;
 
-  // Check if all required environment variables are set
-  if (!url || !username || !password || !client) {
-    throw new Error(`Missing required environment variables. Required variables:
-- SAP_URL
-- SAP_USERNAME
-- SAP_PASSWORD
-- SAP_CLIENT`);
-  }
+const PAGED_TEXT_TOOL_SET = new Set<string>(PAGED_TEXT_TOOL_NAMES);
 
-  return { url, username, password, client };
+export function addPagingSchemas(tools: any[]) {
+  return tools.map((tool) => {
+    if (!PAGED_TEXT_TOOL_SET.has(tool.name)) {
+      return tool;
+    }
+    return {
+      ...tool,
+      inputSchema: {
+        ...tool.inputSchema,
+        properties: {
+          ...tool.inputSchema.properties,
+          startLine: PAGING_START_LINE,
+          maxLines: PAGING_MAX_LINES
+        }
+      }
+    };
+  });
 }
 
 /**
@@ -103,52 +127,58 @@ export class mcp_abap_adt_server {
     // Handler for ListToolsRequest
     this.server.setRequestHandler(ListToolsRequestSchema, async () => {
       return {
-        tools: [ // Define available tools
+        tools: addPagingSchemas([ // Define available tools
           {
             name: 'GetProgram',
-            description: 'Retrieve ABAP program source code',
+            description: 'Retrieve ABAP program source code. For large programs, use startLine/maxLines to page through the source instead of retrieving it all at once.',
             inputSchema: {
               type: 'object',
               properties: {
                 program_name: {
                   type: 'string',
                   description: 'Name of the ABAP program'
-                }
+                },
+                startLine: PAGING_START_LINE,
+                maxLines: PAGING_MAX_LINES
               },
               required: ['program_name']
             }
           },
           {
             name: 'GetClass',
-            description: 'Retrieve ABAP class source code',
+            description: 'Retrieve ABAP class source code. For large classes, use startLine/maxLines to page through the source instead of retrieving it all at once.',
             inputSchema: {
               type: 'object',
               properties: {
                 class_name: {
                   type: 'string',
                   description: 'Name of the ABAP class'
-                }
+                },
+                startLine: PAGING_START_LINE,
+                maxLines: PAGING_MAX_LINES
               },
               required: ['class_name']
             }
           },
           {
             name: 'GetFunctionGroup',
-            description: 'Retrieve ABAP Function Group source code',
+            description: 'Retrieve ABAP Function Group source code. For large function groups, use startLine/maxLines to page through the source instead of retrieving it all at once.',
             inputSchema: {
               type: 'object',
               properties: {
                 function_group: {
                   type: 'string',
                   description: 'Name of the function module'
-                }
+                },
+                startLine: PAGING_START_LINE,
+                maxLines: PAGING_MAX_LINES
               },
               required: ['function_group']
             }
           },
           {
             name: 'GetFunction',
-            description: 'Retrieve ABAP Function Module source code',
+            description: 'Retrieve ABAP Function Module source code. For large function modules, use startLine/maxLines to page through the source instead of retrieving it all at once.',
             inputSchema: {
               type: 'object',
               properties: {
@@ -159,42 +189,48 @@ export class mcp_abap_adt_server {
                 function_group: {
                   type: 'string',
                   description: 'Name of the function group'
-                }
+                },
+                startLine: PAGING_START_LINE,
+                maxLines: PAGING_MAX_LINES
               },
               required: ['function_name', 'function_group']
             }
           },
           {
             name: 'GetStructure',
-            description: 'Retrieve ABAP Structure',
+            description: 'Retrieve ABAP Structure. For large structures, use startLine/maxLines to page through the result instead of retrieving it all at once.',
             inputSchema: {
               type: 'object',
               properties: {
                 structure_name: {
                   type: 'string',
                   description: 'Name of the ABAP Structure'
-                }
+                },
+                startLine: PAGING_START_LINE,
+                maxLines: PAGING_MAX_LINES
               },
               required: ['structure_name']
             }
           },
           {
             name: 'GetTable',
-            description: 'Retrieve ABAP table structure',
+            description: 'Retrieve ABAP table structure. For large tables, use startLine/maxLines to page through the result instead of retrieving it all at once.',
             inputSchema: {
               type: 'object',
               properties: {
                 table_name: {
                   type: 'string',
                   description: 'Name of the ABAP table'
-                }
+                },
+                startLine: PAGING_START_LINE,
+                maxLines: PAGING_MAX_LINES
               },
               required: ['table_name']
             }
           },
           {
             name: 'GetTableContents',
-            description: 'Retrieve contents of an ABAP table',
+            description: 'Retrieve contents of an ABAP table. max_rows limits SAP rows; startLine/maxLines page the returned textual XML when its serialized size is still large.',
             inputSchema: {
               type: 'object',
               properties: {
@@ -213,7 +249,7 @@ export class mcp_abap_adt_server {
           },
           {
             name: 'GetPackage',
-            description: 'Retrieve ABAP package details',
+            description: 'Retrieve ABAP package details. Use startLine/maxLines to page large serialized package listings.',
             inputSchema: {
               type: 'object',
               properties: {
@@ -227,35 +263,39 @@ export class mcp_abap_adt_server {
           },
           {
             name: 'GetTypeInfo',
-            description: 'Retrieve ABAP type information',
+            description: 'Retrieve ABAP type information. For large results, use startLine/maxLines to page through it instead of retrieving it all at once.',
             inputSchema: {
               type: 'object',
               properties: {
                 type_name: {
                   type: 'string',
                   description: 'Name of the ABAP type'
-                }
+                },
+                startLine: PAGING_START_LINE,
+                maxLines: PAGING_MAX_LINES
               },
               required: ['type_name']
             }
           },
           {
             name: 'GetInclude',
-            description: 'Retrieve ABAP Include Source Code',
+            description: 'Retrieve ABAP Include Source Code. For large includes, use startLine/maxLines to page through the source instead of retrieving it all at once.',
             inputSchema: {
               type: 'object',
               properties: {
                 include_name: {
                   type: 'string',
                   description: 'Name of the ABAP Include'
-                }
+                },
+                startLine: PAGING_START_LINE,
+                maxLines: PAGING_MAX_LINES
               },
               required: ['include_name']
             }
           },
           {
             name: 'SearchObject',
-            description: 'Search for ABAP objects using quick search',
+            description: 'Search for ABAP objects using quick search. maxResults limits matches; startLine/maxLines page the returned textual XML when its serialized size is still large.',
             inputSchema: {
               type: 'object',
               properties: {
@@ -274,75 +314,85 @@ export class mcp_abap_adt_server {
           },
           {
             name: 'GetTransaction',
-            description: 'Retrieve ABAP transaction details',
+            description: 'Retrieve ABAP transaction details. For large results, use startLine/maxLines to page through it instead of retrieving it all at once.',
             inputSchema: {
               type: 'object',
               properties: {
                 transaction_name: {
                   type: 'string',
                   description: 'Name of the ABAP transaction'
-                }
+                },
+                startLine: PAGING_START_LINE,
+                maxLines: PAGING_MAX_LINES
               },
               required: ['transaction_name']
             }
           },
           {
             name: 'GetCDSView',
-            description: 'Retrieve CDS view (DDL source) source code',
+            description: 'Retrieve CDS view (DDL source) source code. For large views, use startLine/maxLines to page through the source instead of retrieving it all at once.',
             inputSchema: {
               type: 'object',
               properties: {
                 cds_view_name: {
                   type: 'string',
                   description: 'Name of the CDS view (DDL source name, e.g. I_CURRENCY)'
-                }
+                },
+                startLine: PAGING_START_LINE,
+                maxLines: PAGING_MAX_LINES
               },
               required: ['cds_view_name']
             }
           },
           {
             name: 'GetInterface',
-            description: 'Retrieve ABAP interface source code',
+            description: 'Retrieve ABAP interface source code. For large interfaces, use startLine/maxLines to page through the source instead of retrieving it all at once.',
             inputSchema: {
               type: 'object',
               properties: {
                 interface_name: {
                   type: 'string',
                   description: 'Name of the ABAP interface'
-                }
+                },
+                startLine: PAGING_START_LINE,
+                maxLines: PAGING_MAX_LINES
               },
               required: ['interface_name']
             }
           },
           {
             name: 'GetBehaviorDefinition',
-            description: 'Retrieve RAP Behavior Definition (BDEF) source code (requires ~NW 7.54 / S/4HANA)',
+            description: 'Retrieve RAP Behavior Definition (BDEF) source code (requires ~NW 7.54 / S/4HANA). For large definitions, use startLine/maxLines to page through the source instead of retrieving it all at once.',
             inputSchema: {
               type: 'object',
               properties: {
                 behavior_definition_name: {
                   type: 'string',
                   description: 'Name of the RAP Behavior Definition (e.g. I_MY_ENTITY)'
-                }
+                },
+                startLine: PAGING_START_LINE,
+                maxLines: PAGING_MAX_LINES
               },
               required: ['behavior_definition_name']
             }
           },
           {
             name: 'GetServiceDefinition',
-            description: 'Retrieve RAP Service Definition (SRVD) source code (requires ~NW 7.54 / S/4HANA)',
+            description: 'Retrieve RAP Service Definition (SRVD) source code (requires ~NW 7.54 / S/4HANA). For large definitions, use startLine/maxLines to page through the source instead of retrieving it all at once.',
             inputSchema: {
               type: 'object',
               properties: {
                 service_definition_name: {
                   type: 'string',
                   description: 'Name of the RAP Service Definition (e.g. Z_MY_SERVICE)'
-                }
+                },
+                startLine: PAGING_START_LINE,
+                maxLines: PAGING_MAX_LINES
               },
               required: ['service_definition_name']
             }
           }
-        ]
+        ])
       };
     });
 
@@ -405,8 +455,10 @@ export class mcp_abap_adt_server {
   }
 }
 
-// Create and run the server
-const server = new mcp_abap_adt_server();
-server.run().catch((error) => {
-  process.exit(1);
-});
+// Importing this module for deterministic tests must not start stdio transport.
+if (require.main === module) {
+  const server = new mcp_abap_adt_server();
+  server.run().catch(() => {
+    process.exit(1);
+  });
+}

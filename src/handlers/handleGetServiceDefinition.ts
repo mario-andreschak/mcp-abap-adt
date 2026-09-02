@@ -11,7 +11,7 @@ export async function handleGetServiceDefinition(args: any) {
         const url = `${await getBaseUrl()}/sap/bc/adt/ddic/srvd/sources/${encodedName}/source/main`;
         try {
             const response = await makeAdtRequest(url, 'GET', 30000);
-            return return_response(response);
+            return return_response(response, args);
         } catch (error) {
             // The RAP stack (SRVD) does not exist before ~NW 7.54 / S/4HANA, so the
             // srvd/sources collection is not registered in the ADT discovery document
