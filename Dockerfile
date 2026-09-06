@@ -1,24 +1,16 @@
-# Build and run the mcp-abap-adt MCP server in a container.
-FROM node:18-alpine
-
-# Set the working directory
+FROM node:24-bookworm-slim AS build
 WORKDIR /app
+COPY package.json package-lock.json ./
+RUN npm ci --no-audit --no-fund
+COPY tsconfig.json ./
+COPY src ./src
+RUN npm run build && npm prune --omit=dev --ignore-scripts
 
-# Copy package.json
-COPY package.json ./
-
-# Install dependencies
-RUN npm install -r
-
-
-# Copy the rest of the application code
-COPY . .
-
-# Build the TypeScript application
-RUN npm run build
-
-# Expose the port the app runs on
-EXPOSE 5173
-
-# Start the application
-CMD ["node", "./dist/index.js"]
+FROM node:24-bookworm-slim
+ENV NODE_ENV=production
+WORKDIR /app
+COPY --from=build /app/package.json /app/package-lock.json ./
+COPY --from=build /app/node_modules ./node_modules
+COPY --from=build /app/dist ./dist
+USER node
+CMD ["node", "dist/index.js"]
