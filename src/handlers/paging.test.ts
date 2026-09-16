@@ -13,7 +13,7 @@ function page(result: any): any {
 }
 
 function mockBaseUrl() {
-  jest.spyOn(utils, 'getBaseUrl').mockResolvedValue(Buffer.from('https://sap.example'));
+  jest.spyOn(utils, 'getBaseUrl').mockResolvedValue('https://sap.example');
 }
 
 describe('handler paging coverage', () => {

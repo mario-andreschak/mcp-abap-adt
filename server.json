@@ -45,7 +45,12 @@
         },
         {
           "name": "TLS_REJECT_UNAUTHORIZED",
-          "description": "Set to 0 to allow self-signed certificates, 1 to enforce TLS verification",
+          "description": "Certificate verification is enabled by default (1). Set 0 only for explicit local troubleshooting; prefer SAP_CA_FILE for private CAs.",
+          "isRequired": false
+        },
+        {
+          "name": "SAP_CA_FILE",
+          "description": "Absolute path to a PEM CA bundle for the SAP server; augments Node bundled roots while retaining hostname verification",
           "isRequired": false
         }
       ]

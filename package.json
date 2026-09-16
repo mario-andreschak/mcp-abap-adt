@@ -10,10 +10,16 @@
     "dist"
   ],
   "scripts": {
-    "test": "jest",
-    "build": "tsc -p tsconfig.json",
+    "test": "jest --runInBand",
+    "build": "node -e \"require('fs').rmSync('dist', {recursive:true,force:true})\" && tsc -p tsconfig.json",
     "start": "node ./dist/index.js",
-    "dev": "npx @modelcontextprotocol/inspector node ./dist/index.js"
+    "dev": "npx @modelcontextprotocol/inspector node ./dist/index.js",
+    "test:protocol": "node scripts/test-protocol.cjs",
+    "test:package": "node scripts/test-package.cjs",
+    "check": "npm run format:check && npm run build && npm test && npm run test:network && npm run test:client && npm run test:protocol && npm run test:package",
+    "test:network": "node --test scripts/test-network.cjs",
+    "test:client": "node --test scripts/test-client.cjs",
+    "format:check": "prettier --check src/index.ts src/config.ts src/lib/utils.ts src/lib/network.ts scripts/*.cjs package.json server.json tsconfig.json docs/*.md .github/workflows/ci.yml"
   },
   "keywords": [
     "abap",
@@ -33,14 +39,21 @@
     "url": "git+https://github.com/mario-andreschak/mcp-abap-adt.git"
   },
   "dependencies": {
-    "@modelcontextprotocol/sdk": "^1.29.0",
-    "axios": "^1.18.1",
-    "dotenv": "^16.4.7",
-    "xml-js": "^1.6.11",
-    "typescript": "^5.7.3",
-    "@types/node": "^22.10.10",
+    "@modelcontextprotocol/server": "2.0.0",
+    "axios": "1.18.1",
+    "dotenv": "16.6.1",
+    "xml-js": "1.6.11"
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "devDependencies": {
+    "@modelcontextprotocol/client": "2.0.0",
     "@types/jest": "^29.5.14",
+    "@types/node": "^22.10.10",
     "jest": "^29.7.0",
-    "ts-jest": "^29.2.5"    
+    "prettier": "3.6.2",
+    "ts-jest": "^29.2.5",
+    "typescript": "^5.7.3"
   }
 }

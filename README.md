@@ -4,6 +4,10 @@ This project provides a server that allows you to interact with SAP ABAP systems
 
 The server is published on npm as [`mcp-abap-adt`](https://www.npmjs.com/package/mcp-abap-adt) and listed in the [MCP Registry](https://registry.modelcontextprotocol.io) as `io.github.mario-andreschak/mcp-abap-adt`, so most MCP clients can install it with a single command.
 
+This checkout uses TypeScript MCP SDK 2 and supports modern protocol 2026-07-28 plus legacy 2025-11-25 over stdio, using the SDK's first-message routing. Node.js 22 or 24 LTS is required. The advertised server version comes from package.json. Tool discovery works without SAP credentials; calls that access SAP require the configuration below. See [protocol migration guidance](https://ts.sdk.modelcontextprotocol.io/v2/migration/support-2026-07-28).
+
+The sixteen tools are read-only. Native HTTP is not exposed by this executable; any HTTP bridge has its own authentication, Origin and deployment requirements. Classic screen creation/update requested in [#17](https://github.com/mario-andreschak/mcp-abap-adt/issues/17) remains an open enhancement; see the [supported workflow and implementation prerequisites](docs/screen-support.md).
+
 This guide is designed for beginners, so we'll walk through everything step-by-step.  We'll cover:
 
 1.  **Prerequisites:** What you need before you start.
@@ -56,7 +60,7 @@ The server is published on npm, so you don't need to clone or build anything. Mo
 npx -y mcp-abap-adt
 ```
 
-You'll typically configure this inside your MCP client rather than run it by hand — point the client at the command `npx` with args `["-y", "mcp-abap-adt"]` and supply your SAP credentials as environment variables (`SAP_URL`, `SAP_USERNAME`, `SAP_PASSWORD`, `SAP_CLIENT`; optionally `SAP_LANGUAGE`, `TLS_REJECT_UNAUTHORIZED`). See the integration sections below for [](#4-integrating-with-) and [Cline](#5-integrating-with-cline).
+You'll typically configure this inside your MCP client rather than run it by hand — point the client at the command `npx` with args `["-y", "mcp-abap-adt"]` and supply your SAP credentials as environment variables (`SAP_URL`, `SAP_USERNAME`, `SAP_PASSWORD`, `SAP_CLIENT`; optionally `SAP_LANGUAGE`, `SAP_CA_FILE`). See the integration sections below for [FLUJO](#4-integrating-with-flujo) and [Cline](#5-integrating-with-cline).
 
 To install it globally instead:
 
@@ -89,7 +93,7 @@ npm install -g mcp-abap-adt
 
 2.  **Install Dependencies:**  This downloads all the necessary libraries the project needs.  In the terminal, inside the root directory, run:
     ```bash
-    npm install
+    npm ci
     ```
     This might take a few minutes.
 
@@ -110,6 +114,16 @@ npm install -g mcp-abap-adt
         SAP_CLIENT=100                         # Your SAP client
         ```
         **Important:**  Never share your `.env` file with anyone, and never commit it to a Git repository!
+
+### SAP TLS and network settings
+
+Certificate and hostname verification is enabled by default. For a SAP system signed by your organization's private CA, set `SAP_CA_FILE=/absolute/path/sap-ca.pem` to a readable PEM CA bundle. It augments Node's bundled roots. When running in Docker, mount the bundle read-only and provide its container path. This follows [Node TLS trust configuration](https://nodejs.org/api/tls.html).
+
+`SAP_URL` must be the canonical HTTP(S) origin, such as `https://sap.example:443`, without a path, query, fragment or embedded credentials. Use HTTPS for SAP credentials. Redirects are rejected so authentication and session cookies cannot be forwarded to another server. Configure the final origin when a reverse proxy redirects requests.
+
+The previously documented `TLS_REJECT_UNAUTHORIZED=0` is now an explicit troubleshooting opt-out and emits a warning on stderr; `1` is the default. Previously certificate verification was disabled unconditionally regardless of that setting. A custom CA is the normal way to trust a private certificate; the global `NODE_TLS_REJECT_UNAUTHORIZED` setting is not used by this server.
+
+`SAP_LANGUAGE` accepts a two-letter language code, for example `EN` or `de`. The SAP client and optional language are sent as query parameters on every ADT/CSRF request. Each request has a 30-second timeout and a 16 MiB response limit; tool calls have a 60-second total deadline and propagate cancellation. Existing returned-text pagination stays bounded at 40,000 UTF-8 bytes. Narrow the query if the upstream response exceeds the download limit.
 
 ## 3. Running the Server
 
@@ -335,7 +349,7 @@ The default `npm test` run is credential-free and skips the live SAP integration
     *   Ensure that the SAP system is running and accessible from your network.
     *   Make sure that your SAP user has the necessary authorizations to access the ADT services.
     *   Check that the required ADT services are activated in transaction `SICF`.
-    *   If you're using self-signed certificates or there is an issue with your SAP systems http config, make sure to set TLS_REJECT_UNAUTHORIZED as described above!
+    *   For a private CA or self-signed server certificate, configure SAP_CA_FILE and verify the certificate hostname matches SAP_URL. HTTP status codes are returned without upstream bodies; inspect the SAP server logs for authentication/authorization details.
 
 ## 10. Available Tools
 
@@ -349,12 +363,12 @@ This server provides the following tools, which can be used through FLUJO, Cline
 | `GetFunction`       | Retrieve ABAP Function Module source code.        | `function_name` (string), `function_group` (string)                | `@tool GetFunction function_name=ZMY_FUNCTION function_group=ZFG`|
 | `GetStructure`      | Retrieve ABAP Structure.                          | `structure_name` (string): Name of the DDIC Structure.             | `@tool GetStructure structure_name=ZMY_STRUCT`             |
 | `GetTable`          | Retrieve ABAP table structure.                    | `table_name` (string): Name of the ABAP DB table.                  | `@tool GetTable table_name=ZMY_TABLE`                      |
-| `GetTableContents`  | Retrieve contents of an ABAP table.               | `table_name` (string), `max_rows` (number, optional, default 100)  | `@tool GetTableContents table_name=ZMY_TABLE max_rows=50`  |
+| `GetTableContents`  | Retrieve contents of an ABAP table.               | `table_name` (string), `max_rows` (integer 1-10000, optional, default 100)  | `@tool GetTableContents table_name=ZMY_TABLE max_rows=50`  |
 | `GetCDSView`        | Retrieve CDS view (DDL source) source code.       | `cds_view_name` (string): Name of the CDS view (DDL source name).  | `@tool GetCDSView cds_view_name=I_CURRENCY`                |
 | `GetPackage`        | Retrieve ABAP package details.                    | `package_name` (string): Name of the ABAP package.                 | `@tool GetPackage package_name=ZMY_PACKAGE`                |
 | `GetTypeInfo`       | Retrieve ABAP type information.                   | `type_name` (string): Name of the ABAP type.                       | `@tool GetTypeInfo type_name=ZMY_TYPE`                     |
 | `GetInclude`        | Retrieve ABAP include source code                 | `include_name` (string): name of the ABAP include`                 | `@tool GetInclude include_name=ZMY_INCLUDE`                |
-| `SearchObject`      | Search for ABAP objects using quick search.       | `query` (string), `maxResults` (number, optional, default 100)     | `@tool SearchObject query=ZMY* maxResults=20`              |
+| `SearchObject`      | Search for ABAP objects using quick search.       | `query` (string), `maxResults` (integer 1-10000, optional, default 100)     | `@tool SearchObject query=ZMY* maxResults=20`              |
 | `GetInterface`      | Retrieve ABAP interface source code.              | `interface_name` (string): Name of the ABAP interface.             | `@tool GetInterface interface_name=ZIF_MY_INTERFACE`       |
 | `GetTransaction`    | Retrieve ABAP transaction details.                | `transaction_name` (string): Name of the ABAP transaction.         | `@tool GetTransaction transaction_name=ZMY_TRANSACTION`    |
 | `GetBehaviorDefinition` | Retrieve RAP Behavior Definition (BDEF) source. Requires ~NW 7.54 / S/4HANA. | `behavior_definition_name` (string): Name of the RAP Behavior Definition. | `@tool GetBehaviorDefinition behavior_definition_name=ZMY_ENTITY` |
@@ -365,3 +379,9 @@ This server provides the following tools, which can be used through FLUJO, Cline
 <a href="https://glama.ai/mcp/servers/gwkh12xlu7">
   <img width="380" height="200" src="https://glama.ai/mcp/servers/gwkh12xlu7/badge" alt="ABAP ADT MCP server" />
 </a>
+
+## Validation
+
+Run `npm ci && npm run check` with Node 22 or 24 and OpenSSL available. The credential-free suite covers existing pagination and ADT fallbacks, a local HTTPS server (trust, hostname checks, redirects, limits, cancellation, cookies/CSRF), actual modern/legacy SDK clients and a production-only packed npm installation. CI also builds and starts the Docker image.
+
+The 12 existing live SAP integration tests remain opt-in with `RUN_SAP_INTEGRATION=1` and valid SAP configuration. A successful mock/CI run does not establish a customer's ADT service activation, authorizations, release-specific endpoint support or network access. No live SAP system was contacted for this repair.
