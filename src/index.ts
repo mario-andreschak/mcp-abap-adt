@@ -25,6 +25,15 @@ import { handleSearchObject } from "./handlers/handleSearchObject";
 import { handleGetCDSView } from "./handlers/handleGetCDSView";
 import { handleGetBehaviorDefinition } from "./handlers/handleGetBehaviorDefinition";
 import { handleGetServiceDefinition } from "./handlers/handleGetServiceDefinition";
+import {
+  handleListICFHosts,
+  handleListICFNodes,
+  handleGetICFNode,
+  handleCreateICFNode,
+  handleActivateICFNode,
+  handleDeleteICFNode,
+  handleSetICFLogonData,
+} from "./handlers/handleIcf";
 
 // Import shared utility functions and types
 import { MAX_PAGE_LINES, cleanup } from "./lib/utils";
@@ -374,6 +383,190 @@ const TOOL_DEFINITIONS = [
       required: ["service_definition_name"],
     },
   },
+  {
+    name: "ListICFHosts",
+    description:
+      "List all HTTP virtual hosts of the ICF tree (transaction SICF top level). Standard FMs of function group HTTPTREE (the official SICF API, also used by SAP's own mass-processing report RS_ICF_SERV_MASS_PROCESSING / class CL_ICF_SERVICE_PUBLICATION).",
+    inputSchema: { type: "object", properties: {}, required: [] },
+  },
+  {
+    name: "ListICFNodes",
+    description:
+      "List all ICF service URL prefixes (like executing SICF with all hosts, or report RS_ICF_SERV_ADMIN_TASKS). Optionally filter by substring. Read-only.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        url_contains: {
+          type: "string",
+          description: "Case-insensitive substring filter on the URL path (e.g. 'ZMCP'). Omit for all.",
+        },
+      },
+      required: [],
+    },
+  },
+  {
+    name: "GetICFNode",
+    description:
+      "Read one ICF service node: activation state, handler class list, logon data (passwords masked) and node GUID for every path segment. Read-only inspection before create/modify/delete.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        service_url: {
+          type: "string",
+          description: "Full ICF path, e.g. /sap/bc/zmyservice",
+        },
+        host: {
+          type: "string",
+          description: "Virtual host name (default DEFAULT_HOST).",
+        },
+      },
+      required: ["service_url"],
+    },
+  },
+  {
+    name: "CreateICFNode",
+    description:
+      "Create an ICF (SICF) service node — equivalent to 'Create Service' in transaction SICF. Calls standard FM HTTPTREE_INSERT_NODE (function group HTTPTREE). Parent path must already exist; the last URL segment becomes the node name (max 15 chars, alphanumeric/underscore). A transport request is MANDATORY (creation is recorded via the transport system; headless calls fail without one). Handler class names are validated by SAP against IF_HTTP_EXTENSION implementations. Optionally require HTTPS or activate immediately.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        service_url: {
+          type: "string",
+          description: "Full path of the NEW node, e.g. /sap/bc/zmyservice (parent /sap/bc must exist).",
+        },
+        description: {
+          type: "string",
+          description: "Service description text (mandatory in SICF, stored as node documentation).",
+        },
+        transport: {
+          type: "string",
+          description:
+            "Open workbench request for the transport record (e.g. XZTK900002). MANDATORY — the standard FM cannot run headless without one.",
+        },
+        handlers: {
+          type: "array",
+          items: { type: "string" },
+          description:
+            "Handler class names implementing IF_HTTP_EXTENSION (SAP validates each; e.g. ZCL_JSON_HANDLER), called in listed order.",
+        },
+        https_only: {
+          type: "boolean",
+          description: "Require HTTPS for this service (PROTSEC='X').",
+        },
+        activate: {
+          type: "boolean",
+          description: "Activate the node right after creation (default false).",
+        },
+        package: {
+          type: "string",
+          description: "Optional development package; defaults to the parent node's package.",
+        },
+        host: {
+          type: "string",
+          description: "Virtual host name (default DEFAULT_HOST).",
+        },
+        language: {
+          type: "string",
+          description: "Documentation language key (default EN).",
+        },
+      },
+      required: ["service_url", "description", "transport"],
+    },
+  },
+  {
+    name: "ActivateICFNode",
+    description:
+      "Activate or deactivate an ICF service node — equivalent to right-click 'Activate Service' in SICF. Calls standard FMs HTTP_ACTIVATE_NODE / HTTP_INACTIVATE_NODE (same API SAP's official mass-processing report uses). ICF activation state is client-independent and does not need a transport.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        service_url: {
+          type: "string",
+          description: "Full ICF path, e.g. /sap/bc/zmyservice",
+        },
+        action: {
+          type: "string",
+          enum: ["activate", "deactivate"],
+          description: "Default activate.",
+        },
+        expand_subnodes: {
+          type: "boolean",
+          description: "Activate/deactivate the whole subtree (EXPAND='X', default true).",
+        },
+        host: {
+          type: "string",
+          description: "Virtual host name (default DEFAULT_HOST).",
+        },
+      },
+      required: ["service_url"],
+    },
+  },
+  {
+    name: "DeleteICFNode",
+    description:
+      "Delete an ICF service node — equivalent to 'Delete Node' in SICF. Calls standard FM HTTPTREE_DELETE_NODE. DESTRUCTIVE: requires confirm=true. KNOWN LIMITATION (SAP standard-code defect, verified on this system): the FM fails on headless channels because it never assigns its internal lock-order variable, so it tries to open a GUI transport dialog. If deletion fails for that reason the tool returns a structured explanation and the SICF GUI workaround.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        service_url: {
+          type: "string",
+          description: "Full ICF path of the node to delete, e.g. /sap/bc/zmyservice",
+        },
+        confirm: {
+          type: "boolean",
+          description: "Must be true — deletion cannot be undone from this tool.",
+        },
+        transport: {
+          type: "string",
+          description: "Optional transport request to record the deletion.",
+        },
+        host: {
+          type: "string",
+          description: "Virtual host name (default DEFAULT_HOST).",
+        },
+      },
+      required: ["service_url", "confirm"],
+    },
+  },
+  {
+    name: "SetICFLogonData",
+    description:
+      "Set the logon data of an ICF service node (user/client/password/logon required) — equivalent to the 'Logon Data' tab in SICF. Calls standard FM HTTP_SERVICE_SET_LOGON_DATA (internally cl_icf_tree=>set_logon_data). Password is never echoed back.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        service_url: {
+          type: "string",
+          description: "Full ICF path, e.g. /sap/bc/zmyservice",
+        },
+        user: {
+          type: "string",
+          description: "Logon user for the service.",
+        },
+        password: {
+          type: "string",
+          description: "Logon password (sent to SAP, never echoed back).",
+        },
+        client: {
+          type: "string",
+          description: "Mandant for the service logon (optional).",
+        },
+        language: {
+          type: "string",
+          description: "Logon language key (optional).",
+        },
+        require_logon: {
+          type: "boolean",
+          description: "Mark logon data as mandatory (ICF_OBLIGATE_USER='X').",
+        },
+        host: {
+          type: "string",
+          description: "Virtual host name (default DEFAULT_HOST).",
+        },
+      },
+      required: ["service_url"],
+    },
+  },
 ];
 
 const HANDLERS: Record<string, (args: any) => Promise<any>> = {
@@ -393,7 +586,26 @@ const HANDLERS: Record<string, (args: any) => Promise<any>> = {
   GetCDSView: handleGetCDSView,
   GetBehaviorDefinition: handleGetBehaviorDefinition,
   GetServiceDefinition: handleGetServiceDefinition,
+  ListICFHosts: handleListICFHosts,
+  ListICFNodes: handleListICFNodes,
+  GetICFNode: handleGetICFNode,
+  CreateICFNode: handleCreateICFNode,
+  ActivateICFNode: handleActivateICFNode,
+  DeleteICFNode: handleDeleteICFNode,
+  SetICFLogonData: handleSetICFLogonData,
 };
+
+/**
+ * ICF write tools mutate the SAP system's ICF tree (create/activate/delete/
+ * logon data). They intentionally do NOT get the read-only annotation the
+ * classic read tools get.
+ */
+const ICF_WRITE_TOOLS = new Set([
+  "CreateICFNode",
+  "ActivateICFNode",
+  "DeleteICFNode",
+  "SetICFLogonData",
+]);
 
 export function createServer(): McpServer {
   const server = new McpServer({
@@ -425,9 +637,9 @@ export function createServer(): McpServer {
           additionalProperties: false,
         }),
         annotations: {
-          readOnlyHint: true,
-          destructiveHint: false,
-          idempotentHint: true,
+          readOnlyHint: !ICF_WRITE_TOOLS.has(tool.name),
+          destructiveHint: tool.name === "DeleteICFNode",
+          idempotentHint: !ICF_WRITE_TOOLS.has(tool.name),
           openWorldHint: true,
         },
       },
