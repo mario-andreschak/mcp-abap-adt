@@ -1,12 +1,8 @@
 # mcp-abap-adt: Your Gateway to ABAP Development Tools (ADT)
 
-This project provides a server that allows you to interact with SAP ABAP systems using the Model Context Protocol (MCP).  Think of it as a bridge that lets tools like [FLUJO](https://github.com/mario-andreschak/FLUJO), [Claude](https://claude.com/download) or [Cline](https://marketplace.visualstudio.com/items?itemName=saoudrizwan.claude-dev) (a VS Code extension) talk to your ABAP system and retrieve information like source code, table structures, and more.  It's like having a remote control for your ABAP development environment!
+This project provides a server that allows you to interact with SAP ABAP systems using the Model Context Protocol (MCP).  Think of it as a bridge that lets tools like [FLUJO](https://github.com/mario-andreschak/FLUJO), [Claude](https://claude.com/download) or [Cline](https://marketplace.visualstudio.com/items?itemName=saoudrizwan.claude-dev) (a VS Code extension) talk to your ABAP system and retrieve information like source code, table structures, and more.  It's like having a remote control for your ABAP development environment! The sixteen tools are read-only. 
 
-The server is published on npm as [`mcp-abap-adt`](https://www.npmjs.com/package/mcp-abap-adt) and listed in the [MCP Registry](https://registry.modelcontextprotocol.io) as `io.github.mario-andreschak/mcp-abap-adt`, so most MCP clients can install it with a single command.
-
-This checkout uses TypeScript MCP SDK 2 and supports modern protocol 2026-07-28 plus legacy 2025-11-25 over stdio, using the SDK's first-message routing. Node.js 22 or 24 LTS is required. The advertised server version comes from package.json. Tool discovery works without SAP credentials; calls that access SAP require the configuration below. See [protocol migration guidance](https://ts.sdk.modelcontextprotocol.io/v2/migration/support-2026-07-28).
-
-The sixteen tools are read-only. Native HTTP is not exposed by this executable; any HTTP bridge has its own authentication, Origin and deployment requirements. Classic screen creation/update requested in [#17](https://github.com/mario-andreschak/mcp-abap-adt/issues/17) remains an open enhancement; see the [supported workflow and implementation prerequisites](docs/screen-support.md).
+The server is published on npm as [`mcp-abap-adt`](https://www.npmjs.com/package/mcp-abap-adt) and listed in the [MCP Registry](https://registry.modelcontextprotocol.io) as `io.github.mario-andreschak/mcp-abap-adt`, so most MCP clients can install it with a single command. Tool discovery works without SAP credentials; calls that access SAP require the configuration below. 
 
 This guide is designed for beginners, so we'll walk through everything step-by-step.  We'll cover:
 
